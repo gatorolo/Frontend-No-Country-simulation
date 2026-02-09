@@ -16,11 +16,11 @@ import { DocumentsComponent } from './pages/documents.component';
 import { ReportsComponent } from './pages/reports.component';
 import { SettingsComponent } from './pages/settings.component';
 import { ConfigComponent } from './pages/config.component';
-import { GeneralComponent } from './pages/configuracion/general/general.component';
-import { SeguridadComponent } from './pages/configuracion/seguridad/seguridad.component';
-import { NotificacionesComponent } from './pages/configuracion/notificaciones/notificaciones.component';
-import { AparienciaComponent } from './pages/configuracion/apariencia/apariencia.component';
-import { SistemaComponent } from './pages/configuracion/sistema/sistema.component';
+import { GeneralComponent } from './pages/configuracionComponent/general/general.component';
+import { SeguridadComponent } from './pages/configuracionComponent/seguridad/seguridad.component';
+import { NotificacionesComponent } from './pages/configuracionComponent/notificaciones/notificaciones.component';
+import { AparienciaComponent } from './pages/configuracionComponent/apariencia/apariencia.component';
+import { SistemaComponent } from './pages/configuracionComponent/sistema/sistema.component';
 import { CoreModule } from "src/app/core/core.module";
 
 const routes: Routes = [
