@@ -1,0 +1,44 @@
+<div class="form-container">
+    <div class="form-header">
+        <button class="back-btn" (click)="goBack()">
+            <span class="material-icons">arrow_back</span>
+            Volver
+        </button>
+        <h2>🖥️ Sistema</h2>
+    </div>
+
+    <div class="settings-form">
+        <div class="section-title">Mantenimiento y configuración avanzada</div>
+
+        <div class="info-grid">
+            <div class="info-item">
+                <label>Versión del frontend</label>
+                <span>{{ systemInfo.frontendVersion }}</span>
+            </div>
+            <div class="info-item">
+                <label>Versión de la API</label>
+                <span>{{ systemInfo.apiVersion }}</span>
+            </div>
+            <div class="info-item">
+                <label>Entorno</label>
+                <span class="badge development">{{ systemInfo.environment }}</span>
+            </div>
+            <div class="info-item">
+                <label>Última actualización</label>
+                <span>{{ systemInfo.lastUpdate }}</span>
+            </div>
+        </div>
+
+        <div class="toggle-list" style="margin-top: 2rem;">
+            <div class="toggle-item">
+                <label for="maintenanceMode">Modo mantenimiento</label>
+                <input type="checkbox" id="maintenanceMode" [checked]="systemInfo.maintenanceMode"
+                    (change)="toggleMaintenance()" class="toggle-input">
+            </div>
+        </div>
+
+        <div class="form-actions-extended" style="margin-top: 2rem;">
+            <button type="button" class="outline-btn" (click)="clearCache()">Limpiar Caché</button>
+        </div>
+    </div>
+</div>

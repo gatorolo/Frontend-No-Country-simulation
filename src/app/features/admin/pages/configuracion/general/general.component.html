@@ -1,0 +1,58 @@
+<div class="form-container">
+    <div class="form-header">
+        <button class="back-btn" (click)="goBack()">
+            <span class="material-icons">arrow_back</span>
+            Volver
+        </button>
+        <h2>⚙️ Configuración General</h2>
+    </div>
+
+    <form [formGroup]="generalForm" (ngSubmit)="onSubmit()" class="settings-form">
+        <div class="form-grid">
+            <div class="form-group">
+                <label for="systemName">Nombre del Sistema</label>
+                <input type="text" id="systemName" formControlName="systemName" placeholder="Ej: Valora">
+            </div>
+
+            <div class="form-group">
+                <label for="contactEmail">Email de contacto principal</label>
+                <input type="email" id="contactEmail" formControlName="contactEmail">
+            </div>
+
+            <div class="form-group full-width">
+                <label for="shortDescription">Descripción corta</label>
+                <textarea id="shortDescription" formControlName="shortDescription" rows="3"
+                    placeholder="Se usa en headers, mails, SEO básico">****</textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="defaultLanguage">Idioma por defecto</label>
+                <select id="defaultLanguage" formControlName="defaultLanguage">
+                    <option value="es">Español</option>
+                    <option value="en">Inglés</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="timezone">Zona horaria</label>
+                <select id="timezone" formControlName="timezone">
+                    <option value="GMT-3">GMT-3 (Argentina)</option>
+                    <option value="GMT-5">GMT-5 (Colombia/Perú)</option>
+                    <option value="GMT+1">GMT+1 (España)</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="dateFormat">Formato de fecha</label>
+                <select id="dateFormat" formControlName="dateFormat">
+                    <option value="DD/MM/YYYY">DD/MM/YYYY</option>
+                    <option value="MM/DD/YYYY">MM/DD/YYYY</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="save-btn" [disabled]="generalForm.invalid">Guardar Cambios</button>
+        </div>
+    </form>
+</div>
