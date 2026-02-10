@@ -61,6 +61,11 @@
     font-size: 2.8rem;
 }
 
+.logout-btn .material-icons {
+    font-size: 1.7rem;
+    /* ~40% smaller than 2.8rem */
+}
+
 .menu-btn:hover,
 .badge:hover {
     transform: scale(0.9);
