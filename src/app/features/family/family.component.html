@@ -27,11 +27,14 @@
                 </div>
                 <div class="input-group">
                     <label>Ubicación (Enlace Google Maps)</label>
-                    <input type="text" formControlName="locationLink" placeholder="1s0x915edf8977bba295">
-                    <a [href]="familyForm.get('locationLink')?.value" target="_blank" class="map-btn"
-                        *ngIf="familyForm.get('locationLink')?.value">
-                        <span class="material-icons">room</span> Ver en el Mapa
-                    </a>
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <input type="text" formControlName="locationLink" placeholder="Pegue el enlace aquí"
+                            style="flex: 1;">
+                        <a [href]="familyForm.get('locationLink')?.value" target="_blank" class="map-btn"
+                            *ngIf="familyForm.get('locationLink')?.value" style="margin-top: 0; white-space: nowrap;">
+                            <span class="material-icons">room</span> Ver en el Mapa
+                        </a>
+                    </div>
                 </div>
             </div>
 
@@ -52,8 +55,7 @@
                         <label>Horarios</label>
                         <input type="text" formControlName="schedule" placeholder="Ej: 08:00, 20:00">
                     </div>
-                    <button type="button" class="remove-btn" (click)="removeMedication(i)"
-                        *ngIf="medications.length > 1">
+                    <button type="button" class="remove-btn" (click)="removeMedication(i)">
                         <span class="material-icons">delete</span>
                     </button>
                 </div>

@@ -33,8 +33,7 @@ export class FamilyComponent implements OnInit {
 
             // Gestión de Medicación (FormArray)
             medications: this.fb.array([
-                this.createMedicationGroup('Enalapril 10mg', '08:00, 20:00'),
-                this.createMedicationGroup('Donepezilo 5mg', '22:00')
+                this.createMedicationGroup()
             ]),
 
             // Vinculación
@@ -70,14 +69,8 @@ export class FamilyComponent implements OnInit {
     }
 
     onCaregiverToggle(id: number) {
-        const currentArr = this.familyForm.get('authorizedCaregivers')?.value as number[];
-        const index = currentArr.indexOf(id);
-        if (index > -1) {
-            currentArr.splice(index, 1);
-        } else {
-            currentArr.push(id);
-        }
-        this.familyForm.patchValue({ authorizedCaregivers: currentArr });
+        // Al seleccionar un nuevo cuidador, reemplazamos el anterior para que solo haya uno.
+        this.familyForm.patchValue({ authorizedCaregivers: [id] });
     }
 
     isCaregiverAuthorized(id: number): boolean {
