@@ -84,7 +84,7 @@
 
 .dashboard-main-grid {
     display: grid;
-    grid-template-columns: 2fr 1fr;
+    grid-template-columns: 2.05fr 1fr;
     gap: 1.5rem;
 }
 
@@ -111,7 +111,7 @@
     background: white;
     border-radius: 12px;
     padding: 1.5rem;
-    box-shadow: 3 5px 8px rgba(0, 0, 0, 0.05);
+    box-shadow: 3 5px 8px rgba(0, 0, 0, 0.5);
 }
 
 .card-header {

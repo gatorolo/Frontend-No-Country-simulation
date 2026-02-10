@@ -6,6 +6,12 @@
 /out-tsc
 /bazel-out
 
+# Angular config (si no querés versionarlo)
+angular.json
+
+# VS Code
+.vscode/
+
 # Node
 /node_modules
 npm-debug.log

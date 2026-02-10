@@ -1,11 +1,6 @@
-<aside class="sidebar-container sidebar-wrapper.collapsed">
+<aside class="sidebar-container" [class.collapsed]="collapsed">
   <div class="brand" style="height: auto; padding: 20px 0">
-    <img
-      src="assets/logo.png"
-      alt="Valora"
-      style="height: 10rem; width: auto; margin: 0 auto"
-      class="logo-dash"
-    />
+    <img src="assets/logo.png" alt="Valora" style="height: 10rem; width: auto; margin: 0 auto" class="logo-dash" />
   </div>
 
   <div class="user-profile-summary"></div>
@@ -13,12 +8,7 @@
   <nav class="navigation">
     <ul>
       <li *ngFor="let item of navItems">
-        <a
-          [routerLink]="item.route"
-          class="nav-link"
-          [class.active]="item.active"
-          (click)="onNavigate()"
-        >
+        <a [routerLink]="item.route" class="nav-link" [class.active]="item.active" (click)="onNavigate()">
           <span class="material-icons nav-icon">{{ item.icon }}</span>
           <span class="nav-label">{{ item.label }}</span>
         </a>
@@ -28,5 +18,3 @@
 
   <div class="sidebar-footer"></div>
 </aside>
-
-

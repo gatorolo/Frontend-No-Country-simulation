@@ -1,20 +1,20 @@
 :host {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 64px;
-  z-index: 300;
-  background: #e0e4f0;
-  border-bottom: 1px solid #e5e7eb;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 64px;
+    z-index: 300;
+    background: #e0e4f0;
+    border-bottom: 1px solid #e5e7eb;
 }
 
 .topbar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0 2rem;
-  height: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 2rem;
+    height: 100%;
 }
 
 .left-section,
@@ -24,7 +24,24 @@
     gap: 1.5rem;
 }
 
-.menu-btn,
+.menu-btn {
+    background: rgba(255, 255, 255, 0.5);
+    border: 2px solid #D4AF37;
+    border-radius: 8px;
+    padding: 4px;
+    cursor: pointer;
+    color: #1b191a;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    transition: all 0.2s ease-in-out;
+    width: 48px;
+    height: 48px;
+    text-shadow: 4px 4px 8px rgba(0, 0, 0, 0.5);
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
+}
+
 .icon-btn {
     background: none;
     border: none;
@@ -35,18 +52,19 @@
     justify-content: center;
     position: relative;
     text-shadow: 4px 4px 8px rgba(0, 0, 0, 0.5);
-     color: #1b191a; 
-    transition: transform 0.2s ease-in-out; 
-    display: inline-block; 
+    color: #1b191a;
+    transition: transform 0.2s ease-in-out;
+    display: inline-block;
 }
 
 .material-icons {
     font-size: 2.8rem;
 }
+
 .menu-btn:hover,
 .badge:hover {
-  transform: scale(0.9); 
-  cursor: pointer; 
+    transform: scale(0.9);
+    cursor: pointer;
 }
 
 

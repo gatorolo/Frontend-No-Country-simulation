@@ -8,14 +8,14 @@ import { Router } from '@angular/router';
 })
 export class LoginComponent {
     isLoading = false;
-    selectedRole: string = 'admin'; // Default role
+    selectedRole: string = 'admin'; 
 
     constructor(private router: Router) { }
 
     onLogin() {
         this.isLoading = true;
 
-        // Simulate API call and redirect
+       
         setTimeout(() => {
             switch (this.selectedRole) {
                 case 'admin':

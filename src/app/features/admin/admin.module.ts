@@ -1,6 +1,7 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Routes } from '@angular/router';
+import { ReactiveFormsModule } from '@angular/forms';
 
 // Components
 import { AdminLayoutComponent } from './layout/admin-layout.component';
@@ -15,6 +16,11 @@ import { DocumentsComponent } from './pages/documents.component';
 import { ReportsComponent } from './pages/reports.component';
 import { SettingsComponent } from './pages/settings.component';
 import { ConfigComponent } from './pages/config.component';
+import { GeneralComponent } from './pages/configuracionComponent/general/general.component';
+import { SeguridadComponent } from './pages/configuracionComponent/seguridad/seguridad.component';
+import { NotificacionesComponent } from './pages/configuracionComponent/notificaciones/notificaciones.component';
+import { AparienciaComponent } from './pages/configuracionComponent/apariencia/apariencia.component';
+import { SistemaComponent } from './pages/configuracionComponent/sistema/sistema.component';
 import { CoreModule } from "src/app/core/core.module";
 
 const routes: Routes = [
@@ -29,8 +35,18 @@ const routes: Routes = [
       { path: 'payments', component: PaymentsComponent },
       { path: 'documents', component: DocumentsComponent },
       { path: 'reports', component: ReportsComponent },
-      { path: 'settings', component: SettingsComponent },
-      { path: 'config', component: ConfigComponent },
+      {
+        path: 'settings',
+        component: SettingsComponent,
+        children: [
+          { path: 'general', component: GeneralComponent },
+          { path: 'seguridad', component: SeguridadComponent },
+          { path: 'notificaciones', component: NotificacionesComponent },
+          { path: 'apariencia', component: AparienciaComponent },
+          { path: 'sistema', component: SistemaComponent }
+        ]
+      },
+      { path: 'config', component: ConfigComponent }
     ]
   }
 ];
@@ -47,12 +63,18 @@ const routes: Routes = [
     DocumentsComponent,
     ReportsComponent,
     SettingsComponent,
-    ConfigComponent
+    ConfigComponent,
+    GeneralComponent,
+    SeguridadComponent,
+    NotificacionesComponent,
+    AparienciaComponent,
+    SistemaComponent
   ],
   imports: [
     CommonModule,
     RouterModule.forChild(routes),
+    ReactiveFormsModule,
     CoreModule
-]
+  ]
 })
 export class AdminModule { }
