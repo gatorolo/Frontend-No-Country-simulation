@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms';
+import { Router } from '@angular/router';
 
 @Component({
     selector: 'app-family-dashboard',
@@ -17,7 +18,7 @@ export class FamilyComponent implements OnInit {
         { id: 104, name: 'Carla Vuioner', specialty: 'Rehabilitación' }
     ];
 
-    constructor(private fb: FormBuilder) { }
+    constructor(private fb: FormBuilder, private router: Router) { }
 
     ngOnInit(): void {
         this.initForm();
@@ -76,5 +77,9 @@ export class FamilyComponent implements OnInit {
 
     isCaregiverAuthorized(id: number): boolean {
         return (this.familyForm.get('authorizedCaregivers')?.value as number[]).includes(id);
+    }
+
+    onLogout() {
+        this.router.navigate(['/login']);
     }
 }

@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { Router } from '@angular/router';
 
 @Component({
     selector: 'app-caregiver-dashboard',
@@ -30,7 +31,7 @@ export class CaregiverComponent implements OnInit {
         { patient: 'María Garcia', date: '2024-02-09', duration: '6h 30m', earned: 26000 }
     ];
 
-    constructor(private fb: FormBuilder) { }
+    constructor(private fb: FormBuilder, private router: Router) { }
 
     ngOnInit(): void {
         this.initForms();
@@ -136,5 +137,9 @@ export class CaregiverComponent implements OnInit {
         const file = event.target.files[0];
         console.log(`Uploading ${docType}:`, file?.name);
         // Integrate with backend here
+    }
+
+    onLogout() {
+        this.router.navigate(['/login']);
     }
 }
