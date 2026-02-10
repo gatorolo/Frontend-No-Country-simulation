@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms';
+import { Router } from '@angular/router';
 
 @Component({
     selector: 'app-family-dashboard',
@@ -17,7 +18,7 @@ export class FamilyComponent implements OnInit {
         { id: 104, name: 'Carla Vuioner', specialty: 'Rehabilitación' }
     ];
 
-    constructor(private fb: FormBuilder) { }
+    constructor(private fb: FormBuilder, private router: Router) { }
 
     ngOnInit(): void {
         this.initForm();
@@ -66,6 +67,8 @@ export class FamilyComponent implements OnInit {
         if (this.familyForm.valid) {
             console.log('Family Data Update:', this.familyForm.value);
             // Preparation for Alejandro's Logic (Integration)
+            // Navigate to the summary view mode
+            this.router.navigate(['/family/view']);
         }
     }
 

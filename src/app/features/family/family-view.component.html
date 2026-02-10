@@ -1,0 +1,95 @@
+<div class="container">
+    <div class="glass-card animate-fade">
+        <div class="header-view">
+            <div>
+                <h1 class="section-title">
+                    <span class="material-icons">contact_page</span>
+                    Perfil Médico del Paciente
+                </h1>
+                <p class="subtitle">Resumen informativo de la ficha guardada</p>
+            </div>
+            <div class="header-actions">
+                <button class="edit-btn" (click)="onEdit()">
+                    <span class="material-icons">edit</span> Editar Ficha
+                </button>
+                <button class="logout-btn-view" (click)="onLogout()">
+                    <span class="material-icons">logout</span>
+                </button>
+            </div>
+        </div>
+
+        <div class="summary-grid">
+            <!-- Columna Principal -->
+            <div class="main-column">
+                <section class="info-section profile-info">
+                    <h3 class="section-sub"><span class="material-icons">person</span> Datos Personales</h3>
+                    <div class="data-group">
+                        <div class="data-item">
+                            <span class="data-label">Nombre del Paciente</span>
+                            <span class="data-value">{{ patientData.name }}</span>
+                        </div>
+                        <div class="data-item">
+                            <span class="data-label">Edad</span>
+                            <span class="data-value">{{ patientData.age }} años</span>
+                        </div>
+                        <div class="data-item">
+                            <span class="data-label">Obra Social / Prepaga</span>
+                            <span class="data-value label-pill">{{ patientData.insurance }}</span>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="info-section">
+                    <h3 class="section-sub"><span class="material-icons">psychology</span> Diagnóstico Principal</h3>
+                    <p class="diagnosis-text">{{ patientData.diagnosis }}</p>
+                </section>
+
+                <section class="info-section">
+                    <h3 class="section-sub"><span class="material-icons">medication</span> Plan de Medicación</h3>
+                    <div class="med-list">
+                        <div *ngFor="let med of patientData.medications" class="med-item">
+                            <div class="med-icon"><span class="material-icons">pill</span></div>
+                            <div class="med-info">
+                                <span class="med-name">{{ med.name }}</span>
+                                <span class="med-schedule">{{ med.schedule }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <!-- Columna Lateral -->
+            <div class="side-column">
+                <section class="info-card location-card">
+                    <h3 class="section-sub"><span class="material-icons">room</span> Ubicación</h3>
+                    <p>El paciente se encuentra en el domicilio registrado.</p>
+                    <a [href]="patientData.location" target="_blank" class="map-link">
+                        <span class="material-icons">map</span> Ver en Google Maps
+                    </a>
+                </section>
+
+                <section class="info-card caregiver-card">
+                    <h3 class="section-sub"><span class="material-icons">people_alt</span> Cuidador Asignado</h3>
+                    <div class="caregiver-info">
+                        <div class="user-avatar">
+                            <span class="material-icons">person</span>
+                        </div>
+                        <div>
+                            <span class="cg-name">{{ patientData.caregiver.name }}</span>
+                            <span class="cg-specialty">{{ patientData.caregiver.specialty }}</span>
+                        </div>
+                    </div>
+                    <div class="status-badge-verified">
+                        <span class="material-icons">verified</span> Cuidador Verificado
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- WhatsApp FAB remains -->
+<a class="whatsapp-fab" href="https://wa.me/5493415109918" target="_blank" rel="noopener" aria-label="WhatsApp">
+    <span class="whatsapp-tooltip">ADMIN 'Lara'</span>
+    <img src="assets/whatsapp.svg" alt="WhatsApp" />
+</a>

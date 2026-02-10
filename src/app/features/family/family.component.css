@@ -185,17 +185,19 @@ textarea:focus {
 }
 
 .submit-btn {
-    margin-top: 3rem;
-    width: 100%;
-    padding: 1.15rem;
+    margin: 3rem auto 0;
+    display: block;
+    width: fit-content;
+    min-width: 280px;
+    padding: 1rem 2.5rem;
     background: var(--primary-dark);
     color: white;
     border: none;
-    border-radius: 14px;
+    border-radius: 50px;
     font-weight: 700;
     font-size: 1.1rem;
     cursor: pointer;
-    transition: transform 0.2s, box-shadow 0.2s;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     box-shadow: 0 4px 15px rgba(3, 105, 161, 0.3);
 }
 
