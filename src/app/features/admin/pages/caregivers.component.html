@@ -1,6 +1,108 @@
- <div class="dashboard-container">
-      <h1 class="page-title">Cuidadores</h1>
-      <div class="card">
-        <p>Gestión de Cuidadores y Acompañantes</p>
+<div class="dashboard-container">
+  <div class="header-section">
+    <h1 class="page-title">Gestión de Cuidadores</h1>
+    <button class="add-btn" (click)="toggleAddMode()">
+      <span class="material-icons">{{ showAddForm ? 'close' : 'person_add' }}</span>
+      {{ showAddForm ? 'Cancelar' : 'Nuevo Cuidador' }}
+    </button>
+  </div>
+
+  <!-- Gestión Form (ABM) -->
+  <div *ngIf="showAddForm" class="glass-card animate-slide-down">
+    <h2 class="section-title">
+      <span class="material-icons">manage_accounts</span>
+      {{ selectedCaregiver ? 'Editar Cuidador' : 'Registrar Nuevo Cuidador' }}
+    </h2>
+
+    <form [formGroup]="caregiverForm" (ngSubmit)="saveCaregiver()">
+      <div class="form-grid">
+        <div class="input-group">
+          <label>Nombre Completo</label>
+          <input type="text" formControlName="fullName" placeholder="Ej: Lara Martínez">
+        </div>
+        <div class="input-group">
+          <label>Especialidad</label>
+          <select formControlName="specialty">
+            <option value="">Seleccione especialidad</option>
+            <option value="Enfermería">Enfermería</option>
+            <option value="Kinesiología">Kinesiología</option>
+            <option value="Cuidadora Geriátrica">Cuidadora Geriátrica</option>
+            <option value="Acompañante Terapéutico">Acompañante Terapéutico</option>
+          </select>
+        </div>
+        <div class="input-group">
+          <label>DNI</label>
+          <input type="text" formControlName="dni">
+        </div>
+        <div class="input-group">
+          <label>Teléfono</label>
+          <input type="text" formControlName="phone">
+        </div>
+        <div class="input-group">
+          <label>Valor Hora ($)</label>
+          <input type="number" formControlName="hourlyRate">
+        </div>
+        <div class="input-group">
+          <label>Estado de Verificación</label>
+          <select formControlName="status">
+            <option value="Pendiente">Pendiente</option>
+            <option value="Verificado">Verificado</option>
+            <option value="Inactivo">Inactivo</option>
+          </select>
+        </div>
       </div>
+
+      <div class="form-actions">
+        <button type="submit" class="submit-btn" [disabled]="caregiverForm.invalid">
+          <span class="material-icons">save</span>
+          Guardar Cambios
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Lista de Cuidadores -->
+  <div class="glass-card">
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Nombre</th>
+            <th>Especialidad</th>
+            <th>Estado</th>
+            <th>Valor Hora</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let cg of caregivers">
+            <td>
+              <div class="cg-user">
+                <span class="material-icons avatar">account_circle</span>
+                <span>{{ cg.fullName }}</span>
+              </div>
+            </td>
+            <td><span class="label-pill">{{ cg.specialty }}</span></td>
+            <td>
+              <span class="status-badge" [class.verified]="cg.status === 'Verificado'"
+                [class.pending]="cg.status === 'Pendiente'">
+                {{ cg.status }}
+              </span>
+            </td>
+            <td><span class="money">${{ cg.hourlyRate }}</span></td>
+            <td>
+              <div class="actions">
+                <button class="icon-btn edit" title="Editar" (click)="editCaregiver(cg)">
+                  <span class="material-icons">edit</span>
+                </button>
+                <button class="icon-btn status" title="Cambiar Estado">
+                  <span class="material-icons">swap_horiz</span>
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
     </div>
+  </div>
+</div>

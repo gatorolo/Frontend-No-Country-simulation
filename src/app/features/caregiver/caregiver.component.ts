@@ -7,55 +7,51 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
     styleUrls: ['./caregiver.component.css']
 })
 export class CaregiverComponent implements OnInit {
-    // Forms
-    profileForm!: FormGroup;
-    shiftForm!: FormGroup;
-
-    // View State
-    activeTab: 'profile' | 'activity' | 'history' = 'activity';
+    activeTab: 'activity' | 'profile' | 'history' = 'activity';
     isShiftActive = false;
     shiftDuration = '00:00:00';
-    private shiftTimer: any;
-    private startTime!: Date;
+    shiftForm!: FormGroup;
 
-    // Mock Data
+    // Static data for the professional profile
+    profileData = {
+        fullName: 'Lara Martínez',
+        dni: '35.123.456',
+        phone: '+54 9 341 510-9918',
+        email: 'lara.martinez@valora.com',
+        address: 'Av. Pellegrini 1234, Rosario',
+        hourlyRate: 1500,
+        specialty: 'Enfermería Geriátrica',
+        paymentTarget: 'CBU: 0000054321000098765432 / Mercado Pago',
+        status: 'Verificado'
+    };
+
     patients = [
-        { id: 1, name: 'Juan Pérez' },
-        { id: 2, name: 'María Garcia' },
-        { id: 3, name: 'Roberto Sánchez' }
+        { id: 1, name: 'Roberto Sánchez' },
+        { id: 2, name: 'Marta García' }
     ];
 
     shiftHistory = [
-        { patient: 'Juan Pérez', date: '2024-02-08', duration: '8h 00m', earned: 32000 },
-        { patient: 'María Garcia', date: '2024-02-09', duration: '6h 30m', earned: 26000 }
+        { patient: 'Roberto Sánchez', date: '08/02/2026', duration: '08:00 hs', earned: 12000 },
+        { patient: 'Roberto Sánchez', date: '09/02/2026', duration: '04:00 hs', earned: 6000 }
     ];
+
+    private timerInterval: any;
 
     constructor(private fb: FormBuilder) { }
 
     ngOnInit(): void {
-        this.initForms();
+        this.initShiftForm();
     }
 
-    private initForms() {
-        this.profileForm = this.fb.group({
-            fullName: ['Lara Martínez', Validators.required],
-            dni: ['12.345.678', Validators.required],
-            phone: ['+54 9 341 510-9918', Validators.required],
-            address: ['Calle Falsa 123, Rosario', Validators.required],
-            hourlyRate: [4000, [Validators.required, Validators.min(0)]],
-            paymentTarget: ['laram.mp', Validators.required], // Alias or CBU
-            status: ['Verificado'] // Verificado o Pendiente
-        });
-
+    private initShiftForm() {
         this.shiftForm = this.fb.group({
             patientId: ['', Validators.required],
-            startTimeInput: ['', Validators.required], // New field for manual entry
+            startTimeInput: ['', Validators.required],
             notes: ['']
         });
     }
 
-    // Tab Navigation
-    setTab(tab: 'profile' | 'activity' | 'history') {
+    setTab(tab: 'activity' | 'profile' | 'history') {
         this.activeTab = tab;
     }
 
@@ -70,71 +66,40 @@ export class CaregiverComponent implements OnInit {
 
     private startShift() {
         this.isShiftActive = true;
-
-        // Get manual start time from form and combine with current date
-        const timeValue = this.shiftForm.value.startTimeInput; // Expected "HH:mm"
-        const [hours, minutes] = timeValue.split(':').map(Number);
-
-        this.startTime = new Date();
-        this.startTime.setHours(hours, minutes, 0, 0);
-
-        // If the manual time is in the future (compared to current time), 
-        // we assume it was for yesterday or just handle as is. 
-        // For shift logic, we usually want it to be today's past time.
-        if (this.startTime > new Date()) {
-            this.startTime.setDate(this.startTime.getDate() - 1);
-        }
-
-        this.shiftTimer = setInterval(() => {
-            const now = new Date();
-            const diff = now.getTime() - this.startTime.getTime();
-            this.shiftDuration = this.formatDuration(diff);
+        let seconds = 0;
+        this.timerInterval = setInterval(() => {
+            seconds++;
+            const hrs = Math.floor(seconds / 3600);
+            const mins = Math.floor((seconds % 3600) / 60);
+            const secs = seconds % 60;
+            this.shiftDuration = `${this.pad(hrs)}:${this.pad(mins)}:${this.pad(secs)}`;
         }, 1000);
     }
 
     private stopShift() {
+        clearInterval(this.timerInterval);
         this.isShiftActive = false;
-        clearInterval(this.shiftTimer);
 
-        // Prepare data for "FastAPI" (Lógica de Alejandro)
-        const shiftData = {
-            id_cuidador: 1, // Mock current user
-            id_paciente: this.shiftForm.value.patientId,
-            inicio: this.startTime,
-            fin: new Date(),
-            informe: this.shiftForm.value.notes
-        };
+        const patientName = this.patients.find(p => p.id === +this.shiftForm.value.patientId)?.name || 'Desconocido';
 
-        console.log('Sending to FastAPI POST /api/caregivers/shift:', shiftData);
-
-        // Reset and save to history (locally for demo)
-        const earned = ((new Date().getTime() - this.startTime.getTime()) / 3600000) * this.profileForm.value.hourlyRate;
+        // Save to history
         this.shiftHistory.unshift({
-            patient: this.patients.find(p => p.id == this.shiftForm.value.patientId)?.name || 'N/A',
+            patient: patientName,
             date: new Date().toLocaleDateString(),
-            duration: this.shiftDuration,
-            earned: Math.round(earned)
+            duration: this.shiftDuration.substring(0, 5) + ' hs',
+            earned: 6000 // Mock value
         });
 
         this.shiftForm.reset();
         this.shiftDuration = '00:00:00';
     }
 
-    private formatDuration(ms: number): string {
-        const seconds = Math.floor((ms / 1000) % 60);
-        const minutes = Math.floor((ms / (1000 * 60)) % 60);
-        const hours = Math.floor((ms / (1000 * 60 * 60)) % 24);
-
-        return [
-            hours.toString().padStart(2, '0'),
-            minutes.toString().padStart(2, '0'),
-            seconds.toString().padStart(2, '0')
-        ].join(':');
+    private pad(num: number): string {
+        return num < 10 ? '0' + num : num.toString();
     }
 
     onFileUpload(event: any, docType: string) {
         const file = event.target.files[0];
         console.log(`Uploading ${docType}:`, file?.name);
-        // Integrate with backend here
     }
 }

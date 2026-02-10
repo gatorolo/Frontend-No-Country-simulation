@@ -55,65 +55,77 @@
 
 
     <div *ngIf="activeTab === 'profile'" class="glass-card animate-fade">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-            <h2 class="section-title" style="margin-bottom: 0;">
-                <span class="material-icons">badge</span>
-                Información del Colaborador
-            </h2>
-            <span class="status-badge" [class.verified]="profileForm.value.status === 'Verificado'">
+        <div
+            style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; border-bottom: 1px solid rgba(0,0,0,0.05); padding-bottom: 1.5rem;">
+            <div>
+                <h2 class="section-title" style="margin-bottom: 0.25rem;">
+                    <span class="material-icons">badge</span>
+                    Mi Perfil Profesional
+                </h2>
+                <p style="color: #64748b; font-size: 0.9rem;">Información gestionada por la administración de Valora</p>
+            </div>
+            <span class="status-badge" [class.verified]="profileData.status === 'Verificado'">
                 <span class="material-icons" style="font-size: 16px;">verified</span>
-                {{ profileForm.value.status }}
+                {{ profileData.status }}
             </span>
         </div>
 
-        <form [formGroup]="profileForm">
-            <div class="form-grid">
-                <div class="input-group">
-                    <label>Nombre Completo</label>
-                    <input type="text" formControlName="fullName">
-                </div>
-                <div class="input-group">
-                    <label>DNI / Identificación</label>
-                    <input type="text" formControlName="dni">
-                </div>
-                <div class="input-group">
-                    <label>Teléfono</label>
-                    <input type="text" formControlName="phone">
-                </div>
-                <div class="input-group">
-                    <label>Valor Hora ($)</label>
-                    <input type="number" formControlName="hourlyRate">
-                </div>
-                <div class="input-group" style="grid-column: span 2;">
-                    <label>Dirección</label>
-                    <input type="text" formControlName="address">
-                </div>
-                <div class="input-group" style="grid-column: span 2;">
-                    <label>Datos de Cobro (CBU / Alias / Mercado Pago)</label>
-                    <input type="text" formControlName="paymentTarget">
-                </div>
+        <div class="profile-static-grid">
+            <div class="data-group">
+                <span class="data-label">Nombre Completo</span>
+                <span class="data-value">{{ profileData.fullName }}</span>
             </div>
+            <div class="data-group">
+                <span class="data-label">DNI / Identificación</span>
+                <span class="data-value">{{ profileData.dni }}</span>
+            </div>
+            <div class="data-group">
+                <span class="data-label">Teléfono de Contacto</span>
+                <span class="data-value">{{ profileData.phone }}</span>
+            </div>
+            <div class="data-group">
+                <span class="data-label">Email</span>
+                <span class="data-value">{{ profileData.email }}</span>
+            </div>
+            <div class="data-group">
+                <span class="data-label">Valor Hora Pactado</span>
+                <span class="data-value money">${{ profileData.hourlyRate | number }}</span>
+            </div>
+            <div class="data-group">
+                <span class="data-label">Especialidad</span>
+                <span class="data-value label-pill">{{ profileData.specialty }}</span>
+            </div>
+            <div class="data-group" style="grid-column: span 2;">
+                <span class="data-label">Dirección Particular</span>
+                <span class="data-value">{{ profileData.address }}</span>
+            </div>
+            <div class="data-group" style="grid-column: span 2;">
+                <span class="data-label">Datos de Facturación / Cobro</span>
+                <span class="data-value" style="color: var(--primary-dark); font-weight: 600;">{{
+                    profileData.paymentTarget }}</span>
+            </div>
+        </div>
 
-            <h3 class="section-title" style="margin-top: 2rem; font-size: 1.1rem;">Gestión de Documentación</h3>
-            <div class="form-grid">
-                <div class="input-group">
-                    <label>DNI (Frente/Dorso)</label>
-                    <div class="dropzone" (click)="fileDni.click()">
-                        <span class="material-icons">upload_file</span>
-                        <p>Subir Archivos</p>
-                        <input #fileDni type="file" hidden (change)="onFileUpload($event, 'dni')">
-                    </div>
-                </div>
-                <div class="input-group">
-                    <label>Seguro Mala Praxis</label>
-                    <div class="dropzone" (click)="filePraxis.click()">
-                        <span class="material-icons">shield</span>
-                        <p>Subir Póliza</p>
-                        <input #filePraxis type="file" hidden (change)="onFileUpload($event, 'praxis')">
-                    </div>
+        <h3 class="section-title"
+            style="margin-top: 2.5rem; font-size: 1.1rem; border-top: 1px solid rgba(0,0,0,0.05); padding-top: 1.5rem;">
+            <span class="material-icons">folder_shared</span> Documentación Cargada
+        </h3>
+        <div class="docs-grid">
+            <div class="doc-card">
+                <span class="material-icons">description</span>
+                <div>
+                    <span class="doc-name">Fotocopia de DNI (Frente/Dorso)</span>
+                    <span class="doc-status uploaded">Archivo Verificado</span>
                 </div>
             </div>
-        </form>
+            <div class="doc-card">
+                <span class="material-icons">shield</span>
+                <div>
+                    <span class="doc-name">Seguro de Mala Praxis</span>
+                    <span class="doc-status uploaded">Póliza Vigente</span>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- History View -->

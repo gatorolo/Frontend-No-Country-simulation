@@ -238,6 +238,81 @@ td {
     }
 }
 
+/* Profile Static View Styles */
+.profile-static-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1.5rem;
+}
+
+.profile-static-grid .data-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+}
+
+.profile-static-grid .data-label {
+    font-size: 0.75rem;
+    color: #64748b;
+    text-transform: uppercase;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}
+
+.profile-static-grid .data-value {
+    font-size: 1.05rem;
+    font-weight: 500;
+    color: #1e293b;
+}
+
+.docs-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.doc-card {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+}
+
+.doc-card .material-icons {
+    color: var(--primary);
+    font-size: 2rem;
+}
+
+.doc-name {
+    display: block;
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: #1e293b;
+}
+
+.doc-status.uploaded {
+    font-size: 0.75rem;
+    color: var(--success);
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.label-pill {
+    background: #e0f2fe;
+    color: var(--primary-dark);
+    padding: 0.2rem 0.75rem;
+    border-radius: 50px;
+    font-size: 0.9rem;
+    width: fit-content;
+    font-weight: 600;
+}
+
 .whatsapp-fab:hover .whatsapp-tooltip {
     opacity: 1;
     visibility: visible;
