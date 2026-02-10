@@ -1,28 +1,101 @@
-<div style="padding: 2rem; background: #f0fdf4; min-height: 100vh;">
-    <div style="background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
-        <h1 style="color: #15803d; display: flex; align-items: center; gap: 10px;">
-            <span class="material-icons">family_restroom</span>
-            Portal de Pacientes y Familia
+<div class="container">
+    <div class="glass-card">
+        <h1 class="section-title">
+            <span class="material-icons">medical_information</span>
+            Ficha Médica Digital
         </h1>
-        <p>Visualice la actividad del paciente y reportes diarios.</p>
-        <div style="margin-top: 2rem;">
-            <div style="padding: 1rem; border: 1px solid #dcfce7; border-radius: 8px; background: #f0fdf4;">
-                <h3>Actividad Reciente</h3>
-                <p>• Guardia finalizada - Ana Martinez - 08:00 AM</p>
-                <p>• Reporte diario cargado - 08:15 AM</p>
+
+        <form [formGroup]="familyForm" (ngSubmit)="onSubmit()">
+            <!-- Datos Principales -->
+            <div class="form-grid">
+                <div class="input-group">
+                    <label>Nombre del Paciente</label>
+                    <input type="text" formControlName="patientName" placeholder="Ej: Roberto Sánchez">
+                </div>
+                <div class="input-group">
+                    <label>Edad</label>
+                    <input type="number" formControlName="patientAge">
+                </div>
+                <div class="input-group" style="grid-column: span 2;">
+                    <label>Diagnóstico Principal</label>
+                    <textarea formControlName="diagnosis" rows="3"
+                        placeholder="Detalle la condición del paciente..."></textarea>
+                </div>
+                <div class="input-group">
+                    <label>Obra Social / Prepaga</label>
+                    <input type="text" formControlName="healthInsurance" placeholder="Ej: OSDE, Medicus">
+                </div>
+                <div class="input-group">
+                    <label>Ubicación (Enlace Google Maps)</label>
+                    <input type="text" formControlName="locationLink" placeholder="1s0x915edf8977bba295">
+                    <a [href]="familyForm.get('locationLink')?.value" target="_blank" class="map-btn"
+                        *ngIf="familyForm.get('locationLink')?.value">
+                        <span class="material-icons">room</span> Ver en el Mapa
+                    </a>
+                </div>
             </div>
-        </div>
+
+            <!-- Gestión de Medicación -->
+            <div class="sub-section-title">
+                <span class="material-icons">medication</span>
+                Gestión de Medicación
+            </div>
+
+            <div formArrayName="medications">
+                <div *ngFor="let med of medications.controls; let i=index" [formGroupName]="i"
+                    class="medication-card animate-fade">
+                    <div class="input-group" style="flex: 2;">
+                        <label>Medicamento y Dosis</label>
+                        <input type="text" formControlName="name" placeholder="Ej: Enalapril 10mg">
+                    </div>
+                    <div class="input-group" style="flex: 1;">
+                        <label>Horarios</label>
+                        <input type="text" formControlName="schedule" placeholder="Ej: 08:00, 20:00">
+                    </div>
+                    <button type="button" class="remove-btn" (click)="removeMedication(i)"
+                        *ngIf="medications.length > 1">
+                        <span class="material-icons">delete</span>
+                    </button>
+                </div>
+            </div>
+            <button type="button" class="add-btn" (click)="addMedication()">
+                <span class="material-icons">add_circle</span> Añadir Medicamento
+            </button>
+
+            <!-- Vinculación con Cuidadores -->
+            <div class="sub-section-title">
+                <span class="material-icons">people_alt</span>
+                Cuidadores Autorizados
+            </div>
+            <p style="color: #64748b; margin-bottom: 1.5rem; font-size: 0.9rem;">
+                Seleccione los cuidadores que tienen permiso para visualizar este perfil y registrar guardias.
+            </p>
+
+            <div class="caregiver-grid">
+                <div *ngFor="let cg of availableCaregivers" class="caregiver-card"
+                    [class.active]="isCaregiverAuthorized(cg.id)" (click)="onCaregiverToggle(cg.id)">
+                    <div class="avatar">
+                        <span class="material-icons">person</span>
+                    </div>
+                    <div>
+                        <div style="font-weight: 700; color: #1e293b;">{{ cg.name }}</div>
+                        <div style="font-size: 0.8rem; color: #64748b;">{{ cg.specialty }}</div>
+                    </div>
+                    <div class="check-container" *ngIf="isCaregiverAuthorized(cg.id)">
+                        <span class="material-icons">check_circle</span>
+                    </div>
+                </div>
+            </div>
+
+            <button type="submit" class="submit-btn" [disabled]="familyForm.invalid">
+                Guardar Cambios en Ficha Médica
+            </button>
+        </form>
     </div>
-
-<a
-  class="whatsapp-fab"
-  href="https://wa.me/5493415109918"
-  target="_blank"
-  rel="noopener"
-  aria-label="WhatsApp"
->
-  <span class="whatsapp-tooltip">admin 'Lara M.'</span>
-  <img src="assets/whatsapp.svg" alt="WhatsApp" />
-</a>
-
 </div>
+
+<!-- WhatsApp FAB remains -->
+<a class="whatsapp-fab" href="https://wa.me/5493415109918" target="_blank" rel="noopener" aria-label="WhatsApp">
+    <span class="whatsapp-tooltip">ADMIN 'Lara'</span>
+    <img src="assets/whatsapp.svg" alt="WhatsApp" />
+</a>

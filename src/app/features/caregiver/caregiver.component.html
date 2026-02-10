@@ -1,24 +1,154 @@
-<div style="padding: 2rem; background: #e0f2fe; min-height: 100vh;">
-    <div style="background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
-        <h1 style="color: #0369a1; display: flex; align-items: center; gap: 10px;">
-            <span class="material-icons">medical_services</span>
-            Portal de Cuidadores
-        </h1>
-        <p>Bienvenido al área de gestión de guardias y reportes.</p>
-        <div
-            style="margin-top: 2rem; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
-            <button
-                style="padding: 1rem; background: #0ea5e9; color: white; border: none; border-radius: 8px; cursor: pointer;">Cargar
-                Informe</button>
-            <button
-                style="padding: 1rem; background: #0284c7; color: white; border: none; border-radius: 8px; cursor: pointer;">Billetera
-                Virtual</button>
+<div class="dashboard-container">
+    <!-- Tab Navigation -->
+    <nav class="tab-navbar">
+        <button class="tab-btn" [class.active]="activeTab === 'activity'" (click)="setTab('activity')">
+            <span class="material-icons">timer</span> Registro de Guardia
+        </button>
+        <button class="tab-btn" [class.active]="activeTab === 'profile'" (click)="setTab('profile')">
+            <span class="material-icons">account_circle</span> Mi Perfil (Admin)
+        </button>
+        <button class="tab-btn" [class.active]="activeTab === 'history'" (click)="setTab('history')">
+            <span class="material-icons">history</span> Historial
+        </button>
+    </nav>
+
+    <!-- Activity Log View -->
+    <div *ngIf="activeTab === 'activity'" class="glass-card animate-fade">
+        <h2 class="section-title">
+            <span class="material-icons" [class.pulse]="isShiftActive">radio_button_checked</span>
+            Fichaje de Tiempo
+        </h2>
+
+        <div class="timer-card">
+            <div class="timer-display">{{ shiftDuration }}</div>
+            <p *ngIf="isShiftActive">Guardia en curso...</p>
+
+            <form [formGroup]="shiftForm" class="shift-form">
+                <div class="form-grid" style="margin-bottom: 2rem;">
+                    <div class="input-group">
+                        <label>Paciente Asignado</label>
+                        <select formControlName="patientId">
+                            <option value="">Seleccione un paciente</option>
+                            <option *ngFor="let p of patients" [value]="p.id">{{ p.name }}</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label>Hora de Inicio Real</label>
+                        <input type="time" formControlName="startTimeInput" [readonly]="isShiftActive">
+                    </div>
+                </div>
+
+                <div class="input-group" style="margin-bottom: 2rem;">
+                    <label>Informe de Guardia (Novedades)</label>
+                    <textarea formControlName="notes" rows="4"
+                        placeholder="Redacta novedades sobre medicación, alimentación, etc."></textarea>
+                </div>
+
+                <button class="main-action-btn" [class.btn-start]="!isShiftActive" [class.btn-stop]="isShiftActive"
+                    [disabled]="!isShiftActive && shiftForm.invalid" (click)="toggleShift()">
+                    {{ isShiftActive ? 'Finalizar Guardia' : 'Iniciar Guardia' }}
+                </button>
+            </form>
         </div>
     </div>
 
+    <!-- Profile (Admin ABM) View -->
+    <div *ngIf="activeTab === 'profile'" class="glass-card animate-fade">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+            <h2 class="section-title" style="margin-bottom: 0;">
+                <span class="material-icons">badge</span>
+                Información del Colaborador
+            </h2>
+            <span class="status-badge" [class.verified]="profileForm.value.status === 'Verificado'">
+                <span class="material-icons" style="font-size: 16px;">verified</span>
+                {{ profileForm.value.status }}
+            </span>
+        </div>
+
+        <form [formGroup]="profileForm">
+            <div class="form-grid">
+                <div class="input-group">
+                    <label>Nombre Completo</label>
+                    <input type="text" formControlName="fullName">
+                </div>
+                <div class="input-group">
+                    <label>DNI / Identificación</label>
+                    <input type="text" formControlName="dni">
+                </div>
+                <div class="input-group">
+                    <label>Teléfono</label>
+                    <input type="text" formControlName="phone">
+                </div>
+                <div class="input-group">
+                    <label>Valor Hora ($)</label>
+                    <input type="number" formControlName="hourlyRate">
+                </div>
+                <div class="input-group" style="grid-column: span 2;">
+                    <label>Dirección</label>
+                    <input type="text" formControlName="address">
+                </div>
+                <div class="input-group" style="grid-column: span 2;">
+                    <label>Datos de Cobro (CBU / Alias / Mercado Pago)</label>
+                    <input type="text" formControlName="paymentTarget">
+                </div>
+            </div>
+
+            <h3 class="section-title" style="margin-top: 2rem; font-size: 1.1rem;">Gestión de Documentación</h3>
+            <div class="form-grid">
+                <div class="input-group">
+                    <label>DNI (Frente/Dorso)</label>
+                    <div class="dropzone" (click)="fileDni.click()">
+                        <span class="material-icons">upload_file</span>
+                        <p>Subir Archivos</p>
+                        <input #fileDni type="file" hidden (change)="onFileUpload($event, 'dni')">
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label>Seguro Mala Praxis</label>
+                    <div class="dropzone" (click)="filePraxis.click()">
+                        <span class="material-icons">shield</span>
+                        <p>Subir Póliza</p>
+                        <input #filePraxis type="file" hidden (change)="onFileUpload($event, 'praxis')">
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- History View -->
+    <div *ngIf="activeTab === 'history'" class="glass-card animate-fade">
+        <h2 class="section-title">
+            <span class="material-icons">payments</span>
+            Resumen de Actividad
+        </h2>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Paciente</th>
+                        <th>Fecha</th>
+                        <th>Duración</th>
+                        <th>Monto Acumulado</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let h of shiftHistory">
+                        <td>{{ h.patient }}</td>
+                        <td>{{ h.date }}</td>
+                        <td>{{ h.duration }}</td>
+                        <td class="money">${{ h.earned | number }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- WhatsApp FAB remains -->
     <a class="whatsapp-fab" href="https://wa.me/5493415109918" target="_blank" rel="noopener" aria-label="WhatsApp">
-        <span class="whatsapp-tooltip"> admin 'Lara M.'</span>
+
+        <span class="whatsapp-tooltip">ADMIN 'Lara'</span>
+
         <img src="assets/whatsapp.svg" alt="WhatsApp" />
     </a>
-
 </div>

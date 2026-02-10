@@ -1,1 +1,231 @@
+:host {
+    display: block;
+    --primary: #0ea5e9;
+    --primary-dark: #0369a1;
+    --success: #10b981;
+    --bg-light: #f0fdf4;
+    --glass: rgba(255, 255, 255, 0.85);
+}
 
+.container {
+    padding: 1.5rem;
+    background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+    min-height: 45vh;
+    font-family: 'Inter', sans-serif;
+}
+
+.glass-card {
+    background: var(--glass);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    border-radius: 20px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.04);
+    padding: 2rem;
+    margin-bottom: 1.5rem;
+    animation: slideUp 0.5s ease-out;
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(20px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.section-title {
+    color: var(--primary-dark);
+    font-size: 1.75rem;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.sub-section-title {
+    color: #475569;
+    font-size: 1.25rem;
+    margin: 1rem 0 1rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.8rem;
+}
+
+.input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+label {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #64748b;
+}
+
+input,
+select,
+textarea {
+    padding: 0.85rem 1.15rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    background: white;
+    transition: all 0.3s ease;
+    font-size: 1rem;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.1);
+}
+
+/* Medication List */
+.medication-card {
+    background: white;
+    border: 1px solid #f1f5f9;
+    padding: 1.5rem;
+    border-radius: 16px;
+    margin-bottom: 1rem;
+    display: flex;
+    gap: 1.5rem;
+    align-items: flex-start;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+}
+
+.add-btn {
+    background: #f1f5f9;
+    color: var(--primary-dark);
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s;
+}
+
+.add-btn:hover {
+    background: #e2e8f0;
+}
+
+.remove-btn {
+    color: #ef4444;
+    background: #fee2e2;
+    border: none;
+    padding: 0.5rem;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+}
+
+/* Caregiver Selection */
+.caregiver-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1rem;
+}
+
+.caregiver-card {
+    padding: 1.25rem;
+    background: white;
+    border: 2px solid #f1f5f9;
+    border-radius: 16px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.caregiver-card:hover {
+    border-color: #cbd5e1;
+}
+
+.caregiver-card.active {
+    border-color: var(--primary);
+    background: #f0f9ff;
+    box-shadow: 0 4px 12px rgba(14, 165, 233, 0.1);
+}
+
+.avatar {
+    width: 48px;
+    height: 48px;
+    background: #e0f2fe;
+    color: var(--primary-dark);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.check-container {
+    margin-left: auto;
+    color: var(--primary);
+}
+
+/* Buttons */
+.submit-btn {
+    margin-top: 3rem;
+    width: 100%;
+    padding: 1.15rem;
+    background: var(--primary-dark);
+    color: white;
+    border: none;
+    border-radius: 14px;
+    font-weight: 700;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    box-shadow: 0 4px 15px rgba(3, 105, 161, 0.3);
+}
+
+.submit-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(3, 105, 161, 0.4);
+}
+
+.submit-btn:active {
+    transform: scale(0.98);
+}
+
+.map-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: #ef4444;
+    font-weight: 600;
+    text-decoration: none;
+    margin-top: 0.5rem;
+}
+
+@media (max-width: 640px) {
+    .glass-card {
+        padding: 1.5rem;
+    }
+
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .medication-card {
+        flex-direction: column;
+    }
+}
