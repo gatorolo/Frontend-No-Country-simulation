@@ -184,7 +184,6 @@ textarea:focus {
     color: var(--primary);
 }
 
-/* Buttons */
 .submit-btn {
     margin-top: 3rem;
     width: 100%;
@@ -231,4 +230,10 @@ textarea:focus {
     .medication-card {
         flex-direction: column;
     }
+}
+
+
+.whatsapp-fab:hover .whatsapp-tooltip {
+    opacity: 1;
+    visibility: visible;
 }

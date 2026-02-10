@@ -13,7 +13,8 @@ export class FamilyComponent implements OnInit {
     availableCaregivers = [
         { id: 101, name: 'Lara Martínez', specialty: 'Enfermería' },
         { id: 102, name: 'Carlos Ruiz', specialty: 'Kinesiología' },
-        { id: 103, name: 'Elena Paz', specialty: 'Cuidadora Geriátrica' }
+        { id: 103, name: 'Elena Paz', specialty: 'Cuidadora Geriátrica' },
+        { id: 104, name: 'Carla Vuioner', specialty: 'Rehabilitación' }
     ];
 
     constructor(private fb: FormBuilder) { }
