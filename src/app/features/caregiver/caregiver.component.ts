@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { ConfigService } from 'src/app/core/services/config.service';
 
 @Component({
     selector: 'app-caregiver-dashboard',
@@ -11,6 +12,7 @@ export class CaregiverComponent implements OnInit {
     isShiftActive = false;
     shiftDuration = '00:00:00';
     shiftForm!: FormGroup;
+    whatsappLink = '';
 
     // Static data for the professional profile
     profileData = {
@@ -37,10 +39,16 @@ export class CaregiverComponent implements OnInit {
 
     private timerInterval: any;
 
-    constructor(private fb: FormBuilder) { }
+    constructor(
+        private fb: FormBuilder,
+        private configService: ConfigService
+    ) { }
 
     ngOnInit(): void {
         this.initShiftForm();
+        this.configService.whatsappNumber$.subscribe(num => {
+            this.whatsappLink = `https://wa.me/${num}`;
+        });
     }
 
     private initShiftForm() {

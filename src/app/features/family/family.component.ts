@@ -1,6 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
+import { ConfigService } from 'src/app/core/services/config.service';
+import { PatientService, Patient } from 'src/app/core/services/patient.service';
 
 @Component({
     selector: 'app-family-dashboard',
@@ -9,6 +11,8 @@ import { Router } from '@angular/router';
 })
 export class FamilyComponent implements OnInit {
     familyForm!: FormGroup;
+    whatsappLink = '';
+    currentPatientId = 1; // For demo purposes, we work with patient 1
 
     // Mock Data for Caregivers
     availableCaregivers = [
@@ -18,10 +22,43 @@ export class FamilyComponent implements OnInit {
         { id: 104, name: 'Carla Vuioner', specialty: 'Rehabilitación' }
     ];
 
-    constructor(private fb: FormBuilder, private router: Router) { }
+    constructor(
+        private fb: FormBuilder,
+        private router: Router,
+        private configService: ConfigService,
+        private patientService: PatientService
+    ) { }
 
     ngOnInit(): void {
         this.initForm();
+        this.loadPatientData();
+        this.configService.whatsappNumber$.subscribe(num => {
+            this.whatsappLink = `https://wa.me/${num}`;
+        });
+    }
+
+    private loadPatientData() {
+        const patients = this.patientService.getPatients();
+        const patient = patients.find(p => p.id === this.currentPatientId);
+        if (patient) {
+            // Clear current medications
+            while (this.medications.length) {
+                this.medications.removeAt(0);
+            }
+            // Add medications from data
+            patient.medications.forEach(m => {
+                this.medications.push(this.createMedicationGroup(m.name, m.schedule));
+            });
+            // Patch values
+            this.familyForm.patchValue({
+                patientName: patient.name,
+                patientAge: patient.age,
+                diagnosis: patient.diagnosis,
+                healthInsurance: patient.healthInsurance,
+                locationLink: patient.locationLink,
+                authorizedCaregivers: patient.authorizedCaregivers
+            });
+        }
     }
 
     private initForm() {
@@ -65,9 +102,22 @@ export class FamilyComponent implements OnInit {
 
     onSubmit() {
         if (this.familyForm.valid) {
-            console.log('Family Data Update:', this.familyForm.value);
-            // Preparation for Alejandro's Logic (Integration)
-            // Navigate to the summary view mode
+            const formData = this.familyForm.value;
+            const updatedPatient: Patient = {
+                id: this.currentPatientId,
+                name: formData.patientName,
+                age: formData.patientAge,
+                diagnosis: formData.diagnosis,
+                healthInsurance: formData.healthInsurance,
+                locationLink: formData.locationLink,
+                medications: formData.medications,
+                authorizedCaregivers: formData.authorizedCaregivers,
+                status: 'Activo' // Or preserve existing status
+            };
+
+            this.patientService.updatePatient(updatedPatient);
+            console.log('Family Data Update Saved to Service:', updatedPatient);
+
             this.router.navigate(['/family/view']);
         }
     }
