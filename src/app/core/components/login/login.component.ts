@@ -8,15 +8,20 @@ import { Router } from '@angular/router';
 })
 export class LoginComponent {
     isLoading = false;
-    selectedRole: string = 'admin'; 
+    selectedRole: string = 'admin';
 
     constructor(private router: Router) { }
 
     onLogin() {
         this.isLoading = true;
 
-       
+
         setTimeout(() => {
+            // Store pending role for the intermediate growth page
+            localStorage.setItem('pendingRole', this.selectedRole);
+            this.router.navigate(['/growth']);
+
+            /* Original direct flow (Commented for reversibility)
             switch (this.selectedRole) {
                 case 'admin':
                     this.router.navigate(['/admin']);
@@ -30,6 +35,7 @@ export class LoginComponent {
                 default:
                     this.router.navigate(['/admin']);
             }
+            */
         }, 1500);
     }
 }

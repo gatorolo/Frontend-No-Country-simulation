@@ -1,14 +1,16 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router'; // Needed for routerLink or generic routing in core
+import { RouterModule } from '@angular/router';
 import { HeaderComponent } from './components/header/header.component';
 import { LoginComponent } from './components/login/login.component';
-import { FormsModule } from '@angular/forms'; // Typically needed for login forms
+import { GrowthComponent } from './components/growth/growth.component';
+import { FormsModule } from '@angular/forms';
 
 @NgModule({
     declarations: [
         HeaderComponent,
-        LoginComponent
+        LoginComponent,
+        GrowthComponent
     ],
     imports: [
         CommonModule,
@@ -17,7 +19,8 @@ import { FormsModule } from '@angular/forms'; // Typically needed for login form
     ],
     exports: [
         HeaderComponent,
-        LoginComponent
+        LoginComponent,
+        GrowthComponent
     ]
 })
 export class CoreModule { }
