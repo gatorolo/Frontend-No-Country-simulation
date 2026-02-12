@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ConfigService } from 'src/app/core/services/config.service';
+import { MatchingService } from 'src/app/core/services/matching.service';
 
 @Component({
     selector: 'app-caregiver-dashboard',
@@ -39,9 +40,14 @@ export class CaregiverComponent implements OnInit {
 
     private timerInterval: any;
 
+    notifications: any[] = [];
+    unreadCount = 0;
+    showNotifications = false;
+
     constructor(
         private fb: FormBuilder,
-        private configService: ConfigService
+        private configService: ConfigService,
+        private matchingService: MatchingService
     ) { }
 
     ngOnInit(): void {
@@ -49,8 +55,63 @@ export class CaregiverComponent implements OnInit {
         this.configService.whatsappNumber$.subscribe(num => {
             this.whatsappLink = `https://wa.me/${num}`;
         });
+
+        this.matchingService.posts$.subscribe(posts => {
+            // 1. New Service Posts (status 'Publicado')
+            const publicPosts = posts.filter(p => p.status === 'Publicado');
+
+            // 2. My Approved Applications (status 'Confirmado' && caregiverId === 123 (mock))
+            // In a real app, 123 comes from auth user service
+            const myApprovedPosts = posts.filter(p => p.status === 'Confirmado' && p.caregiverId === 123);
+
+            const allNotifications = [...publicPosts, ...myApprovedPosts];
+
+            if (allNotifications.length > this.notifications.length) {
+                const countDiff = allNotifications.length - this.notifications.length;
+                if (countDiff > 0) {
+                    this.unreadCount += countDiff;
+                }
+                this.notifications = allNotifications;
+            } else {
+                this.notifications = allNotifications;
+            }
+        });
     }
 
+    toggleNotifications() {
+        this.showNotifications = !this.showNotifications;
+        if (this.showNotifications) {
+            this.unreadCount = 0; // Mark as read when opened
+        }
+    }
+
+    selectedNotification: any = null;
+
+    openNotificationDetail(notification: any) {
+        this.selectedNotification = notification;
+        this.showNotifications = false; // Close dropdown
+    }
+
+    closeNotificationDetail() {
+        this.selectedNotification = null;
+    }
+
+    applyToService() {
+        if (this.selectedNotification) {
+            // In a real app, get current caregiver ID
+            const caregiverId = 123;
+            const caregiverName = this.profileData.fullName;
+
+            this.matchingService.applyToPost(this.selectedNotification.id, caregiverId, caregiverName);
+
+            // Show success feedback (simple alert for now)
+            alert(`Te has postulado correctamente para la guardia de ${this.selectedNotification.patientName}`);
+
+            this.closeNotificationDetail();
+        }
+    }
+
+    // ... existing initShiftForm and other methods
     private initShiftForm() {
         this.shiftForm = this.fb.group({
             patientId: ['', Validators.required],
@@ -63,7 +124,7 @@ export class CaregiverComponent implements OnInit {
         this.activeTab = tab;
     }
 
-    // Shift Logic
+    // Shift Logic ... (rest of the file)
     toggleShift() {
         if (!this.isShiftActive) {
             this.startShift();

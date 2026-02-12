@@ -106,7 +106,7 @@
             <div class="card actions-card">
                 <h3>Pagos (Items faltantes)</h3>
                 <div class="action-buttons">
-                    <button class="btn btn-primary full-width">
+                    <button class="btn btn-primary full-width" (click)="openPublishModal()">
                         <span class="material-icons">add</span> Registrar Guardia
                     </button>
                     <button class="btn btn-outline full-width">
@@ -154,3 +154,4 @@
     </div>
 
 </div>
+<app-publish-service [isVisible]="showPublishModal" (close)="closePublishModal()"></app-publish-service>

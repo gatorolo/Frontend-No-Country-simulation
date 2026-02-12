@@ -8,6 +8,7 @@ import { AdminLayoutComponent } from './layout/admin-layout.component';
 import { AdminSidebarComponent } from './components/sidebar/admin-sidebar.component';
 import { AdminTopbarComponent } from './components/topbar/admin-topbar.component';
 import { AdminComponent } from './admin.component'; // Dashboard
+import { PublishServiceComponent } from './components/publish-service/publish-service.component';
 // Pages
 import { CaregiversComponent } from './pages/caregivers.component';
 import { PatientsComponent } from './pages/patients.component';
@@ -68,7 +69,8 @@ const routes: Routes = [
     SeguridadComponent,
     NotificacionesComponent,
     AparienciaComponent,
-    SistemaComponent
+    SistemaComponent,
+    PublishServiceComponent
   ],
   imports: [
     CommonModule,

@@ -24,4 +24,15 @@ export class AdminComponent {
         { name: 'Aurora Rodriguez', amount: '$320.00', status: 'paid' },
         { name: 'Maria Aubeclasón', amount: '$-727.00', status: 'paid' }
     ];
+
+
+    showPublishModal = false;
+
+    openPublishModal() {
+        this.showPublishModal = true;
+    }
+
+    closePublishModal() {
+        this.showPublishModal = false;
+    }
 }

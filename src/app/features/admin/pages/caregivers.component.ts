@@ -11,11 +11,7 @@ export class CaregiversComponent implements OnInit {
   showAddForm = false;
   selectedCaregiver: any = null;
 
-  caregivers = [
-    { id: 1, fullName: 'Lara Martínez', specialty: 'Enfermería', dni: '35.123.456', phone: '3415109918', hourlyRate: 1500, status: 'Verificado' },
-    { id: 2, fullName: 'Carlos Ruiz', specialty: 'Kinesiología', dni: '32.987.654', phone: '3415223344', hourlyRate: 1800, status: 'Pendiente' },
-    { id: 3, fullName: 'Elena Paz', specialty: 'Cuidadora Geriátrica', dni: '28.111.222', phone: '3416556677', hourlyRate: 1200, status: 'Verificado' }
-  ];
+  caregivers: any[] = [];
 
   constructor(private fb: FormBuilder) { }
 

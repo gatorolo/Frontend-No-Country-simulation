@@ -26,12 +26,31 @@
     margin-bottom: 2rem;
 }
 
-.tab-navbar {
+.top-nav {
     display: flex;
+    justify-content: space-between;
+    align-items: center;
     gap: 1rem;
     margin-bottom: 2rem;
+}
+
+.tabs-scroll-area {
+    display: flex;
+    gap: 1rem;
     overflow-x: auto;
     padding-bottom: 0.5rem;
+    flex: 1;
+    min-width: 0;
+    /* Enables scrolling within flex item */
+}
+
+.actions-area {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    padding-bottom: 0.5rem;
+    /* Alignment with tabs */
+    flex-shrink: 0;
 }
 
 .tab-btn {
@@ -316,4 +335,288 @@ td {
 .whatsapp-fab:hover .whatsapp-tooltip {
     opacity: 1;
     visibility: visible;
+}
+
+/* Notification Styles */
+.notification-container {
+    position: relative;
+    /* margin-left: auto;  removed to avoid conflict with logout btn which has margin-left: auto */
+    margin-right: 1rem;
+}
+
+.icon-btn {
+    background: white;
+    border: none;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    position: relative;
+    color: #64748b;
+    transition: all 0.2s;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+
+.icon-btn:hover {
+    background: #f1f5f9;
+    color: var(--primary);
+}
+
+.badge {
+    position: absolute;
+    top: -2px;
+    right: -2px;
+    background: #ef4444;
+    color: white;
+    font-size: 0.7rem;
+    font-weight: 700;
+    min-width: 18px;
+    height: 18px;
+    border-radius: 9px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: 2px solid #e0f2fe;
+}
+
+.notification-dropdown {
+    position: absolute;
+    top: 50px;
+    right: 0;
+    width: 320px;
+    /* Slightly wider */
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    overflow: hidden;
+    padding: 0;
+    animation: slideDown 0.2s ease-out;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.dropdown-header {
+    padding: 1rem;
+    font-weight: 700;
+    border-bottom: 1px solid #f1f5f9;
+    color: #1e293b;
+    background: #f8fafc;
+    font-size: 0.95rem;
+}
+
+.dropdown-content {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.empty-state {
+    padding: 2rem;
+    text-align: center;
+    color: #94a3b8;
+    font-size: 0.9rem;
+    font-style: italic;
+}
+
+.notif-item {
+    display: flex;
+    gap: 1rem;
+    padding: 1rem;
+    border-bottom: 1px solid #f1f5f9;
+    transition: background 0.2s;
+    cursor: pointer;
+    align-items: flex-start;
+}
+
+.notif-item:last-child {
+    border-bottom: none;
+}
+
+.notif-item:hover {
+    background: #f8fafc;
+}
+
+.notif-icon {
+    min-width: 36px;
+    height: 36px;
+    background: #e0f2fe;
+    color: var(--primary);
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.notif-icon.success {
+    background: #dcfce7;
+    color: #16a34a;
+}
+
+.notif-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.notif-title {
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: #1e293b;
+}
+
+.notif-desc {
+    font-size: 0.85rem;
+    color: #475569;
+    line-height: 1.4;
+}
+
+.notif-meta {
+    font-size: 0.75rem;
+    color: #94a3b8;
+    margin-top: 0.25rem;
+}
+
+/* Detail Modal Styles */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+    backdrop-filter: blur(4px);
+    animation: fadeIn 0.3s;
+}
+
+.modal-content {
+    background: white;
+    padding: 2rem;
+    border-radius: 16px;
+    width: 100%;
+    max-width: 500px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+}
+
+.animate-scale-in {
+    animation: scaleIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes scaleIn {
+    from {
+        transform: scale(0.9);
+        opacity: 0;
+    }
+
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.close-btn {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    color: #94a3b8;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.close-btn:hover {
+    color: #ef4444;
+}
+
+.detail-grid {
+    display: grid;
+    gap: 1.5rem;
+}
+
+.detail-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.detail-item .label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    font-weight: 700;
+    color: #64748b;
+}
+
+.detail-item .value {
+    font-size: 1.1rem;
+    font-weight: 500;
+    color: #1e293b;
+}
+
+.detail-item .value.pill {
+    background: #e0f2fe;
+    color: #0369a1;
+    padding: 0.25rem 0.75rem;
+    border-radius: 50px;
+    width: fit-content;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.btn-apply {
+    background: var(--primary);
+    color: white;
+    border: none;
+    padding: 1rem 2rem;
+    border-radius: 50px;
+    font-size: 1.1rem;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s;
+    box-shadow: 0 4px 12px rgba(14, 165, 233, 0.4);
+}
+
+.btn-apply:hover {
+    background: var(--primary-dark);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(14, 165, 233, 0.5);
+}
+
+.btn-apply:active {
+    transform: translateY(0);
 }
