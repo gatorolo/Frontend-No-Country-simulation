@@ -12,7 +12,7 @@ import { PatientService, Patient } from 'src/app/core/services/patient.service';
 export class FamilyComponent implements OnInit {
     familyForm!: FormGroup;
     whatsappLink = '';
-    currentPatientId = 1;
+    currentPatientId = 1; // For demo purposes, we work with patient 1
 
     // Mock Data for Caregivers
     availableCaregivers = [

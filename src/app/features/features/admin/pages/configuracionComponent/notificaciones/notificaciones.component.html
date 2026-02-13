@@ -1,0 +1,56 @@
+<div class="form-container">
+    <div class="form-header">
+        <button class="back-btn" (click)="goBack()">
+            <span class="material-icons">arrow_back</span>
+            Volver
+        </button>
+        <h2>🔔 Notificaciones</h2>
+    </div>
+
+    <form [formGroup]="notificationsForm" (ngSubmit)="onSubmit()" class="settings-form">
+        <div class="section-title">Alertas, correos y avisos</div>
+
+        <div class="toggle-list">
+            <div class="toggle-item">
+                <label for="emailNotifications">Notificaciones por email</label>
+                <input type="checkbox" id="emailNotifications" formControlName="emailNotifications"
+                    class="toggle-input">
+            </div>
+
+            <div class="sub-section">Alertas del sistema</div>
+            <div class="toggle-item">
+                <label for="criticalErrors">Errores críticos</label>
+                <input type="checkbox" id="criticalErrors" formControlName="criticalErrors" class="toggle-input">
+            </div>
+            <div class="toggle-item">
+                <label for="importantEvents">Eventos importantes</label>
+                <input type="checkbox" id="importantEvents" formControlName="importantEvents" class="toggle-input">
+            </div>
+
+            <div class="sub-section">Emails automáticos</div>
+            <div class="toggle-item">
+                <label for="onUserCreate">Al crear usuario</label>
+                <input type="checkbox" id="onUserCreate" formControlName="onUserCreate" class="toggle-input">
+            </div>
+            <div class="toggle-item">
+                <label for="onPasswordChange">Al cambiar contraseña</label>
+                <input type="checkbox" id="onPasswordChange" formControlName="onPasswordChange" class="toggle-input">
+            </div>
+        </div>
+
+        <div class="form-grid" style="margin-top: 2rem;">
+            <div class="form-group">
+                <label for="frequency">Frecuencia de notificaciones</label>
+                <select id="frequency" formControlName="frequency">
+                    <option value="immediate">Inmediato</option>
+                    <option value="daily">Diario</option>
+                    <option value="never">Nunca</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="save-btn">Guardar Cambios</button>
+        </div>
+    </form>
+</div>

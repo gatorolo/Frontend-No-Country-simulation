@@ -1,0 +1,107 @@
+.form-container {
+    background: white;
+    padding: 2rem;
+    border-radius: 16px;
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.back-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    color: #64748b;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-weight: 500;
+}
+
+span {
+    color: cadetblue;
+    text-align: center;
+}
+
+.info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+}
+
+.info-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.info-item label {
+    font-size: 0.8rem;
+    color: #64748b;
+    font-weight: 600;
+}
+
+.info-item span {
+    font-size: 1rem;
+    font-weight: 500;
+    color: #1e293b;
+}
+
+.badge.development {
+    background: #fef3c7;
+    color: #92400e;
+    padding: 2px 8px;
+    border-radius: 4px;
+    width: fit-content;
+    font-size: 0.85rem;
+}
+
+.outline-btn {
+    background: white;
+    border: 1px solid #d1d5db;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.toggle-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    background: #f8fafc;
+    border-radius: 8px;
+}
+
+.toggle-input {
+    width: 44px;
+    height: 22px;
+    appearance: none;
+    background: #cbd5e1;
+    border-radius: 20px;
+    position: relative;
+    cursor: pointer;
+}
+
+.toggle-input:checked {
+    background: #10b981;
+}
+
+.toggle-input::before {
+    content: '';
+    position: absolute;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: white;
+    top: 2px;
+    left: 2px;
+    transition: .3s;
+}
+
+.toggle-input:checked::before {
+    transform: translateX(22px);
+}

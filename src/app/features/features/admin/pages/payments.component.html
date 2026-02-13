@@ -1,0 +1,159 @@
+<div class="dashboard-container animate-fade">
+  <div class="header-section">
+    <div class="title-group">
+      <button class="back-btn" routerLink="/admin/dashboard">
+        <span class="material-icons">arrow_back</span>
+      </button>
+      <h1>Centro de Control de Pagos</h1>
+    </div>
+    <div class="actions">
+      <button class="export-btn" (click)="exportData()">
+        <span class="material-icons">download</span> Exportar Reporte
+      </button>
+    </div>
+  </div>
+
+  <!-- KPI Widgets -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-icon pay">
+        <span class="material-icons">payments</span>
+      </div>
+      <div class="stat-info">
+        <h3>Total a Pagar</h3>
+        <p class="amount">${{ kpis.totalToPay | number }}</p>
+        <span class="stat-label">Mes en curso</span>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon pending">
+        <span class="material-icons">pending_actions</span>
+      </div>
+      <div class="stat-info">
+        <h3>Pagos Pendientes</h3>
+        <p class="amount">${{ kpis.pendingPayments | number }}</p>
+        <span class="stat-label">Facturas recibidas</span>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon alert">
+        <span class="material-icons">priority_high</span>
+      </div>
+      <div class="stat-info">
+        <h3>Vencimientos OS</h3>
+        <p class="amount">{{ kpis.criticalExpirations }}</p>
+        <span class="stat-label">Casos críticos</span>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon validate">
+        <span class="material-icons">rule</span>
+      </div>
+      <div class="stat-info">
+        <h3>Por Validar</h3>
+        <p class="amount">{{ kpis.caregiversToValidate }}</p>
+        <span class="stat-label">Cuidadores bloqueados</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="main-content-grid">
+    <!-- Settlement Table -->
+    <div class="glass-card table-section">
+      <h2 class="section-title">
+        <span class="material-icons">account_balance_wallet</span>
+        Liquidación de Cuidadores
+      </h2>
+      <div class="table-container">
+        <table class="premium-table">
+          <thead>
+            <tr>
+              <th>Cuidador</th>
+              <th>Monto</th>
+              <th>Estado Factura</th>
+              <th>Acción</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let s of settlements">
+              <td>
+                <span class="caregiver-name">{{ s.caregiverName }}</span>
+              </td>
+              <td class="amount-cell">${{ s.amount | number }}</td>
+              <td>
+                <span class="status-pill" [class]="s.invoiceUploaded ? 'uploaded' : 'missing'">
+                  {{ s.invoiceUploaded ? 'Factura Recibida' : 'Pendiente Carga' }}
+                </span>
+              </td>
+              <td>
+                <button *ngIf="s.status !== 'Procesado'" class="pay-btn" [disabled]="!s.invoiceUploaded"
+                  (click)="openReceiptModal(s)">
+                  <span class="material-icons">receipt_long</span> Procesar Pago
+                </button>
+                <span *ngIf="s.status === 'Procesado'" class="done-label">
+                  <span class="material-icons">check_circle</span> Pagado
+                </span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- OS Reconciliation -->
+    <div class="glass-card reconciliation-section">
+      <h2 class="section-title">
+        <span class="material-icons">assignment_turned_in</span>
+        Conciliación de Obras Sociales
+      </h2>
+      <div class="billing-list">
+        <div *ngFor="let item of billing" class="billing-card">
+          <div class="billing-header">
+            <div>
+              <span class="os-name">{{ item.insuranceName }}</span>
+              <span class="patient-name">{{ item.patientName }}</span>
+            </div>
+            <div class="amount-tag">${{ item.amount | number }}</div>
+          </div>
+          <div class="billing-footer">
+            <div class="delay-info" [class]="getDelayClass(item.status)">
+              <span class="material-icons">schedule</span>
+              {{ item.daysDelayed }} días de atraso
+            </div>
+            <span class="presentation-date">Pres: {{ item.presentationDate | date:'dd/MM' }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Receipt Upload Modal -->
+  <div *ngIf="showReceiptModal" class="modal-overlay">
+    <div class="modal-card animate-slide-up">
+      <div class="modal-header">
+        <h3>Procesar Pago: {{ currentSettlement?.caregiverName }}</h3>
+        <button (click)="closeModal()"><span class="material-icons">close</span></button>
+      </div>
+      <div class="modal-body">
+        <p>Monto a transferir: <strong>${{ currentSettlement?.amount | number }}</strong></p>
+        <div class="upload-area">
+          <input type="file" id="receipt" (change)="onFileSelected($event)" hidden>
+          <label for="receipt" class="upload-label">
+            <span class="material-icons">cloud_upload</span>
+            {{ selectedFile ? selectedFile.name : 'Subir Comprobante de Transferencia' }}
+          </label>
+        </div>
+        <p class="note">Al confirmar, se enviará una notificación automática al cuidador.</p>
+      </div>
+      <div class="modal-footer">
+        <button class="cancel-btn" (click)="closeModal()">Cancelar</button>
+        <button class="confirm-btn" [disabled]="!selectedFile" (click)="confirmPayment()">
+          Confirmar Pago y Notificar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,91 @@
+<div class="topbar">
+  <div class="left-section">
+    <button class="menu-btn" (click)="menuClick.emit()">
+      <span class="material-icons">menu</span>
+    </button>
+    <div class="search-bar"></div>
+  </div>
+
+  <div class="right-section">
+    <div class="notification-wrapper">
+      <button class="icon-btn" (click)="toggleNotifications()">
+        <span class="material-icons">notifications</span>
+        <span class="badge" *ngIf="unreadCount > 0">{{ unreadCount }}</span>
+      </button>
+
+      <div class="notification-dropdown" *ngIf="showNotifications">
+        <div class="dropdown-header">Solicitudes de Guardia</div>
+        <div class="dropdown-content">
+          <div *ngIf="notifications.length === 0" class="empty-state">
+            No hay nuevas postulaciones
+          </div>
+          <div class="notif-item" *ngFor="let n of notifications" (click)="openNotificationDetail(n)">
+            <div class="notif-icon">
+              <span class="material-icons">person_add</span>
+            </div>
+            <div class="notif-info">
+              <span class="notif-title">Nueva Postulación</span>
+              <span class="notif-desc">
+                <strong>{{ n.caregiverName }}</strong> se postuló para
+                <strong>{{ n.patientName }}</strong>
+              </span>
+              <span class="notif-meta">Pendiente de Aprobación</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="user-profile">
+      <img src="assets/user-placeholder.png" alt="Profile" class="avatar" />
+      <span class="user-name">Lara M.</span>
+    </div>
+    <button class="icon-btn logout-btn" routerLink="/login" title="Cerrar Sesión">
+      <span class="material-icons">logout</span>
+    </button>
+  </div>
+
+  <!-- Approval Modal -->
+  <div class="modal-overlay" *ngIf="selectedNotification">
+    <div class="modal-content animate-scale-in">
+      <div class="modal-header">
+        <h2>Aprobar Asignación</h2>
+        <button class="close-btn" (click)="closeNotificationDetail()">&times;</button>
+      </div>
+
+      <div class="detail-grid">
+        <div class="detail-item">
+          <span class="label">Cuidador Postulado</span>
+          <span class="value">{{ selectedNotification.caregiverName }}</span>
+        </div>
+        <div class="detail-item">
+          <span class="label">Paciente</span>
+          <span class="value">{{ selectedNotification.patientName }} ({{ selectedNotification.age }} años)</span>
+        </div>
+        <div class="detail-item">
+          <span class="label">Zona / Ciudad</span>
+          <span class="value">{{ selectedNotification.zone }}, {{ selectedNotification.city }}</span>
+        </div>
+        <div class="detail-item">
+          <span class="label">Horario</span>
+          <span class="value">{{ selectedNotification.schedule }}</span>
+        </div>
+        <div class="detail-item">
+          <span class="label">Especialidad Requerida</span>
+          <span class="value pill">{{ selectedNotification.specialty }}</span>
+        </div>
+        <div class="detail-item">
+          <span class="label">Complejidad</span>
+          <span class="value">{{ selectedNotification.complexity }}</span>
+        </div>
+      </div>
+
+      <div class="modal-actions" style="justify-content: center; margin-top: 2rem; display: flex; gap: 1rem;">
+        <button class="btn-cancel" (click)="closeNotificationDetail()">Cancelar</button>
+        <button class="btn-approve" (click)="approveAssignment()">
+          <span>Aprobar Asignación</span>
+          <span class="material-icons">check_circle</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

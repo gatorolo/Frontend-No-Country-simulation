@@ -1,0 +1,61 @@
+<div class="modal-overlay" *ngIf="isVisible">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Publicar Nuevo Servicio</h2>
+            <button class="close-btn" (click)="onCancel()">&times;</button>
+        </div>
+
+        <form [formGroup]="serviceForm" (ngSubmit)="onSubmit()">
+            <div class="form-group">
+                <label>Nombre del Paciente</label>
+                <input type="text" formControlName="patientName" placeholder="Ej: Roberto Sánchez">
+            </div>
+
+            <div class="form-row">
+                <div class="form-group half">
+                    <label>Edad</label>
+                    <input type="number" formControlName="age" placeholder="Ej: 78">
+                </div>
+                <div class="form-group half">
+                    <label>Complejidad</label>
+                    <select formControlName="complexity">
+                        <option value="Baja">Baja</option>
+                        <option value="Media">Media</option>
+                        <option value="Alta">Alta</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group half">
+                    <label>Ciudad</label>
+                    <input type="text" formControlName="city" placeholder="Ej: Rosario">
+                </div>
+                <div class="form-group half">
+                    <label>Zona</label>
+                    <input type="text" formControlName="zone" placeholder="Ej: Centro">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Especialidad Requerida</label>
+                <select formControlName="specialty">
+                    <option value="Enfermería">Enfermería</option>
+                    <option value="Kinesiología">Kinesiología</option>
+                    <option value="Gerontología">Gerontología</option>
+                    <option value="Rehabilitación">Rehabilitación</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Horario</label>
+                <input type="text" formControlName="schedule" placeholder="Ej: Lun-Vie 08:00 - 16:00">
+            </div>
+
+            <div class="modal-actions">
+                <button type="button" class="btn-secondary" (click)="onCancel()">Cancelar</button>
+                <button type="submit" class="btn-primary" [disabled]="serviceForm.invalid">Publicar Guardia</button>
+            </div>
+        </form>
+    </div>
+</div>
