@@ -52,9 +52,13 @@
     justify-content: center;
     position: relative;
     text-shadow: 4px 4px 8px rgba(0, 0, 0, 0.5);
-    color: #1b191a;
+    color: #5e575a;
     transition: transform 0.2s ease-in-out;
     display: inline-block;
+}
+
+.icon-btn:hover {
+    color: var(--primary);
 }
 
 .material-icons {
@@ -63,7 +67,6 @@
 
 .logout-btn .material-icons {
     font-size: 1.7rem;
-    /* ~40% smaller than 2.8rem */
 }
 
 .menu-btn:hover,
@@ -131,6 +134,7 @@
     border: 1px solid rgba(0, 0, 0, 0.05);
 }
 
+
 @keyframes slideDown {
     from {
         opacity: 0;
@@ -147,7 +151,8 @@
     padding: 1rem;
     font-weight: 700;
     border-bottom: 1px solid #f1f5f9;
-    color: #1e293b;
+    color: #0ea5e9;  
+    text-align: center;
     background: #f8fafc;
     font-size: 0.95rem;
 }

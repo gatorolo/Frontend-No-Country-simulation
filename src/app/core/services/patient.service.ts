@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+/*import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 
 export interface Medication {
@@ -57,5 +57,83 @@ export class PatientService {
     addPatient(patient: Patient) {
         const patients = this.getPatients();
         this.patientsSource.next([...patients, patient]);
+    }
+}*/
+
+import { Injectable } from '@angular/core';
+import { BehaviorSubject, Observable } from 'rxjs';
+import { HttpClient } from '@angular/common/http'; // 1. Importamos el cliente HTTP
+import { tap } from 'rxjs/operators';
+
+export interface Medication {
+    name: string;
+    schedule: string;
+}
+
+export interface Patient {
+    id: number;
+    name: string;
+    age: number;
+    diagnosis: string;
+    healthInsurance: string;
+    locationLink: string;
+    medications: Medication[];
+    authorizedCaregivers: number[];
+    status: 'Activo' | 'Internación' | 'Alta';
+}
+
+@Injectable({
+    providedIn: 'root'
+})
+export class PatientService {
+    // 2. La URL de tu API en Java
+    private apiUrl = 'http://localhost:8080/api/patients';
+
+    private patientsSource = new BehaviorSubject<Patient[]>([]);
+    patients$ = this.patientsSource.asObservable();
+
+    constructor(private http: HttpClient) { } // 3. Inyectamos el cliente
+
+    // Método para obtener la lista (opcional, útil para el admin)
+    getPatientsFromApi(): Observable<Patient[]> {
+        return this.http.get<Patient[]>(this.apiUrl).pipe(
+            tap(patients => this.patientsSource.next(patients))
+        );
+    }
+
+    // 4. ESTE ES EL MÉTODO QUE TE DABA ERROR
+    // Ahora devuelve un Observable para que el componente pueda hacer .subscribe()
+    updatePatient(updatedPatient: Patient): Observable<Patient> {
+        return this.http.put<Patient>(`${this.apiUrl}/${updatedPatient.id}`, updatedPatient).pipe(
+            tap(patient => {
+                const patients = this.getPatients();
+                const index = patients.findIndex(p => p.id === patient.id);
+                if (index !== -1) {
+                    patients[index] = patient;
+                    this.patientsSource.next([...patients]);
+                }
+            })
+        );
+    }
+
+    // Obtener un paciente específico por ID
+    getPatientById(id: number): Observable<Patient> {
+        return this.http.get<Patient>(`${this.apiUrl}/${id}`);
+    }
+
+    // Para compatibilidad con lo que ya tienes (get local)
+    getPatients(): Patient[] {
+        return this.patientsSource.getValue();
+    }
+
+    addPatient(patient: Patient): Observable<Patient> {
+        // 1. Enviamos el nuevo paciente al backend Java vía POST
+        return this.http.post<Patient>(this.apiUrl, patient).pipe(
+            tap(newPatient => {
+                // 2. Actualizamos la lista local directamente
+                const patients = this.getPatients();
+                this.patientsSource.next([...patients, newPatient]);
+            })
+        );
     }
 }

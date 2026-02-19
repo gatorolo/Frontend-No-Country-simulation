@@ -3,6 +3,7 @@ import { FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ConfigService } from 'src/app/core/services/config.service';
 import { PatientService, Patient } from 'src/app/core/services/patient.service';
+import Swal from 'sweetalert2';
 
 @Component({
     selector: 'app-family-dashboard',
@@ -27,6 +28,7 @@ export class FamilyComponent implements OnInit {
         private router: Router,
         private configService: ConfigService,
         private patientService: PatientService
+
     ) { }
 
     ngOnInit(): void {
@@ -38,27 +40,32 @@ export class FamilyComponent implements OnInit {
     }
 
     private loadPatientData() {
-        const patients = this.patientService.getPatients();
-        const patient = patients.find(p => p.id === this.currentPatientId);
-        if (patient) {
-            // Clear current medications
-            while (this.medications.length) {
-                this.medications.removeAt(0);
-            }
-            // Add medications from data
-            patient.medications.forEach(m => {
-                this.medications.push(this.createMedicationGroup(m.name, m.schedule));
-            });
-            // Patch values
-            this.familyForm.patchValue({
-                patientName: patient.name,
-                patientAge: patient.age,
-                diagnosis: patient.diagnosis,
-                healthInsurance: patient.healthInsurance,
-                locationLink: patient.locationLink,
-                authorizedCaregivers: patient.authorizedCaregivers
-            });
-        }
+        // Llamamos al método que conecta con Java
+        this.patientService.getPatientById(this.currentPatientId).subscribe({
+            next: (patient) => {
+                if (patient) {
+                    // Limpiar medicaciones previas
+                    while (this.medications.length) {
+                        this.medications.removeAt(0);
+                    }
+                    // Cargar medicaciones desde la DB
+                    patient.medications.forEach(m => {
+                        this.medications.push(this.createMedicationGroup(m.name, m.schedule));
+                    });
+
+                    // Llenar el formulario con datos reales
+                    this.familyForm.patchValue({
+                        patientName: patient.name,
+                        patientAge: patient.age,
+                        diagnosis: patient.diagnosis,
+                        healthInsurance: patient.healthInsurance,
+                        locationLink: patient.locationLink,
+                        authorizedCaregivers: patient.authorizedCaregivers
+                    });
+                }
+            },
+            error: (err) => console.error('Error cargando datos de Java:', err)
+        });
     }
 
     private initForm() {
@@ -112,13 +119,43 @@ export class FamilyComponent implements OnInit {
                 locationLink: formData.locationLink,
                 medications: formData.medications,
                 authorizedCaregivers: formData.authorizedCaregivers,
-                status: 'Activo' // Or preserve existing status
+                status: 'Activo'
             };
 
-            this.patientService.updatePatient(updatedPatient);
-            console.log('Family Data Update Saved to Service:', updatedPatient);
-
-            this.router.navigate(['/family/view']);
+            // EL CAMBIO ESTÁ AQUÍ:
+            // Nos aseguramos de cerrar bien cada paréntesis y llave.
+            this.patientService.updatePatient(updatedPatient).subscribe({
+                next: (response) => {
+                    console.log('✅ Guardado con éxito', response);
+                    Swal.fire({
+                        icon: 'success',
+                        title: '¡Cambios Guardados!',
+                        text: 'La ficha médica ha sido actualizada correctamente.',
+                        timer: 2000,
+                        showConfirmButton: false,
+                        background: '#f7f9fc',
+                        color: '#0891b2'
+                    });
+                    setTimeout(() => {
+                        this.router.navigate(['/family/view']);
+                    }, 2000);
+                },
+                error: (err) => {
+                    console.error('❌ Error en la conexión con Java', err);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error de Conexión',
+                        text: 'No se pudo conectar con el servidor de Java (backend). Verifica que el servicio esté activo.',
+                        confirmButtonText: 'Aceptar',
+                        confirmButtonColor: '#0891b2',
+                        background: '#f7f9fc',
+                        color: '#ef4444'
+                    });
+                },
+                complete: () => {
+                    console.log('Petición completada');
+                }
+            });
         }
     }
 

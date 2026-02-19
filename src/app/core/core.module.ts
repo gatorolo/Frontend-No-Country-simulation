@@ -3,14 +3,12 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { HeaderComponent } from './components/header/header.component';
 import { LoginComponent } from './components/login/login.component';
-import { GrowthComponent } from './components/growth/growth.component';
 import { FormsModule } from '@angular/forms';
 
 @NgModule({
     declarations: [
         HeaderComponent,
-        LoginComponent,
-        GrowthComponent
+        LoginComponent
     ],
     imports: [
         CommonModule,
@@ -19,8 +17,7 @@ import { FormsModule } from '@angular/forms';
     ],
     exports: [
         HeaderComponent,
-        LoginComponent,
-        GrowthComponent
+        LoginComponent
     ]
 })
 export class CoreModule { }

@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { CaregiverService } from 'src/app/core/services/caregiver.service';
 import { ConfigService } from 'src/app/core/services/config.service';
 import { MatchingService } from 'src/app/core/services/matching.service';
 
@@ -43,15 +44,19 @@ export class CaregiverComponent implements OnInit {
     notifications: any[] = [];
     unreadCount = 0;
     showNotifications = false;
+    caregiverForm!: FormGroup;
+
 
     constructor(
         private fb: FormBuilder,
         private configService: ConfigService,
-        private matchingService: MatchingService
+        private matchingService: MatchingService,
+        private caregiverService: CaregiverService
     ) { }
 
     ngOnInit(): void {
         this.initShiftForm();
+        this.initCaregiverForm();
         this.configService.whatsappNumber$.subscribe(num => {
             this.whatsappLink = `https://wa.me/${num}`;
         });
@@ -75,6 +80,41 @@ export class CaregiverComponent implements OnInit {
             } else {
                 this.notifications = allNotifications;
             }
+        });
+    }
+
+    showModal: boolean = false;
+
+    // 2. Definí el método que te está dando error
+    closeModal() {
+        this.showModal = false; // Cerramos el modal
+        this.caregiverForm.reset({ status: 'Pendiente' }); // Limpiamos el formulario para la próxima
+    }
+
+    // 3. (Opcional) El método para abrirlo
+    openModal() {
+        this.showModal = true;
+    }
+
+    // 1. Para cargar la lista (Error de getAllCaregivers)
+    loadCaregivers() {
+        this.caregiverService.getAllCaregivers().subscribe({
+            next: (data: any) => { // Agregamos :any para el error TS7006
+                console.log('Cuidadores cargados', data);
+            },
+            error: (err: any) => console.error(err)
+        });
+    }
+
+    // 2. Para agregar o actualizar (Error de addCaregiver)
+    saveCaregiver() {
+        const cgData = this.caregiverForm.value;
+        this.caregiverService.addCaregiver(cgData).subscribe({
+            next: (res: any) => { // Agregamos :any
+                console.log('Operación exitosa', res);
+                this.closeModal();
+            },
+            error: (err: any) => console.error('Error al procesar', err)
         });
     }
 
@@ -111,7 +151,8 @@ export class CaregiverComponent implements OnInit {
         }
     }
 
-    // ... existing initShiftForm and other methods
+
+
     private initShiftForm() {
         this.shiftForm = this.fb.group({
             patientId: ['', Validators.required],
@@ -120,11 +161,21 @@ export class CaregiverComponent implements OnInit {
         });
     }
 
+    private initCaregiverForm() {
+        this.caregiverForm = this.fb.group({
+            // Note: Currently not used in templates, but defined to avoid TS error
+            // and provide a place for future caregiver profile editing forms.
+            fullName: [this.profileData.fullName, Validators.required],
+            phone: [this.profileData.phone, Validators.required],
+            email: [this.profileData.email, [Validators.required, Validators.email]]
+        });
+    }
+
     setTab(tab: 'activity' | 'profile' | 'history') {
         this.activeTab = tab;
     }
 
-    // Shift Logic ... (rest of the file)
+
     toggleShift() {
         if (!this.isShiftActive) {
             this.startShift();
@@ -151,12 +202,11 @@ export class CaregiverComponent implements OnInit {
 
         const patientName = this.patients.find(p => p.id === +this.shiftForm.value.patientId)?.name || 'Desconocido';
 
-        // Save to history
         this.shiftHistory.unshift({
             patient: patientName,
             date: new Date().toLocaleDateString(),
             duration: this.shiftDuration.substring(0, 5) + ' hs',
-            earned: 6000 // Mock value
+            earned: 6000
         });
 
         this.shiftForm.reset();

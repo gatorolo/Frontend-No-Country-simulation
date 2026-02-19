@@ -80,6 +80,11 @@
     display: flex;
 }
 
+.notif-btn:hover {
+    background: #f1f5f9;
+    color: var(--primary);
+}
+
 .badge {
     position: absolute;
     top: -5px;
@@ -94,15 +99,25 @@
 
 .notif-dropdown {
     position: absolute;
-    top: 50px;
-    right: 0;
+    top: 80px;
+    left: 50%;
     width: 280px;
     background: white;
     border-radius: 16px;
     box-shadow: 0 10px 25px rgba(0,0,0,0.1);
     z-index: 1000;
-    border: 1px solid #e2e8f0;
+    padding-bottom: 10px;
+    border: 1px solid #c5d7f0;
     overflow: hidden;
+}
+
+.notif-header {
+    color: #0ea5e9;
+    text-align: center;
+}
+
+.notif-empty {
+    text-align: center;
 }
 
 .notif-header { padding: 12px; font-weight: bold; background: #f8fafc; font-size: 14px; }
@@ -166,7 +181,6 @@
     font-size: 1.4rem;
 }
 
-/* Data Items */
 .data-group {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
@@ -211,7 +225,6 @@
     border-left: 4px solid var(--primary);
 }
 
-/* Medication List */
 .med-list {
     display: flex;
     flex-direction: column;
@@ -254,7 +267,6 @@
     color: var(--text-light);
 }
 
-/* Cards Lateral */
 .info-card {
     background: #f8fafc;
     padding: 1.5rem;
@@ -324,7 +336,7 @@
     font-weight: 600;
 }
 
-/* Animation */
+
 .animate-fade {
     animation: fadeIn 0.4s ease-out;
 }

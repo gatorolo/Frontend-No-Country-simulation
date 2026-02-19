@@ -15,13 +15,7 @@ export class LoginComponent {
     onLogin() {
         this.isLoading = true;
 
-
         setTimeout(() => {
-            // Store pending role for the intermediate growth page
-            localStorage.setItem('pendingRole', this.selectedRole);
-            this.router.navigate(['/growth']);
-
-            /* Original direct flow (Commented for reversibility)
             switch (this.selectedRole) {
                 case 'admin':
                     this.router.navigate(['/admin']);
@@ -35,7 +29,6 @@ export class LoginComponent {
                 default:
                     this.router.navigate(['/admin']);
             }
-            */
         }, 1500);
     }
 }

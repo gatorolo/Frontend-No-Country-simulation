@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { CaregiverService } from '../../../core/services/caregiver.service';
 
 @Component({
   selector: 'app-caregivers',
@@ -13,7 +14,7 @@ export class CaregiversComponent implements OnInit {
 
   caregivers: any[] = [];
 
-  constructor(private fb: FormBuilder) { }
+  constructor(private fb: FormBuilder, private caregiverService: CaregiverService) { }
 
   ngOnInit(): void {
     this.initForm();
@@ -55,16 +56,43 @@ export class CaregiversComponent implements OnInit {
     if (this.caregiverForm.invalid) return;
 
     const data = this.caregiverForm.value;
+
     if (this.selectedCaregiver) {
-      const index = this.caregivers.findIndex(c => c.id === this.selectedCaregiver.id);
-      this.caregivers[index] = { ...this.selectedCaregiver, ...data };
+      // --- MODO EDICIÓN (PUT) ---
+      const updatedCg = { ...this.selectedCaregiver, ...data };
+
+      // Asumiendo que agregamos updateCaregiver al servicio
+      this.caregiverService.addCaregiver(updatedCg).subscribe({
+        next: (res) => {
+          console.log('✅ Cuidador actualizado en Java', res);
+          this.loadCaregivers(); // Refrescamos la lista
+          this.toggleAddMode();
+        },
+        error: (err) => console.error('Error al actualizar', err)
+      });
+
     } else {
-      const newCg = {
-        id: Date.now(),
-        ...data
-      };
-      this.caregivers.unshift(newCg);
+      // --- MODO CREACIÓN (POST) ---
+      const newCg = { ...data }; // Java se encargará de generar el ID real
+
+      this.caregiverService.addCaregiver(newCg).subscribe({
+        next: (res) => {
+          console.log('✅ Cuidador guardado en DB Java', res);
+          this.loadCaregivers(); // Refrescamos la lista
+          this.toggleAddMode();
+        },
+        error: (err) => {
+          console.error('Error al guardar en Java', err);
+          alert('No se pudo conectar con el servidor Java');
+        }
+      });
     }
-    this.toggleAddMode();
+  }
+
+  // Agregamos este método para traer los datos reales al iniciar
+  private loadCaregivers() {
+    this.caregiverService.getAllCaregivers().subscribe(data => {
+      this.caregivers = data;
+    });
   }
 }

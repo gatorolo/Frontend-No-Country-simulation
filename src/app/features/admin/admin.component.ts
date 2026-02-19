@@ -1,4 +1,6 @@
 import { Component } from '@angular/core';
+import Swal from 'sweetalert2';
+import { PublishServiceComponent } from "./components/publish-service/publish-service.component";
 
 @Component({
     selector: 'app-admin-dashboard',
@@ -34,5 +36,14 @@ export class AdminComponent {
 
     closePublishModal() {
         this.showPublishModal = false;
+        Swal.fire({
+
+            title: 'Publicar Nueva Guardia?',
+            icon: 'question',
+            background: '#f7f9fc',
+            color: '#04d5f5ff',
+            cancelButtonColor: "#d33",
+            confirmButtonColor: '#0891b2',
+        });
     }
 }

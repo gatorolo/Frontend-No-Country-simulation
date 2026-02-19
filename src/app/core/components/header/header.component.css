@@ -33,6 +33,10 @@
   gap: 1rem;
 }
 
+.bell {
+transform: rotate3d(0, 0, 1, 15deg);
+}
+
 .icon-btn {
   background: none;
   border: none;

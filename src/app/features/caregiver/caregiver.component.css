@@ -41,7 +41,6 @@
     padding-bottom: 0.5rem;
     flex: 1;
     min-width: 0;
-    /* Enables scrolling within flex item */
 }
 
 .actions-area {
@@ -49,7 +48,6 @@
     gap: 1rem;
     align-items: center;
     padding-bottom: 0.5rem;
-    /* Alignment with tabs */
     flex-shrink: 0;
 }
 
@@ -257,7 +255,6 @@ td {
     }
 }
 
-/* Profile Static View Styles */
 .profile-static-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -337,10 +334,8 @@ td {
     visibility: visible;
 }
 
-/* Notification Styles */
 .notification-container {
     position: relative;
-    /* margin-left: auto;  removed to avoid conflict with logout btn which has margin-left: auto */
     margin-right: 1rem;
 }
 
@@ -387,7 +382,6 @@ td {
     top: 50px;
     right: 0;
     width: 320px;
-    /* Slightly wider */
     background: white;
     border-radius: 12px;
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
@@ -490,7 +484,7 @@ td {
     margin-top: 0.25rem;
 }
 
-/* Detail Modal Styles */
+
 .modal-overlay {
     position: fixed;
     top: 0;

@@ -1,5 +1,6 @@
 import { Component, EventEmitter, OnInit, Output } from '@angular/core';
 import { MatchingService } from 'src/app/core/services/matching.service';
+import Swal from 'sweetalert2';
 
 @Component({
     selector: 'app-admin-topbar',
@@ -54,7 +55,13 @@ export class AdminTopbarComponent implements OnInit {
     approveAssignment() {
         if (this.selectedNotification) {
             this.matchingService.confirmPost(this.selectedNotification.id);
-            alert(`Has aprobado la asignación de ${this.selectedNotification.caregiverName} para ${this.selectedNotification.patientName}`);
+
+            Swal.fire({
+                icon: 'success',
+                title: '¡Has aprobado la asignación!',
+                text: `de ${this.selectedNotification.caregiverName} para ${this.selectedNotification.patientName}`,
+                confirmButtonText: 'Entendido'
+            });
             this.closeNotificationDetail();
 
             // Refresh logic if needed, or rely on subscription update

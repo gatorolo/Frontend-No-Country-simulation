@@ -71,7 +71,7 @@ export class PatientsComponent implements OnInit {
 
     const data = this.patientForm.value;
     if (this.selectedPatient && !this.showAddForm) {
-      // Save logic
+  
     } else if (this.selectedPatient) {
       this.patientService.updatePatient({
         ...this.selectedPatient,

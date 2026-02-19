@@ -1,9 +1,10 @@
+
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { ConfigService } from 'src/app/core/services/config.service';
 import { PatientService } from 'src/app/core/services/patient.service';
-// 1. IMPORTANTE: Agregamos la importación que faltaba
 import { MatchingService } from 'src/app/core/services/matching.service';
+import { HttpClient } from '@angular/common/http';
 
 @Component({
   selector: 'app-family-view',
@@ -18,12 +19,14 @@ export class FamilyViewComponent implements OnInit {
   unreadCount = 0;
   showNotifications = false;
 
+  private apiUrl = 'http://localhost:8080/api/patients';
+
   constructor(
     private router: Router,
     private configService: ConfigService,
     private patientService: PatientService,
-    // 2. IMPORTANTE: Inyectamos el servicio aquí
-    private matchingService: MatchingService
+    private matchingService: MatchingService,
+    private HttpClient: HttpClient
   ) { }
 
   ngOnInit(): void {
@@ -31,6 +34,8 @@ export class FamilyViewComponent implements OnInit {
       this.whatsappLink = `https://wa.me/${num}`;
     });
 
+
+    // 2. Carga de Paciente y Escucha de Notificaciones Reales
     this.patientService.patients$.subscribe(patients => {
       const p = patients.find(patient => patient.id === this.currentPatientId);
       if (p) {
@@ -39,44 +44,57 @@ export class FamilyViewComponent implements OnInit {
           insurance: p.healthInsurance,
           location: p.locationLink,
           caregiver: {
-            name: 'Lara Martínez',
-            specialty: 'Enfermería'
+            name: 'Buscando...',
+            specialty: '-'
           }
         };
+
+        // Escuchamos el MatchingService AQUÍ ADENTRO para asegurar que patientData existe
+        this.matchingService.posts$.subscribe(posts => {
+
+          console.log('Posts totales en el servicio:', posts);
+          console.log('Buscando para el paciente:', this.patientData.name);
+
+          const confirmedService = posts.find(post => {
+            const matchNombre = post.patientName?.trim().toLowerCase() === this.patientData.name?.trim().toLowerCase();
+            const matchStatus = post.status === 'Publicado';
+            console.log(`Revisando post de ${post.patientName}: NombreMatch=${matchNombre}, Status=${post.status}`);
+            return matchNombre && matchStatus;
+          });
+
+          if (confirmedService) {
+            console.log('✅ ¡MATCH ENCONTRADO!', confirmedService);
+            this.handleNewMatchNotification(confirmedService);
+          } else {
+            console.log('❌ No se encontró ningún match confirmado para este paciente todavía.');
+          }
+        });
       }
     });
+  }
 
-    // 3. Escucha de Matching corregida
-    this.matchingService.posts$.subscribe(posts => {
-      if (this.patientData) {
-        const confirmedService = posts.find(p =>
-          p.patientName === this.patientData.name &&
-          p.status === 'Confirmado'
-        );
-        if (confirmedService) {
-          this.handleNewMatchNotification(confirmedService);
-        }
-      }
-    });
-  } // <--- AQUÍ TERMINA EL ngOnInit
-
-  // 4. Métodos fuera del ngOnInit
   private handleNewMatchNotification(service: any) {
     const exists = this.notifications.some(n => n.id === service.id);
+
     if (!exists) {
+
+      const nombreCuidador = service.caregiverName || 'Lara Martínez';
+
       const newNotif = {
         id: service.id,
         title: '¡Cuidador Asignado!',
-        message: `${service.caregiverName} ha sido confirmado para ${service.patientName}.`,
-        date: new Date()
+        message: `${nombreCuidador} ha sido confirmada para cuidar a ${service.patientName} en zona ${service.zone}.`,
+        date: new Date(),
+        read: false
       };
+
       this.notifications = [newNotif, ...this.notifications];
       this.unreadCount++;
-      
+
       if (this.patientData) {
-        this.patientData.caregiver = { 
-          name: service.caregiverName, 
-          specialty: service.specialty 
+        this.patientData.caregiver = {
+          name: nombreCuidador,
+          specialty: service.specialty || 'Especialista en Gerontología'
         };
       }
     }
