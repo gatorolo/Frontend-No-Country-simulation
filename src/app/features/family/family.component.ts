@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { ConfigService } from 'src/app/core/services/config.service';
 import { PatientService, Patient } from 'src/app/core/services/patient.service';
 import Swal from 'sweetalert2';
@@ -13,47 +13,122 @@ import Swal from 'sweetalert2';
 export class FamilyComponent implements OnInit {
     familyForm!: FormGroup;
     whatsappLink = '';
-    currentPatientId = 1;
+    currentPatientId: number | null = null;
 
-    // Mock Data for Caregivers
     availableCaregivers = [
-        { id: 101, name: 'Lara Martínez', specialty: 'Enfermería' },
-        { id: 102, name: 'Carlos Ruiz', specialty: 'Kinesiología' },
-        { id: 103, name: 'Elena Paz', specialty: 'Cuidadora Geriátrica' },
-        { id: 104, name: 'Carla Vuioner', specialty: 'Rehabilitación' }
+        { id: 101, fullName: 'Lara Martínez', specialty: 'Enfermería' },
+        { id: 102, fullName: 'Carlos Ruiz', specialty: 'Kinesiología' },
+        { id: 103, fullName: 'Elena Paz', specialty: 'Cuidadora Geriátrica' },
+        { id: 104, fullName: 'Carla Vuioner', specialty: 'Rehabilitación' }
     ];
 
     constructor(
         private fb: FormBuilder,
         private router: Router,
         private configService: ConfigService,
-        private patientService: PatientService
+        private patientService: PatientService,
+        private route: ActivatedRoute
 
     ) { }
 
     ngOnInit(): void {
-        this.initForm();
-        this.loadPatientData();
+        this.initForm(); // Solo inicializamos el formulario vacío
         this.configService.whatsappNumber$.subscribe(num => {
             this.whatsappLink = `https://wa.me/${num}`;
         });
+
+        /*this.route.paramMap.subscribe(params => {
+            const id = params.get('id');
+            if (id) {
+                // 1. Convertimos el ID de la URL a un número real
+                const idNumerico = Number(id);
+
+                // 2. Si la conversión fue exitosa (no es NaN)
+                if (!isNaN(idNumerico)) {
+                    this.currentPatientId = idNumerico; // Guardamos en la variable de clase
+                    console.log('✅ Modo Edición: Cargando paciente ID', idNumerico);
+
+                    // 3. Pasamos 'idNumerico' (que es tipo 'number' puro)
+                    this.cargarDatosParaEditar(idNumerico); // <--- AQUÍ SE VA EL ERROR
+                }
+            } else {
+                this.currentPatientId = null;
+                console.log('📝 Modo Creación: Formulario limpio');
+            }
+        });*/
+
+        this.route.paramMap.subscribe(params => {
+            const idParam = params.get('id');
+            if (idParam !== null) { // Si el parámetro existe en la URL
+                const idVal = parseInt(idParam, 10);
+                this.currentPatientId = idVal;
+
+                // Aquí le aseguramos a TS que idVal es un número
+                this.cargarDatosParaEditar(idVal);
+            } else {
+                this.currentPatientId = null;
+            }
+        });
     }
 
+    cargarDatosParaEditar(id: number) {
+        if (!id) return;
+
+        this.patientService.getPatientById(id).subscribe({
+            next: (patient: any) => {
+                // Mapeamos los campos básicos
+                this.familyForm.patchValue({
+                    patientName: patient.name,
+                    patientAge: patient.age,
+                    diagnosis: patient.diagnosis,
+                    healthInsurance: patient.healthInsurance,
+                    locationLink: patient.locationLink
+                });
+
+                // Cargamos las medicaciones con los nombres correctos
+                if (patient.medications) {
+                    this.cargarMedicaciones(patient.medications);
+                }
+            },
+            error: (err) => console.error('Error al cargar datos:', err)
+        });
+    }
+
+    cargarMedicaciones(medications: any[]) {
+        const control = this.medications; // Usa tu getter
+
+        // Limpiamos el array para que no se dupliquen al editar
+        while (control.length !== 0) {
+            control.removeAt(0);
+        }
+
+        // Llenamos usando la función que SÍ tiene 'schedule'
+        medications.forEach(med => {
+            control.push(this.createMedicationGroup(med.name, med.schedule));
+        });
+    }
     private loadPatientData() {
-        // Llamamos al método que conecta con Java
+        // 1. EL GUARDIÁN: Si no hay ID, salimos y no hacemos el subscribe
+        if (this.currentPatientId === null) {
+            console.warn('No hay ID para cargar datos');
+            return;
+        }
+
+        // 2. Ahora TypeScript está tranquilo porque sabe que currentPatientId es NUMBER
         this.patientService.getPatientById(this.currentPatientId).subscribe({
             next: (patient) => {
                 if (patient) {
-                    // Limpiar medicaciones previas
+                    // Limpiamos medicamentos
                     while (this.medications.length) {
                         this.medications.removeAt(0);
                     }
-                    // Cargar medicaciones desde la DB
+
+                    // Llenamos medicamentos
                     patient.medications.forEach(m => {
                         this.medications.push(this.createMedicationGroup(m.name, m.schedule));
                     });
 
-                    // Llenar el formulario con datos reales
+                    // Llenamos el resto del formulario
                     this.familyForm.patchValue({
                         patientName: patient.name,
                         patientAge: patient.age,
@@ -70,24 +145,19 @@ export class FamilyComponent implements OnInit {
 
     private initForm() {
         this.familyForm = this.fb.group({
-            // Ficha Médica
-            patientName: ['Roberto Sánchez', Validators.required],
-            patientAge: [78, [Validators.required, Validators.min(0)]],
-            diagnosis: ['Alzheimer en etapa temprana e Hipertensión', Validators.required],
-            healthInsurance: ['OSDE 310', Validators.required],
-            locationLink: ['https://www.google.com/maps/place/Panader%C3%ADa+Artesanal+189/@-17.7932993,-63.1807397,18z/data=!4m15!1m8!3m7!1s0x915edf8977bba295:0x1c9ec2bb0115edbf!2sBolivia!3b1!8m2!3d-16.290154!4d-63.588653!16zL20vMDE2NXY!3m5!1s0x93f1e92101e9dfdb:0xc1dcd9b85c201702!8m2!3d-17.7933773!4d-63.1790827!16s%2Fg%2F11s5725zvn?entry=ttu&g_ep=EgoyMDI2MDIwNC4wIKXMDSoASAFQAw%3D%3D', Validators.required],
 
-            // Gestión de Medicación (FormArray)
-            medications: this.fb.array([
-                this.createMedicationGroup()
-            ]),
+            patientName: ['', Validators.required],
+            patientAge: [null, [Validators.required, Validators.min(0)]],
+            diagnosis: ['', Validators.required],
+            healthInsurance: ['', Validators.required],
+            locationLink: ['', Validators.required],
 
-            // Vinculación
-            authorizedCaregivers: [[101], Validators.required]
+            medications: this.fb.array([]),
+            authorizedCaregivers: [[], Validators.required]
         });
     }
 
-    // Medication FormArray Helpers
+
     get medications(): FormArray {
         return this.familyForm.get('medications') as FormArray;
     }
@@ -110,53 +180,44 @@ export class FamilyComponent implements OnInit {
     onSubmit() {
         if (this.familyForm.valid) {
             const formData = this.familyForm.value;
-            const updatedPatient: Patient = {
-                id: this.currentPatientId,
+            const patientData: any = {
                 name: formData.patientName,
                 age: formData.patientAge,
                 diagnosis: formData.diagnosis,
                 healthInsurance: formData.healthInsurance,
                 locationLink: formData.locationLink,
-                medications: formData.medications,
+                medications: formData.medications || [],
                 authorizedCaregivers: formData.authorizedCaregivers,
-                status: 'Activo'
+                status: 'Pendiente'
             };
 
-            // EL CAMBIO ESTÁ AQUÍ:
-            // Nos aseguramos de cerrar bien cada paréntesis y llave.
-            this.patientService.updatePatient(updatedPatient).subscribe({
-                next: (response) => {
-                    console.log('✅ Guardado con éxito', response);
-                    Swal.fire({
-                        icon: 'success',
-                        title: '¡Cambios Guardados!',
-                        text: 'La ficha médica ha sido actualizada correctamente.',
-                        timer: 2000,
-                        showConfirmButton: false,
-                        background: '#f7f9fc',
-                        color: '#0891b2'
-                    });
-                    setTimeout(() => {
-                        this.router.navigate(['/family/view']);
-                    }, 2000);
-                },
-                error: (err) => {
-                    console.error('❌ Error en la conexión con Java', err);
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error de Conexión',
-                        text: 'No se pudo conectar con el servidor de Java (backend). Verifica que el servicio esté activo.',
-                        confirmButtonText: 'Aceptar',
-                        confirmButtonColor: '#0891b2',
-                        background: '#f7f9fc',
-                        color: '#ef4444'
-                    });
-                },
-                complete: () => {
-                    console.log('Petición completada');
-                }
-            });
-        }
+            if (this.currentPatientId) {
+                // --- MODO EDICIÓN ---
+                console.log('🚀 Actualizando paciente ID:', this.currentPatientId);
+                this.patientService.updatePatient(this.currentPatientId, patientData).subscribe({
+                    next: (res) => {
+                        console.log('¡Actualizado!', res);
+                        this.ejecutarNavegacionExitosa();
+                    },
+                    error: (err) => console.error('Error al actualizar', err)
+                }); // <-- Cierre del subscribe de update
+            } else {
+                // --- MODO CREACIÓN ---
+                console.log('📝 Creando nuevo paciente');
+                this.patientService.createPatient(patientData).subscribe({
+                    next: (res) => {
+                        console.log('¡Creado!', res);
+                        this.ejecutarNavegacionExitosa();
+                    },
+                    error: (err) => console.error('Error al crear', err)
+                }); // <-- Cierre del subscribe de create
+            } // <-- ESTA ES LA LLAVE QUE SE SOLÍA PERDER (Cierra el else)
+
+        } else {
+            // Lógica de formulario inválido
+            console.warn('Formulario no válido');
+            alert('Por favor, completa los campos obligatorios.');
+        } // <-- Cierra el if (this.familyForm.valid)
     }
 
     onCaregiverToggle(id: number) {
@@ -165,6 +226,29 @@ export class FamilyComponent implements OnInit {
     }
 
     isCaregiverAuthorized(id: number): boolean {
-        return (this.familyForm.get('authorizedCaregivers')?.value as number[]).includes(id);
+        const authorized = this.familyForm.get('authorizedCaregivers')?.value;
+        // Verificamos que sea un array antes de usar .includes
+        return Array.isArray(authorized) && authorized.includes(id);
+    }
+
+    // Navegar siempre (optimista), el backend sincroniza en segundo plano
+    private ejecutarNavegacionExitosa() {
+        Swal.fire({
+            icon: 'success',
+            title: '¡Cambios Guardados!',
+            text: 'La ficha médica ha sido actualizada correctamente.',
+            timer: 1500, // Bajamos un poco el tiempo para que se sienta más fluido
+            showConfirmButton: false,
+            background: '#f7f9fc',
+            color: '#0891b2'
+        }).then((result) => {
+            console.log('SweetAlert cerrado, intentando navegar a /family/view');
+            this.router.navigate(['/family/view'])
+                .then(success => {
+                    if (success) console.log('Navegación exitosa');
+                    else console.warn('Navegación fallida (bloqueada por guard o error)');
+                })
+                .catch(err => console.error('Error crítico en navegación:', err));
+        });
     }
 }

@@ -12,7 +12,6 @@
     </button>
   </div>
 
-  <!-- Add/Edit Form -->
   <div *ngIf="showAddForm" class="glass-card form-card animate-slide-down">
     <h3>{{ selectedPatient ? 'Editar Paciente' : 'Registrar Nuevo Paciente' }}</h3>
     <form [formGroup]="patientForm" (ngSubmit)="savePatient()">
@@ -54,7 +53,6 @@
     </form>
   </div>
 
-  <!-- Patient List Table -->
   <div *ngIf="viewMode === 'list' && !showAddForm" class="glass-card table-container">
     <table class="premium-table">
       <thead>
@@ -92,7 +90,7 @@
     </table>
   </div>
 
-  <!-- Detailed Medical File View -->
+
   <div *ngIf="viewMode === 'details' && selectedPatient" class="details-view animate-fade">
     <button class="back-btn" (click)="closeDetails()">
       <span class="material-icons">arrow_back</span> Volver al listado

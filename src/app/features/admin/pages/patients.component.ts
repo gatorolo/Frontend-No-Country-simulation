@@ -11,7 +11,11 @@ export class PatientsComponent implements OnInit {
   patients: Patient[] = [];
   patientForm!: FormGroup;
   showAddForm = false;
-  selectedPatient: Patient | null = null;
+
+  // Usamos any para que no chille por el ID que viene de la DB
+  selectedPatient: any = null;
+  selectedPatientId: number | null = null;
+
   viewMode: 'list' | 'details' = 'list';
 
   constructor(
@@ -20,6 +24,8 @@ export class PatientsComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
+    // Pedimos los datos a la API apenas carga el admin
+    this.patientService.loadPatients();
     this.patientService.patients$.subscribe(p => this.patients = p);
     this.initForm();
   }
@@ -39,11 +45,12 @@ export class PatientsComponent implements OnInit {
     this.showAddForm = !this.showAddForm;
     if (!this.showAddForm) {
       this.selectedPatient = null;
+      this.selectedPatientId = null;
       this.patientForm.reset({ status: 'Activo' });
     }
   }
 
-  viewDetails(patient: Patient) {
+  viewDetails(patient: any) {
     this.selectedPatient = patient;
     this.viewMode = 'details';
   }
@@ -53,8 +60,9 @@ export class PatientsComponent implements OnInit {
     this.selectedPatient = null;
   }
 
-  editPatient(patient: Patient) {
+  editPatient(patient: any) {
     this.selectedPatient = patient;
+    this.selectedPatientId = patient.id; // Guardamos el ID de la base de datos
     this.showAddForm = true;
     this.patientForm.patchValue({
       name: patient.name,
@@ -70,22 +78,37 @@ export class PatientsComponent implements OnInit {
     if (this.patientForm.invalid) return;
 
     const data = this.patientForm.value;
-    if (this.selectedPatient && !this.showAddForm) {
-  
-    } else if (this.selectedPatient) {
-      this.patientService.updatePatient({
+
+    if (this.selectedPatientId) {
+      // Caso EDITAR: Mandamos el ID y los datos por separado al servicio
+      // Nos aseguramos de mezclar con los datos viejos
+      const updatedPatient: any = {
         ...this.selectedPatient,
         ...data
+      };
+
+      // Enviamos ID como primer argumento y objeto como segundo
+      this.patientService.updatePatient(this.selectedPatientId, updatedPatient).subscribe({
+        next: () => {
+          this.patientService.loadPatients();
+          this.toggleAddMode();
+        },
+        error: (err) => console.error('Error al actualizar', err)
       });
     } else {
+      // Caso NUEVO: El admin crea un paciente desde cero
       const newPatient: Patient = {
-        id: Date.now(),
         ...data,
         medications: [],
         authorizedCaregivers: []
       };
-      this.patientService.addPatient(newPatient);
+      this.patientService.createPatient(newPatient).subscribe({
+        next: () => {
+          this.patientService.loadPatients();
+          this.toggleAddMode();
+        },
+        error: (err) => console.error('Error al crear', err)
+      });
     }
-    this.toggleAddMode();
   }
 }

@@ -9,25 +9,6 @@
                 <p class="subtitle">Resumen informativo de la ficha guardada</p>
             </div>
             <div class="header-actions">
-                <button class="notif-btn" (click)="toggleNotifications()">
-            <span class="material-icons">notifications</span>
-            <span class="badge" *ngIf="unreadCount > 0">{{ unreadCount }}</span>
-        </button>
-
-        <div class="notif-dropdown animate-fade" *ngIf="showNotifications">
-            <div class="notif-header">Avisos del Servicio</div>
-            <div class="notif-list">
-                <div *ngIf="notifications.length === 0" class="notif-empty">Sin novedades por ahora</div>
-                <div *ngFor="let n of notifications" class="notif-item">
-                    <div class="notif-icon"><span class="material-icons">check_circle</span></div>
-                    <div class="notif-body">
-                        <span class="notif-title">{{ n.title }}</span>
-                        <p class="notif-text">{{ n.message }}</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
                 <button class="edit-btn" (click)="onEdit()">
                     <span class="material-icons">edit</span> Editar Ficha
                 </button>
@@ -70,7 +51,7 @@
                             <div class="med-icon"><span class="material-icons">pill</span></div>
                             <div class="med-info">
                                 <span class="med-name">{{ med.name }}</span>
-                                <span class="med-schedule">{{ med.schedule }}</span>
+                                <span class="med-schedule">{{ med.frequency }}</span>
                             </div>
                         </div>
                     </div>
@@ -94,8 +75,8 @@
                             <span class="material-icons">person</span>
                         </div>
                         <div>
-                            <span class="cg-name">{{ patientData.caregiver.name }}</span>
-                            <span class="cg-specialty">{{ patientData.caregiver.specialty }}</span>
+                            <span class="cg-name">{{ patientData?.caregiver?.fullName }}</span>
+                            <span class="cg-specialty">{{ patientData?.caregiver?.specialty }}</span>
                         </div>
                     </div>
                     <div class="status-badge-verified">
@@ -105,7 +86,7 @@
             </div>
         </div>
     </div>
-
+</div>
 
 <!-- WhatsApp FAB remains -->
 <a class="whatsapp-fab" [href]="whatsappLink" target="_blank" rel="noopener" aria-label="WhatsApp">

@@ -71,7 +71,7 @@ export interface Medication {
 }
 
 export interface Patient {
-    id: number;
+    id?: number;
     name: string;
     age: number;
     diagnosis: string;
@@ -103,17 +103,17 @@ export class PatientService {
 
     // 4. ESTE ES EL MÉTODO QUE TE DABA ERROR
     // Ahora devuelve un Observable para que el componente pueda hacer .subscribe()
-    updatePatient(updatedPatient: Patient): Observable<Patient> {
-        return this.http.put<Patient>(`${this.apiUrl}/${updatedPatient.id}`, updatedPatient).pipe(
-            tap(patient => {
-                const patients = this.getPatients();
-                const index = patients.findIndex(p => p.id === patient.id);
-                if (index !== -1) {
-                    patients[index] = patient;
-                    this.patientsSource.next([...patients]);
-                }
+    updatePatient(id: number, updatedPatient: Patient): Observable<Patient> {
+        return this.http.put<Patient>(`${this.apiUrl}/${id}`, updatedPatient).pipe(
+            tap(response => {
+                // Aquí la lógica de actualizar la lista local si la usas
+                this.loadPatients();
             })
         );
+    }
+
+    loadPatients() {
+        this.getPatientsFromApi().subscribe();
     }
 
     // Obtener un paciente específico por ID
@@ -126,7 +126,7 @@ export class PatientService {
         return this.patientsSource.getValue();
     }
 
-    addPatient(patient: Patient): Observable<Patient> {
+    createPatient(patient: Patient): Observable<Patient> {
         // 1. Enviamos el nuevo paciente al backend Java vía POST
         return this.http.post<Patient>(this.apiUrl, patient).pipe(
             tap(newPatient => {

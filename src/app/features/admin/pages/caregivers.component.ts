@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { CaregiverService } from '../../../core/services/caregiver.service';
+import { MatchingService } from '../../../core/services/matching.service';
 
 @Component({
   selector: 'app-caregivers',
@@ -14,10 +15,11 @@ export class CaregiversComponent implements OnInit {
 
   caregivers: any[] = [];
 
-  constructor(private fb: FormBuilder, private caregiverService: CaregiverService) { }
+  constructor(private fb: FormBuilder, private caregiverService: CaregiverService, private matchingService: MatchingService) { }
 
   ngOnInit(): void {
     this.initForm();
+    this.matchingService.loadPosts().subscribe();
   }
 
   initForm() {

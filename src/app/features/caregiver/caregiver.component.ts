@@ -45,6 +45,7 @@ export class CaregiverComponent implements OnInit {
     unreadCount = 0;
     showNotifications = false;
     caregiverForm!: FormGroup;
+    showModal: boolean = false;
 
 
     constructor(
@@ -83,7 +84,6 @@ export class CaregiverComponent implements OnInit {
         });
     }
 
-    showModal: boolean = false;
 
     // 2. Definí el método que te está dando error
     closeModal() {
@@ -138,16 +138,19 @@ export class CaregiverComponent implements OnInit {
 
     applyToService() {
         if (this.selectedNotification) {
-            // In a real app, get current caregiver ID
             const caregiverId = 123;
             const caregiverName = this.profileData.fullName;
 
-            this.matchingService.applyToPost(this.selectedNotification.id, caregiverId, caregiverName);
-
-            // Show success feedback (simple alert for now)
-            alert(`Te has postulado correctamente para la guardia de ${this.selectedNotification.patientName}`);
-
-            this.closeNotificationDetail();
+            this.matchingService.applyToPost(this.selectedNotification.id, caregiverId, caregiverName).subscribe({
+                next: () => {
+                    alert(`Te has postulado correctamente para la guardia de ${this.selectedNotification.patientName}`);
+                    this.closeNotificationDetail();
+                },
+                error: (err) => {
+                    console.error('Error al postularse:', err);
+                    alert('Hubo un error al postularse. Por favor, intenta nuevamente.');
+                }
+            });
         }
     }
 

@@ -28,9 +28,23 @@ export class PublishServiceComponent {
     onSubmit() {
         if (this.serviceForm.valid) {
             const newService = this.serviceForm.value;
-            this.matchingService.publishPost(newService);
-            this.serviceForm.reset();
-            this.close.emit();
+
+            // Ahora nos suscribimos para que el HttpClient haga el POST a Java
+            this.matchingService.publishPost(newService).subscribe({
+                next: (response) => {
+                    console.log('¡Guardia guardada en la base de datos!', response);
+
+                    this.serviceForm.reset({
+                        complexity: 'Baja',
+                        specialty: 'Enfermería'
+                    });
+                    this.close.emit(); // Cerramos el modal solo si salió bien
+                },
+                error: (err) => {
+                    console.error('Error al publicar:', err);
+
+                }
+            });
         }
     }
 

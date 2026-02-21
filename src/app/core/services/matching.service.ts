@@ -1,5 +1,6 @@
+import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Observable, catchError, of, tap } from 'rxjs';
 
 export interface ServicePost {
     id: number;
@@ -19,47 +20,54 @@ export interface ServicePost {
     providedIn: 'root'
 })
 export class MatchingService {
-    private postsSource = new BehaviorSubject<ServicePost[]>([
-        {
-            id: 1,
-            patientName: 'Roberto Sánchez',
-            age: 78,
-            city: 'Rosario',
-            zone: 'Centro',
-            schedule: '08:00 - 16:00',
-            complexity: 'Media',
-            specialty: 'Gerontología',
-            status: 'Publicado'
-        }
-    ]);
+
+    private apiUrl = 'http://localhost:8080/api/service-orders';
+
+    private postsSource = new BehaviorSubject<ServicePost[]>([]);
 
     posts$ = this.postsSource.asObservable();
 
-    publishPost(post: Omit<ServicePost, 'id' | 'status'>) {
-        const current = this.postsSource.getValue();
-        const newPost: ServicePost = {
-            ...post,
-            id: Date.now(),
-            status: 'Publicado'
-        };
-        this.postsSource.next([newPost, ...current]);
-        return newPost;
+    constructor(private http: HttpClient) { }
+
+    publishPost(post: any): Observable<ServicePost> {
+        return this.http.post<ServicePost>(`${this.apiUrl}/publish`, post).pipe(
+            tap(() => this.loadPosts().subscribe()) // Refresca la lista automáticamente
+        );
     }
 
-    applyToPost(postId: number, caregiverId: number, caregiverName: string) {
+    applyToPost(postId: number, caregiverId: number, caregiverName: string): Observable<ServicePost> {
+        // 1. Actualización local inmediata (optimista) para que la notificación llegue al Admin
+        //    sin depender del backend
         const current = this.postsSource.getValue();
         const index = current.findIndex(p => p.id === postId);
         if (index !== -1) {
-            current[index] = {
-                ...current[index],
+            const updated = [...current];
+            updated[index] = {
+                ...updated[index],
                 status: 'Postulado',
                 caregiverId,
                 caregiverName
             };
-            this.postsSource.next([...current]);
-            return current[index];
+            this.postsSource.next(updated);
         }
-        return null;
+
+        // 2. Intento HTTP en background (sincroniza con el backend si está disponible)
+        const url = `${this.apiUrl}/${postId}/apply?caregiverId=${caregiverId}`;
+        return this.http.put<ServicePost>(url, {}).pipe(
+            tap((updatedPost) => {
+                const curr = this.postsSource.getValue();
+                const idx = curr.findIndex(p => p.id === postId);
+                if (idx !== -1) {
+                    curr[idx] = updatedPost;
+                    this.postsSource.next([...curr]);
+                }
+            }),
+            catchError((err: any) => {
+                // Backend no disponible: la actualización local ya fue aplicada, ignoramos el error HTTP
+                console.warn('Backend no disponible, usando actualización local:', err.message);
+                return of(current[index]);
+            })
+        );
     }
 
     confirmPost(postId: number) {
@@ -74,7 +82,16 @@ export class MatchingService {
             return current[index];
         }
         return null;
-       
+    }
+
+    loadPosts(): Observable<ServicePost[]> {
+        // Usamos backticks `` para que la variable se combine con el texto
+        return this.http.get<ServicePost[]>(`${this.apiUrl}/active`).pipe(
+            tap(posts => {
+                console.log('Datos recibidos de Java:', posts); // Para que veas en la consola si llega Ricardo Darín
+                this.postsSource.next(posts);
+            })
+        );
     }
 
     getPosts() {

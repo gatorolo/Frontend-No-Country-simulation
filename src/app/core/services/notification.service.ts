@@ -8,8 +8,8 @@ export interface Notification {
     type: 'info' | 'success' | 'warning';
     date: Date;
     read: boolean;
-    relatedPostId?: number; 
-    recipientRole?: 'admin' | 'caregiver' | 'family'; 
+    relatedPostId?: number;
+    recipientRole?: 'admin' | 'caregiver' | 'family';
 }
 
 @Injectable({
@@ -23,7 +23,7 @@ export class NotificationService {
             title: 'Nueva Postulación Recibida',
             message: 'María González se ha postulado para el servicio de Roberto Sánchez (78 años).',
             type: 'success',
-            date: new Date(Date.now() - 5 * 60000), 
+            date: new Date(Date.now() - 5 * 60000),
             read: false,
             relatedPostId: 1,
             recipientRole: 'admin'
@@ -33,17 +33,17 @@ export class NotificationService {
             title: 'Nueva Postulación Recibida',
             message: 'Carlos Pérez se ha postulado para el servicio de Ana Martínez (82 años).',
             type: 'success',
-            date: new Date(Date.now() - 15 * 60000), 
+            date: new Date(Date.now() - 15 * 60000),
             read: false,
             recipientRole: 'admin'
         },
-        
+
         {
             id: 9003,
             title: 'Nuevo Servicio Disponible',
             message: 'Se busca Kinesiología para José Rodríguez (70 años) en Centro.',
             type: 'info',
-            date: new Date(Date.now() - 10 * 60000), 
+            date: new Date(Date.now() - 10 * 60000),
             read: false,
             relatedPostId: 2,
             recipientRole: 'caregiver'
@@ -53,17 +53,17 @@ export class NotificationService {
             title: 'Servicio Confirmado',
             message: 'Has sido confirmado para el servicio de Roberto Sánchez.',
             type: 'success',
-            date: new Date(Date.now() - 30 * 60000), 
+            date: new Date(Date.now() - 30 * 60000),
             read: true,
             recipientRole: 'caregiver'
         },
-        
+
         {
             id: 9005,
             title: 'Cuidador Asignado',
             message: 'María González ha sido asignada para el cuidado de Roberto Sánchez. Especialidad: Gerontología.',
             type: 'success',
-            date: new Date(Date.now() - 20 * 60000), 
+            date: new Date(Date.now() - 20 * 60000),
             read: false,
             recipientRole: 'family'
         },
@@ -72,7 +72,7 @@ export class NotificationService {
             title: 'Próxima Visita Programada',
             message: 'Recordatorio: La próxima visita de María González es mañana a las 10:00 AM.',
             type: 'info',
-            date: new Date(Date.now() - 2 * 60 * 60000), 
+            date: new Date(Date.now() - 2 * 60 * 60000),
             read: true,
             recipientRole: 'family'
         }

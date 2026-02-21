@@ -7,7 +7,8 @@ import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 
 const routes: Routes = [
   { path: '', component: FamilyComponent },
-  { path: 'view', component: FamilyViewComponent }
+  { path: 'view', component: FamilyViewComponent },
+  { path: ':id', component: FamilyComponent }
 ];
 
 @NgModule({

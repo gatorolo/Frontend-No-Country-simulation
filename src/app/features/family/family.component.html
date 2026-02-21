@@ -78,23 +78,22 @@
                 Seleccione los cuidadores que tienen permiso para visualizar este perfil y registrar guardias.
             </p>
 
-            <div class="caregiver-grid">
-                <div *ngFor="let cg of availableCaregivers" class="caregiver-card"
-                    [class.active]="isCaregiverAuthorized(cg.id)" (click)="onCaregiverToggle(cg.id)">
-                    <div class="avatar">
-                        <span class="material-icons">person</span>
-                    </div>
-                    <div>
-                        <div style="font-weight: 700; color: #1e293b;">{{ cg.name }}</div>
-                        <div style="font-size: 0.8rem; color: #64748b;">{{ cg.specialty }}</div>
-                    </div>
-                    <div class="check-container" *ngIf="isCaregiverAuthorized(cg.id)">
-                        <span class="material-icons">check_circle</span>
-                    </div>
+            <div *ngFor="let cg of availableCaregivers" class="caregiver-card"
+                [class.active]="cg.id ? isCaregiverAuthorized(cg.id) : false"
+                (click)="cg.id && onCaregiverToggle(cg.id)">
+                <div class="avatar">
+                    <span class="material-icons">person</span>
+                </div>
+                <div>
+                    <div style="font-weight: 700; color: #1e293b;">{{ cg.fullName }}</div>
+                    <div style="font-size: 0.8rem; color: #64748b;">{{ cg.specialty }}</div>
+                </div>
+                <div class="check-container" *ngIf="cg.id && isCaregiverAuthorized(cg.id)">
+                    <span class="material-icons">check_circle</span>
                 </div>
             </div>
 
-            <button type="submit" class="submit-btn" [disabled]="familyForm.invalid">
+            <button type="submit" class="submit-btn">
                 Confirmar y Continuar
             </button>
         </form>
