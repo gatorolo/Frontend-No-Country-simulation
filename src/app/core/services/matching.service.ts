@@ -27,7 +27,9 @@ export class MatchingService {
 
     posts$ = this.postsSource.asObservable();
 
-    constructor(private http: HttpClient) { }
+    constructor(private http: HttpClient) {
+        this.loadPosts().subscribe();
+    }
 
     publishPost(post: any): Observable<ServicePost> {
         return this.http.post<ServicePost>(`${this.apiUrl}/publish`, post).pipe(

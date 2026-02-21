@@ -1,5 +1,6 @@
 import { Component, EventEmitter, OnInit, Output } from '@angular/core';
 import { MatchingService } from 'src/app/core/services/matching.service';
+import { NotificationService } from 'src/app/core/services/notification.service';
 import Swal from 'sweetalert2';
 
 @Component({
@@ -15,7 +16,10 @@ export class AdminTopbarComponent implements OnInit {
     unreadCount = 0;
     showNotifications = false;
 
-    constructor(private matchingService: MatchingService) { }
+    constructor(
+        private matchingService: MatchingService,
+        private notificationService: NotificationService
+    ) { }
 
     ngOnInit(): void {
         this.matchingService.posts$.subscribe(posts => {
@@ -56,6 +60,15 @@ export class AdminTopbarComponent implements OnInit {
         if (this.selectedNotification) {
             this.matchingService.confirmPost(this.selectedNotification.id);
 
+            // Notificamos al servicio central para que la familia lo reciba
+            this.notificationService.addNotification({
+                title: '¡Cuidador Asignado!',
+                message: `${this.selectedNotification.caregiverName} ha sido confirmada para el cuidado de ${this.selectedNotification.patientName}.`,
+                type: 'success',
+                recipientRole: 'family',
+                relatedPostId: this.selectedNotification.id
+            });
+
             Swal.fire({
                 icon: 'success',
                 title: '¡Has aprobado la asignación!',
@@ -63,8 +76,6 @@ export class AdminTopbarComponent implements OnInit {
                 confirmButtonText: 'Entendido'
             });
             this.closeNotificationDetail();
-
-            // Refresh logic if needed, or rely on subscription update
         }
     }
 

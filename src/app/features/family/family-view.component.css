@@ -16,7 +16,7 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    overflow-y: visible; 
+    overflow-y: visible;
 }
 
 
@@ -28,11 +28,13 @@
     padding: 2rem;
     max-width: 900px;
     width: 100%;
-    margin-bottom: 2rem; /* Espacio al final para que no pegue al borde */
-    
+    margin-bottom: 2rem;
+    /* Espacio al final para que no pegue al borde */
+
     /* QUITAMOS max-height fijo para que la tarjeta se estire hacia abajo */
-    height: auto; 
-    overflow: visible; /* Importante para que el dropdown de notificaciones no se corte */
+    height: auto;
+    overflow: visible;
+    /* Importante para que el dropdown de notificaciones no se corte */
 }
 
 .header-view {
@@ -65,65 +67,148 @@
 }
 
 .notification-container {
+    position: relative;
     display: flex;
     align-items: center;
-    margin-right: 10px;
 }
 
 .notif-btn {
-    background: rgba(255, 255, 255, 0.2);
-    border: 1px solid rgba(255, 255, 255, 0.3);
+    background: white;
+    border: 1px solid #e2e8f0;
     border-radius: 50%;
-    padding: 8px;
+    padding: 10px;
     cursor: pointer;
     position: relative;
     display: flex;
+    color: var(--text-light);
+    transition: all 0.2s;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
 .notif-btn:hover {
-    background: #f1f5f9;
+    background: #f8fafc;
     color: var(--primary);
+    transform: translateY(-1px);
 }
 
 .badge {
     position: absolute;
-    top: -5px;
-    right: -5px;
+    top: -4px;
+    right: -4px;
     background: #ef4444;
     color: white;
     font-size: 10px;
-    padding: 2px 6px;
-    border-radius: 10px;
+    font-weight: 700;
+    min-width: 18px;
+    height: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
     border: 2px solid white;
 }
 
 .notif-dropdown {
     position: absolute;
-    top: 80px;
-    left: 50%;
-    width: 280px;
+    top: calc(100% + 15px);
+    right: 0;
+    width: 300px;
     background: white;
     border-radius: 16px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
     z-index: 1000;
-    padding-bottom: 10px;
-    border: 1px solid #c5d7f0;
+    padding: 0;
+    border: 1px solid rgba(0, 0, 0, 0.05);
     overflow: hidden;
+    animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .notif-header {
-    color: #0ea5e9;
+    padding: 1rem;
+    font-weight: 700;
+    background: #f8fafc;
+    color: var(--primary-dark);
+    font-size: 0.9rem;
+    border-bottom: 1px solid #f1f5f9;
     text-align: center;
 }
 
 .notif-empty {
+    padding: 2rem;
     text-align: center;
+    color: var(--text-light);
+    font-size: 0.85rem;
+    font-style: italic;
 }
 
-.notif-header { padding: 12px; font-weight: bold; background: #f8fafc; font-size: 14px; }
-.notif-item { display: flex; gap: 10px; padding: 12px; border-bottom: 1px solid #f1f5f9; }
-.notif-title { font-weight: 600; font-size: 13px; display: block; }
-.notif-text { font-size: 12px; color: #64748b; margin: 0; }
+.notif-list {
+    max-height: 350px;
+    overflow-y: auto;
+}
+
+.notif-item {
+    display: flex;
+    gap: 12px;
+    padding: 1rem;
+    border-bottom: 1px solid #f1f5f9;
+    transition: background 0.2s;
+}
+
+.notif-item:last-child {
+    border-bottom: none;
+}
+
+.notif-item:hover {
+    background: #f0f9ff;
+}
+
+.notif-icon-circle {
+    min-width: 36px;
+    height: 36px;
+    background: #dcfce7;
+    color: #10b981;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.notif-content {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.notif-title {
+    font-weight: 700;
+    font-size: 0.85rem;
+    color: var(--text-main);
+}
+
+.notif-text {
+    font-size: 0.8rem;
+    color: #475569;
+    margin: 0;
+    line-height: 1.4;
+}
+
+.notif-time {
+    font-size: 0.7rem;
+    color: #94a3b8;
+    margin-top: 4px;
+}
 
 .edit-btn {
     background: white;
@@ -157,7 +242,7 @@
 
 .summary-grid {
     display: grid;
-    grid-template-columns: 1fr 300px; 
+    grid-template-columns: 1fr 300px;
     gap: 2rem;
     align-items: start;
 }

@@ -9,6 +9,33 @@
                 <p class="subtitle">Resumen informativo de la ficha guardada</p>
             </div>
             <div class="header-actions">
+                <!-- Campanita de notificaciones -->
+                <div class="notification-container">
+                    <button class="notif-btn" (click)="toggleNotifications()">
+                        <span class="material-icons">notifications</span>
+                        <span class="badge" *ngIf="unreadCount > 0">{{ unreadCount }}</span>
+                    </button>
+
+                    <div class="notif-dropdown" *ngIf="showNotifications">
+                        <div class="notif-header">Notificaciones</div>
+                        <div class="notif-empty" *ngIf="notifications.length === 0">
+                            No tienes nuevas notificaciones
+                        </div>
+                        <div class="notif-list" *ngIf="notifications.length > 0">
+                            <div class="notif-item" *ngFor="let n of notifications">
+                                <div class="notif-icon-circle">
+                                    <span class="material-icons">check_circle</span>
+                                </div>
+                                <div class="notif-content">
+                                    <span class="notif-title">{{ n.title }}</span>
+                                    <p class="notif-text">{{ n.message }}</p>
+                                    <span class="notif-time">{{ n.date | date:'shortTime' }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <button class="edit-btn" (click)="onEdit()">
                     <span class="material-icons">edit</span> Editar Ficha
                 </button>

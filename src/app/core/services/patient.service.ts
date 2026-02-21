@@ -92,7 +92,9 @@ export class PatientService {
     private patientsSource = new BehaviorSubject<Patient[]>([]);
     patients$ = this.patientsSource.asObservable();
 
-    constructor(private http: HttpClient) { } // 3. Inyectamos el cliente
+    constructor(private http: HttpClient) {
+        this.loadPatients();
+    }
 
     // Método para obtener la lista (opcional, útil para el admin)
     getPatientsFromApi(): Observable<Patient[]> {
