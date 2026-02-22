@@ -1,6 +1,8 @@
 import { Component } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { Router } from '@angular/router';
+import { ConfigService } from 'src/app/core/services/config.service';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-notificaciones-config',
@@ -10,14 +12,19 @@ import { Router } from '@angular/router';
 export class NotificacionesComponent {
   notificationsForm: FormGroup;
 
-  constructor(private fb: FormBuilder, private router: Router) {
+  constructor(
+    private fb: FormBuilder,
+    private router: Router,
+    private configService: ConfigService
+  ) {
+    const config = this.configService.getConfig().notifications;
     this.notificationsForm = this.fb.group({
-      emailNotifications: [true],
-      criticalErrors: [true],
-      importantEvents: [true],
-      onUserCreate: [true],
-      onPasswordChange: [true],
-      frequency: ['immediate']
+      emailNotifications: [config.emailNotifications],
+      criticalErrors: [config.criticalErrors],
+      importantEvents: [config.importantEvents],
+      onUserCreate: [config.onUserCreate],
+      onPasswordChange: [config.onPasswordChange],
+      frequency: [config.frequency]
     });
   }
 
@@ -26,6 +33,13 @@ export class NotificacionesComponent {
   }
 
   onSubmit() {
-    console.log('Notification Settings Saved:', this.notificationsForm.value);
+    this.configService.updateConfig('notifications', this.notificationsForm.value);
+    console.log('Notification Settings Saved Persistent:', this.notificationsForm.value);
+    Swal.fire({
+      icon: 'success',
+      title: 'Preferencias Guardadas',
+      text: 'Tus ajustes de notificaciones se han actualizado.',
+      confirmButtonText: 'Aceptar'
+    });
   }
 }

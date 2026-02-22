@@ -1,25 +1,25 @@
 :host {
-  position: fixed;
-  top: 64px;
-  left: 0;
-  width: 260px;
-  height: calc(100vh - 64px);
-  background-color: #1a1e29;
-  z-index: 200;
-  transition: transform 0.7s ease;
+    position: fixed;
+    top: 64px;
+    left: 0;
+    width: 260px;
+    height: calc(100vh - 64px);
+    background-color: var(--sidebar-bg, #1a1e29);
+    z-index: 200;
+    transition: all 0.7s ease;
 }
 
 
 :host(.collapsed) {
-  transform: translateX(-100%);
+    transform: translateX(-100%);
 }
 
 .sidebar-container {
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  padding: 1.5rem 0;
-  overflow-y: auto;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    padding: 1.5rem 0;
+    overflow-y: auto;
 }
 
 
@@ -36,7 +36,7 @@
 .brand-name {
     font-size: 1.5rem;
     font-weight: 600;
-    color: #fff;
+    color: var(--sidebar-text-active, #fff);
 }
 
 .navigation {
@@ -57,7 +57,7 @@
     align-items: center;
     gap: 12px;
     padding: 12px 24px;
-    color: #94a3b8;
+    color: var(--sidebar-text, #94a3b8);
     text-decoration: none;
     font-size: 0.9rem;
     font-weight: 500;
@@ -68,13 +68,13 @@
 
 .nav-link:hover {
     background-color: rgba(255, 255, 255, 0.03);
-    color: #f8fafc;
+    color: var(--sidebar-text-active, #f8fafc);
 }
 
 .nav-link.active {
     background: linear-gradient(90deg, rgba(250, 204, 21, 0.1) 0%, transparent 100%);
-    color: #facc15;
-    border-left-color: #facc15;
+    color: var(--sidebar-text-active, #facc15);
+    border-left-color: var(--sidebar-text-active, #facc15);
 }
 
 .nav-icon {
@@ -93,16 +93,15 @@
 
 
 .sidebar-toggle {
-  position: fixed;
-  top: 80px;
-  left: 260px;
-  z-index: 300;
-  transition: left 0.3s ease;
-  background: #1e1e1e;
-    color: #d4af37;
+    position: fixed;
+    top: 80px;
+    left: 260px;
+    z-index: 300;
+    transition: left 0.3s ease;
+    background: var(--sidebar-bg, #1e1e1e);
+    color: var(--sidebar-text-active, #d4af37);
 }
 
 .sidebar-toggle:hover {
     background: #2a2a2a;
 }
-

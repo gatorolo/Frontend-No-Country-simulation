@@ -1,18 +1,51 @@
+:root {
+    --primary: #0ea5e9;
+    --primary-dark: #0284c7;
+    --bg-color: #f8f9fa;
+    --text-color: #333;
+    --card-bg: rgba(255, 255, 255, 0.9);
+    /* Inverted Dropdown Variables (Dark in Light Mode) */
+    --dropdown-bg: #1e293b;
+    --dropdown-text: #f1f5f9;
+    --dropdown-header-bg: #0f172a;
+    /* Inverted Sidebar Variables (Dark in Light Mode) */
+    --sidebar-bg: #1a1e29;
+    --sidebar-text: #94a3b8;
+    --sidebar-text-active: #facc15;
+}
+
+body.dark-mode {
+    --bg-color: #1e293b;
+    --text-color: #f1f5f9;
+    --card-bg: rgba(30, 41, 59, 0.8);
+    /* Inverted Dropdown Variables (Light in Dark Mode) */
+    --dropdown-bg: #ffffff;
+    --dropdown-text: #1e293b;
+    --dropdown-header-bg: #f8fafc;
+    /* Inverted Sidebar Variables (Light in Dark Mode) */
+    --sidebar-bg: #ffffff;
+    --sidebar-text: #64748b;
+    --sidebar-text-active: var(--primary);
+    background-color: var(--bg-color);
+    color: var(--text-color);
+}
+
 body {
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
     margin: 0;
     padding: 0;
-    background-color: #f8f9fa;
-    color: #333;
+    background-color: var(--bg-color);
+    color: var(--text-color);
     overflow: hidden;
     box-sizing: border-box;
+    transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 h1,
 h2,
 h3 {
     font-weight: 600;
-    color: #1a1a1a;
+    color: var(--text-color);
 }
 
 .main-content {

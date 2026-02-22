@@ -85,7 +85,7 @@
             <td><span class="label-pill">{{ cg.specialty }}</span></td>
             <td>
               <span class="status-badge" [class.verified]="cg.status === 'Verificado'"
-                [class.pending]="cg.status === 'Pendiente'">
+                [class.pending]="cg.status !== 'Verificado'">
                 {{ cg.status }}
               </span>
             </td>
@@ -95,8 +95,8 @@
                 <button class="icon-btn edit" title="Editar" (click)="editCaregiver(cg)">
                   <span class="material-icons">edit</span>
                 </button>
-                <button class="icon-btn status" title="Cambiar Estado">
-                  <span class="material-icons">swap_horiz</span>
+                <button class="icon-btn status" title="Verificar" (click)="toggleVerification(cg)">
+                  <span class="material-icons">{{ cg.status === 'Verificado' ? 'verified_user' : 'rule' }}</span>
                 </button>
               </div>
             </td>

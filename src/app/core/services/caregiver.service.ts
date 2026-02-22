@@ -11,7 +11,10 @@ export interface Caregiver {
   zone: string;
   hourlyRate?: number;
   phone?: string;
-  status?: boolean;
+  email?: string;
+  address?: string;
+  paymentTarget?: string;
+  status?: string | boolean;
 }
 
 @Injectable({
@@ -33,17 +36,20 @@ export class CaregiverService {
     );
   }
 
-  // 2. Guardar el nuevo cuidador que viene del Formulario de Admin
+  // 2. Guardar el nuevo cuidador o actualizar
   addCaregiver(caregiver: Caregiver): Observable<Caregiver> {
     return this.http.post<Caregiver>(this.apiUrl, caregiver).pipe(
-      tap(() => {
-        // Refrescamos la lista después de añadir uno nuevo
-        this.getAllCaregivers().subscribe();
-      })
+      tap(() => this.getAllCaregivers().subscribe())
     );
   }
 
-  // 3. Eliminar (opcional, por si el Admin se equivoca)
+  updateCaregiver(id: number, caregiver: Caregiver): Observable<Caregiver> {
+    return this.http.put<Caregiver>(`${this.apiUrl}/${id}`, caregiver).pipe(
+      tap(() => this.getAllCaregivers().subscribe())
+    );
+  }
+
+  // 3. Eliminar
   deleteCaregiver(id: number): Observable<any> {
     return this.http.delete(`${this.apiUrl}/${id}`).pipe(
       tap(() => this.getAllCaregivers().subscribe())

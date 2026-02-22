@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { Router } from '@angular/router';
+import { ConfigService } from 'src/app/core/services/config.service';
 import Swal from 'sweetalert2';
 
 @Component({
@@ -11,13 +12,18 @@ import Swal from 'sweetalert2';
 export class SeguridadComponent {
     securityForm: FormGroup;
 
-    constructor(private fb: FormBuilder, private router: Router) {
+    constructor(
+        private fb: FormBuilder,
+        private router: Router,
+        private configService: ConfigService
+    ) {
+        const config = this.configService.getConfig().security;
         this.securityForm = this.fb.group({
             newPassword: [''],
             confirmPassword: [''],
-            requireStrongPassword: [true],
-            sessionExpiration: ['30min'],
-            allowMultipleSessions: [false]
+            requireStrongPassword: [config.requireStrongPassword],
+            sessionExpiration: [config.sessionExpiration],
+            allowMultipleSessions: [config.allowMultipleSessions]
         });
     }
 
@@ -26,7 +32,28 @@ export class SeguridadComponent {
     }
 
     onSubmit() {
-        console.log('Security Settings Saved:', this.securityForm.value);
+        if (this.securityForm.value.newPassword) {
+            if (this.securityForm.value.newPassword !== this.securityForm.value.confirmPassword) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Las contraseñas no coinciden.',
+                    confirmButtonText: 'Reintentar'
+                });
+                return;
+            }
+        }
+
+        const { newPassword, confirmPassword, ...settings } = this.securityForm.value;
+        this.configService.updateConfig('security', settings);
+
+        console.log('Security Settings Saved Persistent:', settings);
+        Swal.fire({
+            icon: 'success',
+            title: 'Seguridad Actualizada',
+            text: 'Los ajustes de seguridad se han guardado. (La contraseña se simula en esta versión).',
+            confirmButtonText: 'Aceptar'
+        });
     }
 
     closeAllSessions() {

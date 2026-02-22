@@ -19,7 +19,13 @@
                     <span class="badge" *ngIf="unreadCount > 0">{{ unreadCount }}</span>
                 </button>
                 <div class="notification-dropdown glass-card" *ngIf="showNotifications">
-                    <div class="dropdown-header">Notificaciones</div>
+                    <div class="dropdown-header">
+                        <span>Notificaciones</span>
+                        <button class="clear-all-btn" *ngIf="notifications.length > 0"
+                            (click)="clearAllNotifications()">
+                            Limpiar todo
+                        </button>
+                    </div>
                     <div class="dropdown-content">
                         <div *ngIf="notifications.length === 0" class="empty-state">
                             No tienes nuevas notificaciones
@@ -27,13 +33,15 @@
                         <div class="notif-item" *ngFor="let n of notifications"
                             (click)="n.status !== 'Confirmado' ? openNotificationDetail(n) : null"
                             [style.cursor]="n.status === 'Confirmado' ? 'default' : 'pointer'">
-                            <div class="notif-icon" [class.success]="n.status === 'Confirmado'">
-                                <span class="material-icons">{{ n.status === 'Confirmado' ? 'check_circle' : 'work'
-                                    }}</span>
-                            </div>
+
                             <div class="notif-info">
-                                <span class="notif-title">{{ n.status === 'Confirmado' ? '¡Solicitud Aprobada!' : 'Nueva
-                                    Guardia Disponible' }}</span>
+                                <div class="notif-title-row">
+                                    <span class="notif-title">{{ n.status === 'Confirmado' ? '¡Solicitud Aprobada!' :
+                                        'Nueva Guardia Disponible' }}</span>
+                                    <button class="remove-notif-btn" (click)="removeNotification($event, n.id)">
+                                        <span class="material-icons">close</span>
+                                    </button>
+                                </div>
                                 <span class="notif-desc">{{ n.patientName }} - {{ n.zone }}</span>
                                 <span class="notif-meta">{{ n.schedule }}</span>
                             </div>
@@ -98,10 +106,17 @@
                 </h2>
                 <p style="color: #64748b; font-size: 0.9rem;">Información gestionada por la administración de Valora</p>
             </div>
-            <span class="status-badge" [class.verified]="profileData.status === 'Verificado'">
-                <span class="material-icons" style="font-size: 16px;">verified</span>
-                {{ profileData.status }}
-            </span>
+            <div style="display: flex; align-items: center; gap: 1rem;">
+                <button class="edit-profile-btn" (click)="openEditProfileModal()">
+                    <span class="material-icons">edit</span> Editar Perfil
+                </button>
+                <span class="status-badge" [class.verified]="profileData.status === 'Verificado'"
+                    [class.pending]="profileData.status !== 'Verificado'">
+                    <span class="material-icons" style="font-size: 16px;">{{ profileData.status === 'Verificado' ?
+                        'verified' : 'hourglass_empty' }}</span>
+                    {{ profileData.status }}
+                </span>
+            </div>
         </div>
 
         <div class="profile-static-grid">
@@ -196,6 +211,60 @@
         <span class="whatsapp-tooltip">ADMIN 'Lara'</span>
         <img src="assets/whatsapp.svg" alt="WhatsApp" />
     </a>
+
+    <!-- Modal Editar Perfil -->
+    <div class="modal-overlay" *ngIf="showProfileModal">
+        <div class="modal-content profile-modal animate-scale-in">
+            <div class="modal-header">
+                <h2>Editar Mi Perfil Profesional</h2>
+                <button class="close-btn" (click)="closeModal()">&times;</button>
+            </div>
+
+            <form [formGroup]="caregiverForm" (ngSubmit)="saveProfile()" class="edit-profile-form">
+                <div class="form-grid">
+                    <div class="input-group">
+                        <label>Nombre Completo</label>
+                        <input type="text" formControlName="fullName">
+                    </div>
+                    <div class="input-group">
+                        <label>DNI</label>
+                        <input type="text" formControlName="dni">
+                    </div>
+                    <div class="input-group">
+                        <label>Teléfono</label>
+                        <input type="text" formControlName="phone">
+                    </div>
+                    <div class="input-group">
+                        <label>Email</label>
+                        <input type="email" formControlName="email">
+                    </div>
+                    <div class="input-group">
+                        <label>Especialidad</label>
+                        <input type="text" formControlName="specialty">
+                    </div>
+                    <div class="input-group">
+                        <label>Valor Hora ($)</label>
+                        <input type="number" formControlName="hourlyRate">
+                    </div>
+                    <div class="input-group full-width">
+                        <label>Dirección</label>
+                        <input type="text" formControlName="address">
+                    </div>
+                    <div class="input-group full-width">
+                        <label>Datos de Cobro (CBU / Alias)</label>
+                        <input type="text" formControlName="paymentTarget">
+                    </div>
+                </div>
+
+                <div class="modal-actions">
+                    <button type="button" class="btn-cancel" (click)="closeModal()">Cancelar</button>
+                    <button type="submit" class="btn-save" [disabled]="caregiverForm.invalid">
+                        <span class="material-icons">save</span> Guardar Cambios
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
 
     <!-- Notification Detail Modal -->
     <div class="modal-overlay" *ngIf="selectedNotification">

@@ -91,6 +91,18 @@ export class CaregiversComponent implements OnInit {
     }
   }
 
+  toggleVerification(cg: any) {
+    const newStatus = cg.status === 'Verificado' ? 'Falta verificar' : 'Verificado';
+    const updatedCg = { ...cg, status: newStatus };
+
+    this.caregiverService.updateCaregiver(cg.id, updatedCg).subscribe({
+      next: () => {
+        this.loadCaregivers();
+      },
+      error: (err) => console.error('Error al cambiar estado', err)
+    });
+  }
+
   // Agregamos este método para traer los datos reales al iniciar
   private loadCaregivers() {
     this.caregiverService.getAllCaregivers().subscribe(data => {

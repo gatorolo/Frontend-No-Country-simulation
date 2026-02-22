@@ -229,6 +229,12 @@
     border: 1px solid #bae6fd;
 }
 
+.status-pill.pendiente {
+    background: #e0e7ff;
+    color: #4338ca;
+    border: 1px solid #c7d2fe;
+}
+
 .actions {
     display: flex;
     gap: 8px;

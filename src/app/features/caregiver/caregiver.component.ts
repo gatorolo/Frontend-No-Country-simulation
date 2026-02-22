@@ -26,7 +26,7 @@ export class CaregiverComponent implements OnInit {
         hourlyRate: 1500,
         specialty: 'Enfermería Geriátrica',
         paymentTarget: 'CBU: 0000054321000098765432 / Mercado Pago',
-        status: 'Verificado'
+        status: 'Falta verificar'
     };
 
     patients = [
@@ -46,6 +46,7 @@ export class CaregiverComponent implements OnInit {
     showNotifications = false;
     caregiverForm!: FormGroup;
     showModal: boolean = false;
+    showProfileModal: boolean = false;
 
 
     constructor(
@@ -55,20 +56,22 @@ export class CaregiverComponent implements OnInit {
         private caregiverService: CaregiverService
     ) { }
 
+    clearedPostIds: number[] = [];
+
     ngOnInit(): void {
+        this.loadClearedPostIds();
         this.initShiftForm();
         this.initCaregiverForm();
-        this.configService.whatsappNumber$.subscribe(num => {
-            this.whatsappLink = `https://wa.me/${num}`;
+        this.configService.config$.subscribe(config => {
+            this.whatsappLink = `https://wa.me/${config.general.whatsappNumber}`;
         });
 
         this.matchingService.posts$.subscribe(posts => {
             // 1. New Service Posts (status 'Publicado')
-            const publicPosts = posts.filter(p => p.status === 'Publicado');
+            const publicPosts = posts.filter(p => p.status === 'Publicado' && !this.clearedPostIds.includes(p.id));
 
-            // 2. My Approved Applications (status 'Confirmado' && caregiverId === 123 (mock))
-            // In a real app, 123 comes from auth user service
-            const myApprovedPosts = posts.filter(p => p.status === 'Confirmado' && p.caregiverId === 123);
+            // 2. My Approved Applications
+            const myApprovedPosts = posts.filter(p => p.status === 'Confirmado' && p.caregiverId === 123 && !this.clearedPostIds.includes(p.id));
 
             const allNotifications = [...publicPosts, ...myApprovedPosts];
 
@@ -84,45 +87,91 @@ export class CaregiverComponent implements OnInit {
         });
     }
 
+    private loadClearedPostIds() {
+        const saved = localStorage.getItem('valora_cleared_posts');
+        if (saved) {
+            try {
+                this.clearedPostIds = JSON.parse(saved);
+            } catch (e) {
+                console.error('Error loading cleared posts', e);
+            }
+        }
+    }
 
-    // 2. Definí el método que te está dando error
+    private saveClearedPostIds() {
+        localStorage.setItem('valora_cleared_posts', JSON.stringify(this.clearedPostIds));
+    }
+
+
     closeModal() {
-        this.showModal = false; // Cerramos el modal
-        this.caregiverForm.reset({ status: 'Pendiente' }); // Limpiamos el formulario para la próxima
+        this.showModal = false;
+        this.showProfileModal = false;
     }
 
-    // 3. (Opcional) El método para abrirlo
-    openModal() {
-        this.showModal = true;
-    }
-
-    // 1. Para cargar la lista (Error de getAllCaregivers)
-    loadCaregivers() {
-        this.caregiverService.getAllCaregivers().subscribe({
-            next: (data: any) => { // Agregamos :any para el error TS7006
-                console.log('Cuidadores cargados', data);
-            },
-            error: (err: any) => console.error(err)
+    openEditProfileModal() {
+        this.caregiverForm.patchValue({
+            fullName: this.profileData.fullName,
+            dni: this.profileData.dni,
+            phone: this.profileData.phone,
+            email: this.profileData.email,
+            address: this.profileData.address,
+            hourlyRate: this.profileData.hourlyRate,
+            specialty: this.profileData.specialty,
+            paymentTarget: this.profileData.paymentTarget
         });
+        this.showProfileModal = true;
     }
 
-    // 2. Para agregar o actualizar (Error de addCaregiver)
-    saveCaregiver() {
-        const cgData = this.caregiverForm.value;
-        this.caregiverService.addCaregiver(cgData).subscribe({
-            next: (res: any) => { // Agregamos :any
-                console.log('Operación exitosa', res);
+    saveProfile() {
+        if (this.caregiverForm.invalid) return;
+
+        const updatedData = this.caregiverForm.value;
+        // Simulamos el ID 123 para el cuidador actual (Lara Martínez)
+        this.caregiverService.updateCaregiver(123, updatedData).subscribe({
+            next: (res: any) => {
+                console.log('Perfil actualizado en BD', res);
+                // Actualizamos la vista local inmediata
+                this.profileData = {
+                    ...this.profileData,
+                    ...updatedData
+                };
                 this.closeModal();
             },
-            error: (err: any) => console.error('Error al procesar', err)
+            error: (err: any) => {
+                console.error('Error al actualizar perfil', err);
+                // Fallback: actualizamos localmente si falla la API (para demo)
+                this.profileData = { ...this.profileData, ...updatedData };
+                this.closeModal();
+            }
         });
     }
 
     toggleNotifications() {
         this.showNotifications = !this.showNotifications;
         if (this.showNotifications) {
-            this.unreadCount = 0; // Mark as read when opened
+            this.unreadCount = 0; // Marca como leídas al abrir
         }
+    }
+
+    removeNotification(event: Event, id: number) {
+        event.stopPropagation();
+        if (!this.clearedPostIds.includes(id)) {
+            this.clearedPostIds.push(id);
+            this.saveClearedPostIds();
+        }
+        // Forzamos actualización local inmediata
+        this.notifications = this.notifications.filter(n => n.id !== id);
+    }
+
+    clearAllNotifications() {
+        this.notifications.forEach(n => {
+            if (!this.clearedPostIds.includes(n.id)) {
+                this.clearedPostIds.push(n.id);
+            }
+        });
+        this.saveClearedPostIds();
+        this.notifications = [];
+        this.showNotifications = false;
     }
 
     selectedNotification: any = null;
@@ -154,8 +203,6 @@ export class CaregiverComponent implements OnInit {
         }
     }
 
-
-
     private initShiftForm() {
         this.shiftForm = this.fb.group({
             patientId: ['', Validators.required],
@@ -164,13 +211,17 @@ export class CaregiverComponent implements OnInit {
         });
     }
 
+
     private initCaregiverForm() {
         this.caregiverForm = this.fb.group({
-            // Note: Currently not used in templates, but defined to avoid TS error
-            // and provide a place for future caregiver profile editing forms.
             fullName: [this.profileData.fullName, Validators.required],
+            dni: [this.profileData.dni, Validators.required],
             phone: [this.profileData.phone, Validators.required],
-            email: [this.profileData.email, [Validators.required, Validators.email]]
+            email: [this.profileData.email, [Validators.required, Validators.email]],
+            address: [this.profileData.address, Validators.required],
+            hourlyRate: [this.profileData.hourlyRate, [Validators.required, Validators.min(0)]],
+            specialty: [this.profileData.specialty, Validators.required],
+            paymentTarget: [this.profileData.paymentTarget, Validators.required]
         });
     }
 

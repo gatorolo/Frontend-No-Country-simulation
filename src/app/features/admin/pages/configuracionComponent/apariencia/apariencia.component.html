@@ -9,12 +9,24 @@
 
     <form [formGroup]="appearanceForm" (ngSubmit)="onSubmit()" class="settings-form">
         <div class="form-grid">
-            <div class="form-group">
-                <label for="darkMode">Modo de visualización</label>
+            <div class="form-group checkbox-group full-width"
+                style="margin-bottom: 2rem; border-bottom: 1px dashed #e2e8f0; padding-bottom: 1rem;">
+                <input type="checkbox" id="useAutoTheme" formControlName="useAutoTheme">
+                <label for="useAutoTheme" style="font-weight: 600; color: var(--primary);">🌗 Programación Automática
+                    (Modo Claro 8am-8pm / Oscuro 8pm-8am)</label>
+            </div>
+
+            <div class="form-group" [style.opacity]="appearanceForm.get('useAutoTheme')?.value ? '0.5' : '1'"
+                [style.pointer-events]="appearanceForm.get('useAutoTheme')?.value ? 'none' : 'auto'">
+                <label for="darkMode">Modo de visualización manual</label>
                 <select id="darkMode" formControlName="darkMode">
                     <option [ngValue]="false">Modo Claro</option>
                     <option [ngValue]="true">Modo Oscuro</option>
                 </select>
+                <small *ngIf="appearanceForm.get('useAutoTheme')?.value"
+                    style="color: #64748b; display: block; margin-top: 0.5rem;">
+                    * Desactiva la programación automática para cambiar el modo manualmente.
+                </small>
             </div>
 
             <div class="form-group">

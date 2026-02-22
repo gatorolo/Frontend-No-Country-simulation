@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { PaymentService, Settlement, InsuranceBilling } from 'src/app/core/services/payment.service';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-payments',
@@ -59,7 +60,12 @@ export class PaymentsComponent implements OnInit {
   exportData() {
     console.log('Exporting financial report...');
     // Simulation of export
-    alert('Reporte exportado exitosamente (Excel/PDF Simulation)');
+    Swal.fire({
+      icon: 'success',
+      title: 'Exportación Exitosa',
+      text: 'Reporte exportado exitosamente (Excel/PDF Simulation)',
+      confirmButtonColor: 'var(--primary, #0ea5e9)'
+    });
   }
 
   getDelayClass(status: string): string {

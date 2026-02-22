@@ -33,7 +33,8 @@ export class FamilyComponent implements OnInit {
 
     ngOnInit(): void {
         this.initForm(); // Solo inicializamos el formulario vacío
-        this.configService.whatsappNumber$.subscribe(num => {
+        this.configService.config$.subscribe(config => {
+            const num = config.general.whatsappNumber;
             this.whatsappLink = `https://wa.me/${num}`;
         });
 
@@ -192,26 +193,36 @@ export class FamilyComponent implements OnInit {
             };
 
             if (this.currentPatientId) {
-                // --- MODO EDICIÓN ---
-                console.log('🚀 Actualizando paciente ID:', this.currentPatientId);
+                // --- MODO GUARDADO (Intenta actualizar, si falla crea) ---
+                console.log('🚀 Intentando guardar paciente ID:', this.currentPatientId);
                 this.patientService.updatePatient(this.currentPatientId, patientData).subscribe({
                     next: (res) => {
-                        console.log('¡Actualizado!', res);
-                        this.ejecutarNavegacionExitosa();
+                        console.log('✅ Paciente actualizado con éxito');
+                        this.ejecutarNavegacionExitosa(this.currentPatientId!);
                     },
-                    error: (err) => console.error('Error al actualizar', err)
-                }); // <-- Cierre del subscribe de update
+                    error: (err) => {
+                        console.warn('⚠️ Falló la actualización (posiblemente ID no existe), intentando crear...', err);
+                        // Si falla (ej: 404), intentamos crearlo
+                        this.patientService.createPatient({ ...patientData, id: this.currentPatientId! }).subscribe({
+                            next: (res) => {
+                                console.log('✅ Paciente creado con éxito (ID 23 forzado)');
+                                this.ejecutarNavegacionExitosa(this.currentPatientId!);
+                            },
+                            error: (errCreate) => console.error('❌ Error crítico al crear:', errCreate)
+                        });
+                    }
+                });
             } else {
-                // --- MODO CREACIÓN ---
+                // --- MODO CREACIÓN ESTÁNDAR ---
                 console.log('📝 Creando nuevo paciente');
                 this.patientService.createPatient(patientData).subscribe({
                     next: (res) => {
-                        console.log('¡Creado!', res);
-                        this.ejecutarNavegacionExitosa();
+                        console.log('✅ Nuevo paciente creado con éxito');
+                        this.ejecutarNavegacionExitosa(res.id || 1);
                     },
-                    error: (err) => console.error('Error al crear', err)
-                }); // <-- Cierre del subscribe de create
-            } // <-- ESTA ES LA LLAVE QUE SE SOLÍA PERDER (Cierra el else)
+                    error: (err) => console.error('❌ Error al crear:', err)
+                });
+            }
 
         } else {
             // Lógica de formulario inválido
@@ -221,32 +232,48 @@ export class FamilyComponent implements OnInit {
     }
 
     onCaregiverToggle(id: number) {
-        // Al seleccionar un nuevo cuidador, reemplazamos el anterior para que solo haya uno.
-        this.familyForm.patchValue({ authorizedCaregivers: [id] });
+        const current = this.familyForm.get('authorizedCaregivers')?.value || [];
+        let updated: number[];
+
+        if (current.includes(id)) {
+            updated = current.filter((c: number) => c !== id);
+        } else {
+            updated = [...current, id];
+        }
+
+        this.familyForm.patchValue({ authorizedCaregivers: updated });
+    }
+
+    selectAllCaregivers() {
+        const allIds = this.availableCaregivers.map(cg => cg.id);
+        this.familyForm.patchValue({ authorizedCaregivers: allIds });
+    }
+
+    deselectAllCaregivers() {
+        this.familyForm.patchValue({ authorizedCaregivers: [] });
     }
 
     isCaregiverAuthorized(id: number): boolean {
         const authorized = this.familyForm.get('authorizedCaregivers')?.value;
-        // Verificamos que sea un array antes de usar .includes
         return Array.isArray(authorized) && authorized.includes(id);
     }
 
     // Navegar siempre (optimista), el backend sincroniza en segundo plano
-    private ejecutarNavegacionExitosa() {
+    private ejecutarNavegacionExitosa(id: number) {
         Swal.fire({
             icon: 'success',
             title: '¡Cambios Guardados!',
             text: 'La ficha médica ha sido actualizada correctamente.',
-            timer: 1500, // Bajamos un poco el tiempo para que se sienta más fluido
+            timer: 1500,
             showConfirmButton: false,
             background: '#f7f9fc',
             color: '#0891b2'
-        }).then((result) => {
-            console.log('SweetAlert cerrado, intentando navegar a /family/view');
-            this.router.navigate(['/family/view'])
+        }).then(() => {
+            console.log('SweetAlert cerrado, intentando navegar a /family/view/', id);
+            this.router.navigate(['/family/view', id])
                 .then(success => {
-                    if (success) console.log('Navegación exitosa');
-                    else console.warn('Navegación fallida (bloqueada por guard o error)');
+                    if (success) console.log('Navegación exitosa a ID:', id);
+                    else console.warn('Navegación fallida');
                 })
                 .catch(err => console.error('Error crítico en navegación:', err));
         });

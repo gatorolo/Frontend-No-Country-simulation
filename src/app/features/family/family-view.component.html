@@ -17,7 +17,13 @@
                     </button>
 
                     <div class="notif-dropdown" *ngIf="showNotifications">
-                        <div class="notif-header">Notificaciones</div>
+                        <div class="notif-header">
+                            <span>Notificaciones</span>
+                            <button class="clear-all-btn" *ngIf="notifications.length > 0"
+                                (click)="clearNotifications()">
+                                Limpiar todo
+                            </button>
+                        </div>
                         <div class="notif-empty" *ngIf="notifications.length === 0">
                             No tienes nuevas notificaciones
                         </div>
@@ -27,7 +33,12 @@
                                     <span class="material-icons">check_circle</span>
                                 </div>
                                 <div class="notif-content">
-                                    <span class="notif-title">{{ n.title }}</span>
+                                    <div class="notif-title-row">
+                                        <span class="notif-title">{{ n.title }}</span>
+                                        <button class="remove-notif-btn" (click)="removeNotification($event, n.id)">
+                                            <span class="material-icons">close</span>
+                                        </button>
+                                    </div>
                                     <p class="notif-text">{{ n.message }}</p>
                                     <span class="notif-time">{{ n.date | date:'shortTime' }}</span>
                                 </div>
@@ -106,8 +117,11 @@
                             <span class="cg-specialty">{{ patientData?.caregiver?.specialty }}</span>
                         </div>
                     </div>
-                    <div class="status-badge-verified">
+                    <div class="status-badge-verified" *ngIf="patientData?.caregiver?.isVerified">
                         <span class="material-icons">verified</span> Cuidador Verificado
+                    </div>
+                    <div class="status-badge-pending" *ngIf="!patientData?.caregiver?.isVerified">
+                        <span class="material-icons">hourglass_empty</span> Búsqueda en curso
                     </div>
                 </section>
             </div>

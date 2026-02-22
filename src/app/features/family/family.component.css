@@ -9,24 +9,25 @@
 
 .container {
     padding: 1.5rem;
-    background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+    background: var(--bg-color, linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%));
     height: 100vh;
     overflow-y: auto;
     font-family: 'Inter', sans-serif;
     padding-bottom: 5rem;
-    /* Space for FAB */
+    transition: background 0.3s ease;
 }
 
 .glass-card {
-    background: var(--glass);
+    background: var(--card-bg, var(--glass));
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 20px;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.04);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
     padding: 2rem;
     margin-bottom: 1.5rem;
     animation: slideUp 0.5s ease-out;
+    color: var(--text-color);
 }
 
 @keyframes slideUp {
@@ -238,4 +239,24 @@ textarea:focus {
 .whatsapp-fab:hover .whatsapp-tooltip {
     opacity: 1;
     visibility: visible;
+}
+
+.action-link-btn {
+    background: #e0f2fe;
+    color: var(--primary-dark);
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s;
+}
+
+.action-link-btn:hover {
+    filter: brightness(0.95);
+    transform: translateY(-1px);
 }

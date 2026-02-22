@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
+import { ConfigService } from 'src/app/core/services/config.service';
 import Swal from 'sweetalert2';
 
 @Component({
@@ -16,7 +17,12 @@ export class SistemaComponent {
     lastUpdate: '2026-02-08 14:30:00'
   };
 
-  constructor(private router: Router) { }
+  constructor(
+    private router: Router,
+    private configService: ConfigService
+  ) {
+    this.systemInfo.maintenanceMode = this.configService.getConfig().system.maintenanceMode;
+  }
 
   goBack() {
     this.router.navigate(['/admin/settings']);
@@ -24,7 +30,15 @@ export class SistemaComponent {
 
   toggleMaintenance() {
     this.systemInfo.maintenanceMode = !this.systemInfo.maintenanceMode;
-    console.log('Maintenance Mode:', this.systemInfo.maintenanceMode);
+    this.configService.updateConfig('system', { maintenanceMode: this.systemInfo.maintenanceMode });
+    console.log('Maintenance Mode Persistent:', this.systemInfo.maintenanceMode);
+
+    Swal.fire({
+      icon: this.systemInfo.maintenanceMode ? 'warning' : 'success',
+      title: this.systemInfo.maintenanceMode ? 'Modo Mantenimiento Activado' : 'Modo Mantenimiento Desactivado',
+      text: this.systemInfo.maintenanceMode ? 'El sistema ahora solo es accesible para administradores.' : 'El sistema vuelve a estar disponible para todos.',
+      confirmButtonText: 'Aceptar'
+    });
   }
 
   clearCache() {

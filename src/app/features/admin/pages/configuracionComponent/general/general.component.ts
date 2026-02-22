@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ConfigService } from 'src/app/core/services/config.service';
+import Swal from 'sweetalert2';
 
 @Component({
     selector: 'app-general-config',
@@ -16,14 +17,15 @@ export class GeneralComponent implements OnInit {
         private router: Router,
         private configService: ConfigService
     ) {
+        const config = this.configService.getConfig().general;
         this.generalForm = this.fb.group({
-            systemName: ['Valora', Validators.required],
-            shortDescription: ['Sistema de gestión y seguimiento.'],
-            contactEmail: ['soporte@valora.com', [Validators.required, Validators.email]],
-            whatsappNumber: [this.configService.getWhatsAppNumber(), Validators.required],
-            defaultLanguage: ['es'],
-            timezone: ['GMT-3'],
-            dateFormat: ['DD/MM/YYYY']
+            systemName: [config.systemName, Validators.required],
+            shortDescription: [config.shortDescription],
+            contactEmail: [config.contactEmail, [Validators.required, Validators.email]],
+            whatsappNumber: [config.whatsappNumber, Validators.required],
+            defaultLanguage: [config.defaultLanguage],
+            timezone: [config.timezone],
+            dateFormat: [config.dateFormat]
         });
     }
 
@@ -35,9 +37,15 @@ export class GeneralComponent implements OnInit {
 
     onSubmit() {
         if (this.generalForm.valid) {
-            const { whatsappNumber } = this.generalForm.value;
-            this.configService.setWhatsAppNumber(whatsappNumber);
-            console.log('General Settings Saved:', this.generalForm.value);
+            this.configService.updateConfig('general', this.generalForm.value);
+            console.log('General Settings Saved Persistent:', this.generalForm.value);
+            // Visual feedback
+            Swal.fire({
+                icon: 'success',
+                title: 'Ajustes Guardados',
+                text: 'La configuración general se ha actualizado correctamente.',
+                confirmButtonText: 'Aceptar'
+            });
         }
     }
 }

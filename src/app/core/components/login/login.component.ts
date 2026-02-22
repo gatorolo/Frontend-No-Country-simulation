@@ -15,19 +15,29 @@ export class LoginComponent {
     onLogin() {
         this.isLoading = true;
 
-        setTimeout(() => {
-            switch (this.selectedRole) {
-                case 'admin':
-                    this.router.navigate(['/admin']);
-                    break;
-                case 'caregiver':
-                    this.router.navigate(['/caregiver']);
-                    break;
-                case 'patient':
-                    this.router.navigate(['/family']);
-                    break;
-                default:
-                    this.router.navigate(['/admin']);
+        setTimeout(async () => {
+            try {
+                let target = '/admin';
+                switch (this.selectedRole) {
+                    case 'admin':
+                        target = '/admin';
+                        break;
+                    case 'caregiver':
+                        target = '/caregiver';
+                        break;
+                    case 'patient':
+                        target = '/family/view/23';
+                        break;
+                }
+
+                const success = await this.router.navigate([target]);
+                if (!success) {
+                    this.isLoading = false;
+                    console.error('Navigation rejected');
+                }
+            } catch (error) {
+                this.isLoading = false;
+                console.error('Navigation error:', error);
             }
         }, 1500);
     }
