@@ -23,7 +23,7 @@
 .brand-name {
   font-size: 1.5rem;
   font-weight: 700;
-  color: #333;
+  color: #cab4b4;
   letter-spacing: -0.02em;
 }
 
@@ -41,7 +41,7 @@ transform: rotate3d(0, 0, 1, 15deg);
   background: none;
   border: none;
   cursor: pointer;
-  color: #666;
+  color: #d4c1c1;
 }
 
 .user-profile .avatar {
@@ -49,5 +49,5 @@ transform: rotate3d(0, 0, 1, 15deg);
   height: 36px;
   border-radius: 50%;
   object-fit: cover;
-  background-color: #eee;
+  background-color: #cea4a4;
 }
