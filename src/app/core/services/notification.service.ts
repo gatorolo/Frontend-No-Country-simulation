@@ -10,6 +10,7 @@ export interface Notification {
     read: boolean;
     relatedPostId?: number;
     recipientRole?: 'admin' | 'caregiver' | 'family';
+    status?: 'Pendiente' | 'Aprobado' | 'Rechazado' | 'Completado';
 }
 
 @Injectable({
@@ -22,6 +23,12 @@ export class NotificationService {
 
     constructor() {
         this.loadFromStorage();
+        // Sincronización entre pestañas
+        window.addEventListener('storage', (event) => {
+            if (event.key === this.storageKey) {
+                this.loadFromStorage();
+            }
+        });
     }
 
     private loadFromStorage() {
@@ -29,63 +36,18 @@ export class NotificationService {
         if (saved) {
             try {
                 const parsed = JSON.parse(saved);
-                // Convertimos strings de fecha a objetos Date
                 const formatted = parsed.map((n: any) => ({
                     ...n,
                     date: new Date(n.date)
                 }));
                 this.notificationsSource.next(formatted);
             } catch (e) {
-                console.error('Error parsing notifications from storage', e);
-                this.setInitialMocks();
+                console.error('Error al cargar notificaciones:', e);
+                this.notificationsSource.next([]);
             }
         } else {
-            this.setInitialMocks();
+            this.notificationsSource.next([]); // Empezamos vacío si no hay nada guardado
         }
-    }
-
-    private setInitialMocks() {
-        const mocks: Notification[] = [
-            {
-                id: 9001,
-                title: 'Nueva Postulación Recibida',
-                message: 'María González se ha postulado para el servicio de Roberto Sánchez (78 años).',
-                type: 'success',
-                date: new Date(Date.now() - 5 * 60000),
-                read: false,
-                relatedPostId: 1,
-                recipientRole: 'admin'
-            },
-            {
-                id: 9002,
-                title: 'Nueva Postulación Recibida',
-                message: 'Carlos Pérez se ha postulado para el servicio de Ana Martínez (82 años).',
-                type: 'success',
-                date: new Date(Date.now() - 15 * 60000),
-                read: false,
-                recipientRole: 'admin'
-            },
-            {
-                id: 9003,
-                title: 'Nuevo Servicio Disponible',
-                message: 'Se busca Kinesiología para José Rodríguez (70 años) en Centro.',
-                type: 'info',
-                date: new Date(Date.now() - 10 * 60000),
-                read: false,
-                relatedPostId: 2,
-                recipientRole: 'caregiver'
-            },
-            {
-                id: 9004,
-                title: 'Servicio Confirmado',
-                message: 'Has sido confirmado para el servicio de Roberto Sánchez.',
-                type: 'success',
-                date: new Date(Date.now() - 30 * 60000),
-                read: true,
-                recipientRole: 'caregiver'
-            }
-        ];
-        this.saveAndNext(mocks);
     }
 
     private saveAndNext(notifications: Notification[]) {
@@ -93,15 +55,24 @@ export class NotificationService {
         this.notificationsSource.next(notifications);
     }
 
-    addNotification(notification: Omit<Notification, 'id' | 'date' | 'read'>) {
+    // ESTE ES EL MÉTODO QUE USAREMOS PARA CREAR NOTIFICACIONES NUEVAS
+    addNotification(notification: Omit<Notification, 'id' | 'date' | 'read' | 'status'>) {
         const current = this.notificationsSource.getValue();
         const newNotif: Notification = {
+            status: 'Pendiente',
             ...notification,
             id: Date.now(),
             date: new Date(),
             read: false
-        };
+        } as Notification;
+        // Las nuevas aparecen primero (unshift)
         this.saveAndNext([newNotif, ...current]);
+    }
+
+    updateNotificationStatus(id: number, status: Notification['status']) {
+        const current = this.notificationsSource.getValue();
+        const updated = current.map(n => n.id === id ? { ...n, status } : n);
+        this.saveAndNext(updated);
     }
 
     markAsRead(id: number) {
@@ -110,12 +81,7 @@ export class NotificationService {
         this.saveAndNext(updated);
     }
 
-    markAllAsReadByRole(role: 'admin' | 'caregiver' | 'family') {
-        const current = this.notificationsSource.getValue();
-        const updated = current.map(n => n.recipientRole === role ? { ...n, read: true } : n);
-        this.saveAndNext(updated);
-    }
-
+    // Limpia las notificaciones por rol (ej: al vaciar la papelera)
     clearByRole(role: 'admin' | 'caregiver' | 'family') {
         const current = this.notificationsSource.getValue();
         const filtered = current.filter(n => n.recipientRole !== role);
@@ -125,9 +91,5 @@ export class NotificationService {
     removeNotification(id: number) {
         const current = this.notificationsSource.getValue();
         this.saveAndNext(current.filter(n => n.id !== id));
-    }
-
-    clearAll() {
-        this.saveAndNext([]);
     }
 }

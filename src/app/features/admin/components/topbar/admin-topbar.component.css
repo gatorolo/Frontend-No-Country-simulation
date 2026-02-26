@@ -26,7 +26,7 @@
 }
 
 .menu-btn {
-    background: rgba(255, 255, 255, 0.5);
+    background: rgba(231, 212, 212, 0.5);
     border: 2px solid #D4AF37;
     border-radius: 8px;
     padding: 4px;
@@ -47,13 +47,13 @@
     background: none;
     border: none;
     cursor: pointer;
-    color: #202429;
+    color: #b0cbec;
     display: flex;
     align-items: center;
     justify-content: center;
     position: relative;
     text-shadow: 4px 4px 8px rgba(0, 0, 0, 0.5);
-    color: #5e575a;
+    color: #6598b9;
     transition: transform 0.2s ease-in-out;
     display: inline-block;
 }
@@ -154,10 +154,28 @@
     font-weight: 700;
     border-bottom: 2px solid var(--primary);
     color: var(--dropdown-text);
-    text-align: center;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     background: var(--dropdown-header-bg);
     font-size: 0.95rem;
     letter-spacing: 0.5px;
+}
+
+.clear-all-btn {
+    background: none;
+    border: none;
+    color: var(--primary);
+    font-size: 0.75rem;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 4px;
+    transition: background 0.2s;
+}
+
+.clear-all-btn:hover {
+    background: rgba(14, 165, 233, 0.1);
 }
 
 .dropdown-content {
@@ -181,6 +199,23 @@
     transition: all 0.2s;
     cursor: pointer;
     align-items: flex-start;
+    position: relative;
+}
+
+.notif-item.unread {
+    background: rgba(16, 185, 129, 0.05);
+}
+
+.notif-item.unread::before {
+    content: '';
+    position: absolute;
+    left: 4px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 4px;
+    height: 100%;
+    background: #10b981;
+    border-radius: 0 4px 4px 0;
 }
 
 .notif-item:last-child {

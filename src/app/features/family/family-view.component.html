@@ -1,4 +1,26 @@
-<div class="container" *ngIf="patientData">
+<!-- Estado de Carga -->
+<div class="loading-overlay" *ngIf="isLoading">
+    <div class="spinner-container">
+        <div class="loading-spinner"></div>
+        <p>Cargando información del paciente...</p>
+    </div>
+</div>
+
+<!-- Estado de Error / Sin Datos -->
+<div class="container" *ngIf="!isLoading && (!patientData || errorMessage)">
+    <div class="glass-card animate-fade empty-card">
+        <span class="material-icons error-icon">error_outline</span>
+        <h2>Oops! Algo no salió bien</h2>
+        <p>{{ errorMessage || 'No pudimos encontrar la información del paciente solicitado.' }}</p>
+        <div style="margin-top: 2rem; display: flex; gap: 1rem;">
+            <button class="edit-btn" (click)="onLogout()">Regresar al Login</button>
+            <button class="edit-btn" style="background: var(--primary); color: white; border: none;"
+                (click)="onCreateNew()">Crear nueva Ficha</button>
+        </div>
+    </div>
+</div>
+
+<div class="container" *ngIf="!isLoading && patientData && !errorMessage">
     <div class="glass-card animate-fade">
         <div class="header-view">
             <div>
@@ -40,6 +62,10 @@
                                         </button>
                                     </div>
                                     <p class="notif-text">{{ n.message }}</p>
+                                    <div class="notif-details" *ngIf="n.caregiverName">
+                                        <span class="material-icons">medical_services</span>
+                                        <strong>{{ n.caregiverName }}</strong>
+                                    </div>
                                     <span class="notif-time">{{ n.date | date:'shortTime' }}</span>
                                 </div>
                             </div>

@@ -1,6 +1,7 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatchingService } from 'src/app/core/services/matching.service';
+import { NotificationService } from 'src/app/core/services/notification.service';
 
 @Component({
     selector: 'app-publish-service',
@@ -13,7 +14,7 @@ export class PublishServiceComponent {
 
     serviceForm: FormGroup;
 
-    constructor(private fb: FormBuilder, private matchingService: MatchingService) {
+    constructor(private fb: FormBuilder, private matchingService: MatchingService, private notificationService: NotificationService) {
         this.serviceForm = this.fb.group({
             patientName: ['', Validators.required],
             age: ['', [Validators.required, Validators.min(0)]],
@@ -25,31 +26,42 @@ export class PublishServiceComponent {
         });
     }
 
-    onSubmit() {
-        if (this.serviceForm.valid) {
-            const newService = this.serviceForm.value;
+onSubmit() {
+    if (this.serviceForm.valid) {
+        const newService = this.serviceForm.value;
 
-            // Ahora nos suscribimos para que el HttpClient haga el POST a Java
-            this.matchingService.publishPost(newService).subscribe({
-                next: (response) => {
-                    console.log('¡Guardia guardada en la base de datos!', response);
+        // 1. IMPORTANTE: Faltaba llamar al servicio aquí
+        this.matchingService.publishPost(newService).subscribe({
+            next: (response) => {
+                console.log('Datos reales de Java:', response);
 
-                    this.serviceForm.reset({
-                        complexity: 'Baja',
-                        specialty: 'Enfermería'
-                    });
-                    this.close.emit(); // Cerramos el modal solo si salió bien
-                },
-                error: (err) => {
-                    console.error('Error al publicar:', err);
+                // 2. Ahora 'response' existe y tiene el ID que devuelve el backend
+                this.notificationService.addNotification({
+                    title: '¡Nueva Guardia Disponible!',
+                    message: `Se busca personal para ${response.patientName} en ${response.city}.`,
+                    type: 'info',
+                    recipientRole: 'caregiver',
+                    relatedPostId: response.id // Esto es vital para que el cuidador pueda "Aplicar"
+                });
 
-                }
-            });
-        }
+                // 3. Limpiar y cerrar solo si el servidor respondió bien
+                this.serviceForm.reset({
+                    complexity: 'Baja',
+                    specialty: 'Enfermería'
+                });
+                this.close.emit();
+            },
+            error: (err) => {
+                console.error('Error al publicar en Java:', err);
+                alert('No se pudo publicar la guardia. Revisa la conexión con el servidor.');
+            }
+        }); 
     }
+}
 
     onCancel() {
         this.serviceForm.reset();
         this.close.emit();
     }
+        
 }

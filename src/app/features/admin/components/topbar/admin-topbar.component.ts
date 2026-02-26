@@ -1,6 +1,7 @@
 import { Component, EventEmitter, OnInit, Output } from '@angular/core';
 import { MatchingService } from 'src/app/core/services/matching.service';
 import { NotificationService } from 'src/app/core/services/notification.service';
+import { CaregiverService } from 'src/app/core/services/caregiver.service';
 import Swal from 'sweetalert2';
 
 @Component({
@@ -18,24 +19,24 @@ export class AdminTopbarComponent implements OnInit {
 
     constructor(
         private matchingService: MatchingService,
-        private notificationService: NotificationService
+        private notificationService: NotificationService,
+        private caregiverService: CaregiverService
     ) { }
 
     ngOnInit(): void {
-        this.matchingService.posts$.subscribe(posts => {
-            // Admin interested in 'Postulado' status (applications)
-            const applications = posts.filter(p => p.status === 'Postulado');
+        // Suscripción a Notificaciones Reales vía NotificationService
+        this.notificationService.notifications$.subscribe(allNotifs => {
+            // Filtramos solo las que son para el ADMIN
+            const adminNotifs = allNotifs.filter(n => n.recipientRole === 'admin');
 
-            if (applications.length > this.notifications.length) {
-                const countDiff = applications.length - this.notifications.length;
-                if (countDiff > 0) {
-                    this.unreadCount += countDiff;
-                }
-                this.notifications = applications;
-            } else {
-                this.notifications = applications;
-            }
+            this.notifications = adminNotifs;
+            this.unreadCount = adminNotifs.filter(n => !n.read).length;
+
+            console.log('🔔 Admin notifications updated:', this.notifications);
         });
+
+        // Mantenemos carga inicial de posts por si acaso
+        this.matchingService.loadPosts().subscribe();
     }
 
     toggleNotifications() {
@@ -46,10 +47,29 @@ export class AdminTopbarComponent implements OnInit {
     }
 
     selectedNotification: any = null;
+    activeNotificationId: number | null = null;
 
     openNotificationDetail(notification: any) {
-        this.selectedNotification = notification;
+        this.activeNotificationId = notification.id;
+        // Buscamos el post real para alimentar el modal de aprobación si hay un ID relacionado
+        if (notification.relatedPostId) {
+            const posts = this.matchingService.getPosts();
+            const postReal = posts.find(p => p.id === notification.relatedPostId);
+
+            if (postReal) {
+                this.selectedNotification = postReal;
+            } else {
+                // Si no está en la lista local, usamos la notificación pero nos aseguramos de que tenga los campos
+                // Gracias a que ahora el cuidador envía metadatos, esto funcionará.
+                this.selectedNotification = notification;
+            }
+        } else {
+            this.selectedNotification = notification;
+        }
+
         this.showNotifications = false;
+        // Marcamos como leída al abrir el detalle
+        this.notificationService.markAsRead(notification.id);
     }
 
     closeNotificationDetail() {
@@ -58,25 +78,76 @@ export class AdminTopbarComponent implements OnInit {
 
     approveAssignment() {
         if (this.selectedNotification) {
-            this.matchingService.confirmPost(this.selectedNotification.id);
+            // Normalizar el ID del post (si es notificación usamos relatedPostId, si es post usamos id)
+            const postId = this.selectedNotification.relatedPostId || this.selectedNotification.id;
+            const patientName = this.selectedNotification.patientName || 'Paciente';
+            const caregiverId = this.selectedNotification.caregiverId;
+            const caregiverName = this.selectedNotification.caregiverName || 'Cuidador';
 
-            // Notificamos al servicio central para que la familia lo reciba
+            this.matchingService.confirmPost(postId);
+
+            // Actualizar estado de la notificación a Aprobado
+            if (this.activeNotificationId) {
+                this.notificationService.updateNotificationStatus(this.activeNotificationId, 'Aprobado');
+            }
+
+            // 1. Notificación al CUIDADOR
             this.notificationService.addNotification({
-                title: '¡Cuidador Asignado!',
-                message: `${this.selectedNotification.caregiverName} ha sido confirmada para el cuidado de ${this.selectedNotification.patientName}.`,
+                title: '¡Postulación Aceptada!',
+                message: `Tu postulación para el servicio de ${patientName} ha sido aceptada por el administrador.`,
                 type: 'success',
-                recipientRole: 'family',
-                relatedPostId: this.selectedNotification.id
+                recipientRole: 'caregiver',
+                relatedPostId: postId
             });
+
+            // 2. Buscamos datos del cuidador para la familia
+            if (caregiverId) {
+                this.caregiverService.getCaregiverById(caregiverId).subscribe({
+                    next: (cg) => {
+                        // 3. Notificación a la FAMILIA con datos reales
+                        this.notificationService.addNotification({
+                            title: '¡Cuidador Asignado!',
+                            message: `Se ha asignado a ${cg.fullName} (${cg.specialty}) para ${patientName}. Teléfono: ${cg.phone}`,
+                            type: 'success',
+                            recipientRole: 'family',
+                            relatedPostId: postId,
+                            // Metadatos para actualización inmediata del UI
+                            caregiverName: cg.fullName,
+                            caregiverSpecialty: cg.specialty,
+                            caregiverVerified: true
+                        } as any);
+                    },
+                    error: (err) => {
+                        console.error('Error al recuperar datos del cuidador', err);
+                        // Fallback si falla la carga de datos del cuidador
+                        this.notificationService.addNotification({
+                            title: '¡Cuidador Asignado!',
+                            message: `${caregiverName} ha sido confirmada para el cuidado de ${patientName}.`,
+                            type: 'success',
+                            recipientRole: 'family',
+                            relatedPostId: postId,
+                            caregiverName: caregiverName,
+                            caregiverSpecialty: 'Acompañante Especiliazado',
+                            caregiverVerified: true
+                        } as any);
+                    }
+                });
+            }
 
             Swal.fire({
                 icon: 'success',
                 title: '¡Has aprobado la asignación!',
-                text: `de ${this.selectedNotification.caregiverName} para ${this.selectedNotification.patientName}`,
+                text: `de ${caregiverName} para ${patientName}`,
                 confirmButtonText: 'Entendido'
             });
             this.closeNotificationDetail();
         }
+    }
+
+    clearNotifications() {
+        this.notificationService.clearByRole('admin');
+        this.showNotifications = false;
+        console.log('🧹 Admin notifications cleared');
     }
 
 }

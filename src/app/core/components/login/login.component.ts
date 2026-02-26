@@ -26,7 +26,7 @@ export class LoginComponent {
                         target = '/caregiver';
                         break;
                     case 'patient':
-                        target = '/family/view/23';
+                        target = '/family/view/1';
                         break;
                 }
 

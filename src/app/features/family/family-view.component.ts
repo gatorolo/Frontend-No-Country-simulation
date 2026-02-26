@@ -18,6 +18,9 @@ export class FamilyViewComponent implements OnInit {
   notifications: any[] = [];
   unreadCount = 0;
   showNotifications = false;
+  isLoading = true;
+  errorMessage = '';
+  private pendingCaregiver: any = null;
 
   constructor(
     private router: Router,
@@ -36,18 +39,35 @@ export class FamilyViewComponent implements OnInit {
 
     // 2. Escuchar el ID de la URL y Cargar Datos de forma robusta
     this.route.paramMap.pipe(
-      // Cada vez que cambie el ID en la URL, recargamos
       tap(params => {
+        this.isLoading = true;
+        this.errorMessage = '';
         const idParam = params.get('id');
         if (idParam) {
           this.currentPatientId = Number(idParam);
           this.fetchPatientData(this.currentPatientId);
         } else {
-          // Fallback si no hay ID: cargamos la lista y tomamos el último (o el default 1)
-          this.patientService.getPatientsFromApi().subscribe(patients => {
-            if (patients && patients.length > 0) {
-              const p = patients.find(patient => (patient as any).id === this.currentPatientId) || patients[patients.length - 1];
-              if (p) this.initializePatientData(p);
+          // Fallback si no hay ID en la URL
+          this.patientService.getPatientsFromApi().subscribe({
+            next: (patients) => {
+              if (patients && patients.length > 0) {
+                // Buscamos el último o el que coincida con el current
+                const p = patients.find(patient => (patient as any).id === this.currentPatientId) || patients[patients.length - 1];
+                if (p) {
+                  this.initializePatientData(p);
+                  this.isLoading = false;
+                } else {
+                  this.isLoading = false;
+                  this.errorMessage = 'No se encontró el paciente solicitado.';
+                }
+              } else {
+                this.isLoading = false;
+                this.errorMessage = 'No hay pacientes registrados en el sistema.';
+              }
+            },
+            error: (err) => {
+              this.isLoading = false;
+              this.errorMessage = 'Error de conexión con el servidor.';
             }
           });
         }
@@ -60,8 +80,20 @@ export class FamilyViewComponent implements OnInit {
       if (familyNotifs.length > this.notifications.length) {
         const diff = familyNotifs.length - this.notifications.length;
         this.unreadCount += diff;
-        const latest = familyNotifs[0];
-        if (latest && latest.relatedPostId) {
+        const latest: any = familyNotifs[0];
+        if (latest && latest.caregiverName) {
+          const cgData = {
+            fullName: latest.caregiverName,
+            specialty: latest.caregiverSpecialty || '-',
+            isVerified: latest.caregiverVerified || false
+          };
+
+          if (this.patientData) {
+            this.patientData.caregiver = cgData;
+          } else {
+            this.pendingCaregiver = cgData;
+          }
+        } else if (latest?.relatedPostId) {
           this.syncCaregiverById(latest.relatedPostId);
         }
       }
@@ -69,20 +101,36 @@ export class FamilyViewComponent implements OnInit {
     });
   }
 
-  private fetchPatientData(id: number) {
+  fetchPatientData(id: number) {
     this.patientService.getPatientById(id).subscribe({
-      next: (data: any) => {
-        if (data) {
-          this.initializePatientData(data);
-        }
+      next: (data) => {
+        this.patientData = data;
+        this.isLoading = false;
       },
       error: (err) => {
-        console.error('Error al cargar paciente por ID, reintentando con lista completa...', err);
-        // Fallback: intentar buscar en la lista completa
-        this.patientService.getPatientsFromApi().subscribe(patients => {
-          const p = patients.find(p => (p as any).id === id);
-          if (p) this.initializePatientData(p);
-        });
+        console.error('Error al cargar paciente por ID, intentando fallback...', err);
+        this.tryFallback(id);
+      }
+    });
+  }
+
+  private tryFallback(requestedId: number) {
+    this.patientService.getPatientsFromApi().subscribe({
+      next: (patients) => {
+        if (patients && patients.length > 0) {
+          // Si el ID pedido no existe, mostramos el primero disponible para evitar pantalla en blanco
+          const p = patients[0];
+          console.log(`⚠️ ID ${requestedId} no encontrado. Mostrando fallback: ${p.id}`);
+          this.initializePatientData(p);
+          this.isLoading = false;
+        } else {
+          this.isLoading = false;
+          this.errorMessage = 'No se encontraron pacientes disponibles.';
+        }
+      },
+      error: () => {
+        this.isLoading = false;
+        this.errorMessage = 'Error al intentar recuperar la lista de pacientes.';
       }
     });
   }
@@ -98,7 +146,7 @@ export class FamilyViewComponent implements OnInit {
         ...m,
         frequency: m.schedule || m.frequency
       })),
-      caregiver: this.patientData?.caregiver || { fullName: 'Buscando...', specialty: '-', isVerified: false }
+      caregiver: this.patientData?.caregiver || this.pendingCaregiver || { fullName: 'Buscando...', specialty: '-', isVerified: false }
     };
     this.checkMatchingForPatient();
   }
@@ -171,5 +219,9 @@ export class FamilyViewComponent implements OnInit {
 
   onLogout() {
     this.router.navigate(['/login']);
+  }
+
+  onCreateNew() {
+    this.router.navigate(['/family']);
   }
 }

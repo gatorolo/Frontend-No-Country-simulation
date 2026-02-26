@@ -3,6 +3,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { CaregiverService } from 'src/app/core/services/caregiver.service';
 import { ConfigService } from 'src/app/core/services/config.service';
 import { MatchingService } from 'src/app/core/services/matching.service';
+import { NotificationService } from 'src/app/core/services/notification.service';
 
 @Component({
     selector: 'app-caregiver-dashboard',
@@ -15,18 +16,19 @@ export class CaregiverComponent implements OnInit {
     shiftDuration = '00:00:00';
     shiftForm!: FormGroup;
     whatsappLink = '';
+    posts: any[] = [];
 
     // Static data for the professional profile
-    profileData = {
-        fullName: 'Lara Martínez',
-        dni: '35.123.456',
-        phone: '+54 9 341 510-9918',
-        email: 'lara.martinez@valora.com',
-        address: 'Av. Pellegrini 1234, Rosario',
-        hourlyRate: 1500,
-        specialty: 'Enfermería Geriátrica',
-        paymentTarget: 'CBU: 0000054321000098765432 / Mercado Pago',
-        status: 'Falta verificar'
+    profileData: any = {
+        id: null,
+        fullName: '',
+        dni: '',
+        phone: '',
+        city: '',
+        address: '',
+        hourlyRate: 0,
+        specialty: '',
+        status: ''
     };
 
     patients = [
@@ -53,7 +55,8 @@ export class CaregiverComponent implements OnInit {
         private fb: FormBuilder,
         private configService: ConfigService,
         private matchingService: MatchingService,
-        private caregiverService: CaregiverService
+        private caregiverService: CaregiverService,
+        private notificationService: NotificationService
     ) { }
 
     clearedPostIds: number[] = [];
@@ -61,29 +64,48 @@ export class CaregiverComponent implements OnInit {
     ngOnInit(): void {
         this.loadClearedPostIds();
         this.initShiftForm();
+        this.loadProfile();
         this.initCaregiverForm();
+
+        // 1. Configuración de WhatsApp
         this.configService.config$.subscribe(config => {
             this.whatsappLink = `https://wa.me/${config.general.whatsappNumber}`;
         });
 
+        // 2. Suscripción a Notificaciones (La que maneja la campanita)
+        this.notificationService.notifications$.subscribe(allNotifs => {
+            // Filtramos solo las que son para el CUIDADOR
+            const caregiverNotifs = allNotifs.filter(n => n.recipientRole === 'caregiver');
+
+            // Manejo del contador de no leídos
+            const unread = caregiverNotifs.filter(n => !n.read).length;
+            this.unreadCount = unread;
+
+            this.notifications = caregiverNotifs;
+            console.log('🔔 Notificaciones del Service actualizadas:', this.notifications);
+
+        });
+
         this.matchingService.posts$.subscribe(posts => {
-            // 1. New Service Posts (status 'Publicado')
-            const publicPosts = posts.filter(p => p.status === 'Publicado' && !this.clearedPostIds.includes(p.id));
+            this.posts = posts;
+        });
+    }
 
-            // 2. My Approved Applications
-            const myApprovedPosts = posts.filter(p => p.status === 'Confirmado' && p.caregiverId === 123 && !this.clearedPostIds.includes(p.id));
 
-            const allNotifications = [...publicPosts, ...myApprovedPosts];
 
-            if (allNotifications.length > this.notifications.length) {
-                const countDiff = allNotifications.length - this.notifications.length;
-                if (countDiff > 0) {
-                    this.unreadCount += countDiff;
+    loadProfile() {
+        // Asumimos el ID 1 para Mariano según tu base de datos
+        this.caregiverService.getCaregiverById(1).subscribe({
+            next: (data) => {
+                this.profileData = data;
+                console.log('✅ Perfil cargado correctamente:', this.profileData);
+
+                // Si usas un formulario para el perfil, actualízalo aquí
+                if (this.caregiverForm && data) {
+                    this.caregiverForm.patchValue(data);
                 }
-                this.notifications = allNotifications;
-            } else {
-                this.notifications = allNotifications;
-            }
+            },
+            error: (err) => console.error('❌ Error al cargar el perfil:', err)
         });
     }
 
@@ -113,11 +135,12 @@ export class CaregiverComponent implements OnInit {
             fullName: this.profileData.fullName,
             dni: this.profileData.dni,
             phone: this.profileData.phone,
-            email: this.profileData.email,
             address: this.profileData.address,
+            city: this.profileData.city,
             hourlyRate: this.profileData.hourlyRate,
             specialty: this.profileData.specialty,
-            paymentTarget: this.profileData.paymentTarget
+            status: this.profileData.status
+
         });
         this.showProfileModal = true;
     }
@@ -125,31 +148,30 @@ export class CaregiverComponent implements OnInit {
     saveProfile() {
         if (this.caregiverForm.invalid) return;
 
-        const updatedData = this.caregiverForm.value;
-        // Simulamos el ID 123 para el cuidador actual (Lara Martínez)
-        this.caregiverService.updateCaregiver(123, updatedData).subscribe({
+        const caregiverId = this.profileData?.id || 1;
+
+
+        const payload = {
+            id: caregiverId,
+            ...this.caregiverForm.value,
+            status: this.profileData.status || 'Activo'
+        };
+
+        this.caregiverService.updateCaregiver(caregiverId, payload).subscribe({
             next: (res: any) => {
-                console.log('Perfil actualizado en BD', res);
-                // Actualizamos la vista local inmediata
-                this.profileData = {
-                    ...this.profileData,
-                    ...updatedData
-                };
+                console.log('✅ Sincronización exitosa con la BD');
+                this.profileData = res;
                 this.closeModal();
             },
-            error: (err: any) => {
-                console.error('Error al actualizar perfil', err);
-                // Fallback: actualizamos localmente si falla la API (para demo)
-                this.profileData = { ...this.profileData, ...updatedData };
-                this.closeModal();
-            }
+            error: (err) => console.error('❌ Error de persistencia:', err)
         });
     }
+
 
     toggleNotifications() {
         this.showNotifications = !this.showNotifications;
         if (this.showNotifications) {
-            this.unreadCount = 0; // Marca como leídas al abrir
+            this.unreadCount = 0;
         }
     }
 
@@ -159,50 +181,84 @@ export class CaregiverComponent implements OnInit {
             this.clearedPostIds.push(id);
             this.saveClearedPostIds();
         }
-        // Forzamos actualización local inmediata
         this.notifications = this.notifications.filter(n => n.id !== id);
     }
 
     clearAllNotifications() {
-        this.notifications.forEach(n => {
-            if (!this.clearedPostIds.includes(n.id)) {
-                this.clearedPostIds.push(n.id);
-            }
-        });
-        this.saveClearedPostIds();
+        // 1. Borramos permanentemente del LocalStorage para el rol de cuidador
+        this.notificationService.clearByRole('caregiver');
+
+        // 2. Opcional: También podrías limpiar la variable local por seguridad
         this.notifications = [];
-        this.showNotifications = false;
+        this.unreadCount = 0;
+
+        console.log('🧹 Notificaciones borradas permanentemente');
     }
 
     selectedNotification: any = null;
 
-    openNotificationDetail(notification: any) {
-        this.selectedNotification = notification;
-        this.showNotifications = false; // Close dropdown
+    openNotificationDetail(n: any) {
+        // Buscamos el post real para alimentar el modal detallado
+        const postReal = this.posts.find(p => p.id === n.relatedPostId);
+
+        if (postReal) {
+            this.selectedNotification = postReal; // Aquí el modal tendrá patientName, zone, etc.
+        } else {
+            this.selectedNotification = n; // Fallback a la notificación
+        }
+        this.showNotifications = false;
+
     }
+
+
 
     closeNotificationDetail() {
         this.selectedNotification = null;
     }
 
     applyToService() {
-        if (this.selectedNotification) {
-            const caregiverId = 123;
-            const caregiverName = this.profileData.fullName;
+        if (!this.selectedNotification) return;
 
-            this.matchingService.applyToPost(this.selectedNotification.id, caregiverId, caregiverName).subscribe({
-                next: () => {
-                    alert(`Te has postulado correctamente para la guardia de ${this.selectedNotification.patientName}`);
-                    this.closeNotificationDetail();
-                },
-                error: (err) => {
-                    console.error('Error al postularse:', err);
-                    alert('Hubo un error al postularse. Por favor, intenta nuevamente.');
-                }
-            });
-        }
+        const postId = this.selectedNotification.id;
+
+        // 1. Prioridad: fullName de la base de datos. 
+        // 2. Si no hay perfil cargado, usamos 'Mariano' (para que no salga Anónimo).
+        const caregiverName = this.profileData?.fullName || 'Mariano';
+        const caregiverId = this.profileData?.id || 1;
+
+        console.log('🚀 Postulando a:', caregiverName);
+
+        this.matchingService.applyToPost(postId, caregiverId, caregiverName).subscribe({
+            next: (response: any) => {
+                alert("¡Postulación enviada!");
+
+                // Notificación para el ADMIN
+                this.notificationService.addNotification({
+                    title: 'Nueva Postulación',
+                    // Aquí usamos la variable que ya tiene el nombre real
+                    message: `El cuidador ${caregiverName} se ha postulado para el servicio de ${this.selectedNotification.patientName}.`,
+                    type: 'success',
+                    recipientRole: 'admin',
+                    relatedPostId: postId,
+                    // Metadatos extra para que el Admin tenga info aunque el polling falle
+                    patientName: this.selectedNotification.patientName,
+                    caregiverName: caregiverName,
+                    caregiverId: caregiverId,
+                    age: this.selectedNotification.age,
+                    zone: this.selectedNotification.zone,
+                    city: this.selectedNotification.city,
+                    schedule: this.selectedNotification.schedule,
+                    specialty: this.selectedNotification.specialty,
+                    complexity: this.selectedNotification.complexity
+                } as any);
+
+                this.closeNotificationDetail();
+            },
+            error: (err: any) => {
+                console.error("Error al postularse:", err);
+            }
+        });
     }
-
     private initShiftForm() {
         this.shiftForm = this.fb.group({
             patientId: ['', Validators.required],
@@ -214,14 +270,14 @@ export class CaregiverComponent implements OnInit {
 
     private initCaregiverForm() {
         this.caregiverForm = this.fb.group({
-            fullName: [this.profileData.fullName, Validators.required],
-            dni: [this.profileData.dni, Validators.required],
-            phone: [this.profileData.phone, Validators.required],
-            email: [this.profileData.email, [Validators.required, Validators.email]],
-            address: [this.profileData.address, Validators.required],
-            hourlyRate: [this.profileData.hourlyRate, [Validators.required, Validators.min(0)]],
-            specialty: [this.profileData.specialty, Validators.required],
-            paymentTarget: [this.profileData.paymentTarget, Validators.required]
+            fullName: [this.profileData.fullName || '', Validators.required],
+            dni: [this.profileData.dni || '', Validators.required],
+            phone: [this.profileData.phone || ''],
+            city: [this.profileData.city || '', Validators.required],
+            specialty: [this.profileData.specialty || '', Validators.required],
+            hourlyRate: [this.profileData.hourlyRate || 0, [Validators.required, Validators.min(1)]],
+            address: [this.profileData.address || ''],
+            paymentTarget: [this.profileData.paymentTarget || '', Validators.required]
         });
     }
 

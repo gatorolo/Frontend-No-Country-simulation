@@ -38,33 +38,13 @@ export class FamilyComponent implements OnInit {
             this.whatsappLink = `https://wa.me/${num}`;
         });
 
-        /*this.route.paramMap.subscribe(params => {
-            const id = params.get('id');
-            if (id) {
-                // 1. Convertimos el ID de la URL a un número real
-                const idNumerico = Number(id);
-
-                // 2. Si la conversión fue exitosa (no es NaN)
-                if (!isNaN(idNumerico)) {
-                    this.currentPatientId = idNumerico; // Guardamos en la variable de clase
-                    console.log('✅ Modo Edición: Cargando paciente ID', idNumerico);
-
-                    // 3. Pasamos 'idNumerico' (que es tipo 'number' puro)
-                    this.cargarDatosParaEditar(idNumerico); // <--- AQUÍ SE VA EL ERROR
-                }
-            } else {
-                this.currentPatientId = null;
-                console.log('📝 Modo Creación: Formulario limpio');
-            }
-        });*/
-
+     
         this.route.paramMap.subscribe(params => {
             const idParam = params.get('id');
-            if (idParam !== null) { // Si el parámetro existe en la URL
+            if (idParam !== null) { 
                 const idVal = parseInt(idParam, 10);
                 this.currentPatientId = idVal;
 
-                // Aquí le aseguramos a TS que idVal es un número
                 this.cargarDatosParaEditar(idVal);
             } else {
                 this.currentPatientId = null;
@@ -77,7 +57,7 @@ export class FamilyComponent implements OnInit {
 
         this.patientService.getPatientById(id).subscribe({
             next: (patient: any) => {
-                // Mapeamos los campos básicos
+                
                 this.familyForm.patchValue({
                     patientName: patient.name,
                     patientAge: patient.age,
@@ -86,7 +66,7 @@ export class FamilyComponent implements OnInit {
                     locationLink: patient.locationLink
                 });
 
-                // Cargamos las medicaciones con los nombres correctos
+            
                 if (patient.medications) {
                     this.cargarMedicaciones(patient.medications);
                 }
@@ -96,40 +76,40 @@ export class FamilyComponent implements OnInit {
     }
 
     cargarMedicaciones(medications: any[]) {
-        const control = this.medications; // Usa tu getter
+        const control = this.medications; 
 
-        // Limpiamos el array para que no se dupliquen al editar
+       
         while (control.length !== 0) {
             control.removeAt(0);
         }
 
-        // Llenamos usando la función que SÍ tiene 'schedule'
+     
         medications.forEach(med => {
             control.push(this.createMedicationGroup(med.name, med.schedule));
         });
     }
     private loadPatientData() {
-        // 1. EL GUARDIÁN: Si no hay ID, salimos y no hacemos el subscribe
+        
         if (this.currentPatientId === null) {
             console.warn('No hay ID para cargar datos');
             return;
         }
 
-        // 2. Ahora TypeScript está tranquilo porque sabe que currentPatientId es NUMBER
+        
         this.patientService.getPatientById(this.currentPatientId).subscribe({
             next: (patient) => {
                 if (patient) {
-                    // Limpiamos medicamentos
+                    
                     while (this.medications.length) {
                         this.medications.removeAt(0);
                     }
 
-                    // Llenamos medicamentos
+
                     patient.medications.forEach(m => {
                         this.medications.push(this.createMedicationGroup(m.name, m.schedule));
                     });
 
-                    // Llenamos el resto del formulario
+                   
                     this.familyForm.patchValue({
                         patientName: patient.name,
                         patientAge: patient.age,
@@ -193,7 +173,6 @@ export class FamilyComponent implements OnInit {
             };
 
             if (this.currentPatientId) {
-                // --- MODO GUARDADO (Intenta actualizar, si falla crea) ---
                 console.log('🚀 Intentando guardar paciente ID:', this.currentPatientId);
                 this.patientService.updatePatient(this.currentPatientId, patientData).subscribe({
                     next: (res) => {
@@ -202,7 +181,7 @@ export class FamilyComponent implements OnInit {
                     },
                     error: (err) => {
                         console.warn('⚠️ Falló la actualización (posiblemente ID no existe), intentando crear...', err);
-                        // Si falla (ej: 404), intentamos crearlo
+                       
                         this.patientService.createPatient({ ...patientData, id: this.currentPatientId! }).subscribe({
                             next: (res) => {
                                 console.log('✅ Paciente creado con éxito (ID 23 forzado)');
@@ -213,7 +192,7 @@ export class FamilyComponent implements OnInit {
                     }
                 });
             } else {
-                // --- MODO CREACIÓN ESTÁNDAR ---
+                
                 console.log('📝 Creando nuevo paciente');
                 this.patientService.createPatient(patientData).subscribe({
                     next: (res) => {
@@ -228,7 +207,7 @@ export class FamilyComponent implements OnInit {
             // Lógica de formulario inválido
             console.warn('Formulario no válido');
             alert('Por favor, completa los campos obligatorios.');
-        } // <-- Cierra el if (this.familyForm.valid)
+        } 
     }
 
     onCaregiverToggle(id: number) {

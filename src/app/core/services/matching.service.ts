@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable, catchError, of, tap } from 'rxjs';
+import { BehaviorSubject, Observable, catchError, interval, of, startWith, switchMap, tap } from 'rxjs';
 
 export interface ServicePost {
     id: number;
@@ -29,6 +29,12 @@ export class MatchingService {
 
     constructor(private http: HttpClient) {
         this.loadPosts().subscribe();
+        interval(30000) // Cada 30 segundos (30000 ms)
+            .pipe(
+                startWith(0), // Ejecuta uno de inmediato al arrancar
+                switchMap(() => this.loadPosts()) // Llama a tu método existente
+            )
+            .subscribe();
     }
 
     publishPost(post: any): Observable<ServicePost> {
@@ -38,36 +44,44 @@ export class MatchingService {
     }
 
     applyToPost(postId: number, caregiverId: number, caregiverName: string): Observable<ServicePost> {
-        // 1. Actualización local inmediata (optimista) para que la notificación llegue al Admin
-        //    sin depender del backend
-        const current = this.postsSource.getValue();
-        const index = current.findIndex(p => p.id === postId);
+        // 1. Limpieza de URL para evitar la doble barra //
+        const cleanApiUrl = this.apiUrl.endsWith('/') ? this.apiUrl.slice(0, -1) : this.apiUrl;
+        const url = `${cleanApiUrl}/${postId}/apply?caregiverId=${caregiverId}&caregiverName=${caregiverName}`;
+
+        console.log('🔗 URL final construida:', url);
+
+        // 2. Actualización local (Optimista)
+        const currentPosts = this.postsSource.getValue();
+        const index = currentPosts.findIndex(p => p.id === postId);
+        let backupPost = currentPosts[index]; // Guardamos respaldo por si falla el servidor
+
         if (index !== -1) {
-            const updated = [...current];
+            const updated = [...currentPosts];
             updated[index] = {
                 ...updated[index],
                 status: 'Postulado',
-                caregiverId,
-                caregiverName
+                caregiverId: caregiverId,
+                caregiverName: caregiverName
             };
             this.postsSource.next(updated);
         }
 
-        // 2. Intento HTTP en background (sincroniza con el backend si está disponible)
-        const url = `${this.apiUrl}/${postId}/apply?caregiverId=${caregiverId}`;
+        // 3. Petición al Backend
         return this.http.put<ServicePost>(url, {}).pipe(
-            tap((updatedPost) => {
+            tap((updatedPostFromServer) => {
+                console.log('✅ Backend actualizado correctamente');
+                // Sincronizamos con los datos REALES del servidor
                 const curr = this.postsSource.getValue();
                 const idx = curr.findIndex(p => p.id === postId);
                 if (idx !== -1) {
-                    curr[idx] = updatedPost;
+                    curr[idx] = updatedPostFromServer;
                     this.postsSource.next([...curr]);
                 }
             }),
             catchError((err: any) => {
-                // Backend no disponible: la actualización local ya fue aplicada, ignoramos el error HTTP
-                console.warn('Backend no disponible, usando actualización local:', err.message);
-                return of(current[index]);
+                console.error('❌ Error 404/500 en Backend:', err);
+                // Si el backend falla, podrías revertir el cambio optimista aquí si quisieras
+                return of(backupPost);
             })
         );
     }
@@ -98,5 +112,18 @@ export class MatchingService {
 
     getPosts() {
         return this.postsSource.getValue();
+    }
+
+    confirmCaregiver(postId: number): Observable<any> {
+        // Esta es la URL que Java esperará para confirmar la guardia
+        const url = `${this.apiUrl}/${postId}/confirm`;
+
+        return this.http.put(url, {}).pipe(
+            tap(() => {
+                console.log(`✅ Guardia ${postId} confirmada en el servidor`);
+                // Opcional: refrescar la lista de posts
+                this.loadPosts().subscribe();
+            })
+        );
     }
 }

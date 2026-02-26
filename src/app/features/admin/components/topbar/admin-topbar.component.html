@@ -14,22 +14,25 @@
       </button>
 
       <div class="notification-dropdown" *ngIf="showNotifications">
-        <div class="dropdown-header">Solicitudes de Guardia</div>
+        <div class="dropdown-header">
+          <span>Solicitudes de Guardia</span>
+          <button class="clear-all-btn" *ngIf="notifications.length > 0" (click)="clearNotifications()">
+            Limpiar todo
+          </button>
+        </div>
         <div class="dropdown-content">
           <div *ngIf="notifications.length === 0" class="empty-state">
             No hay nuevas postulaciones
           </div>
-          <div class="notif-item" *ngFor="let n of notifications" (click)="openNotificationDetail(n)">
+          <div class="notif-item" *ngFor="let n of notifications" (click)="openNotificationDetail(n)"
+            [class.unread]="!n.read">
             <div class="notif-icon">
               <span class="material-icons">person_add</span>
             </div>
             <div class="notif-info">
-              <span class="notif-title">Nueva Postulación</span>
-              <span class="notif-desc">
-                <strong>{{ n.caregiverName }}</strong> se postuló para
-                <strong>{{ n.patientName }}</strong>
-              </span>
-              <span class="notif-meta">Pendiente de Aprobación</span>
+              <span class="notif-title">{{ n.title }}</span>
+              <span class="notif-desc">{{ n.message }}</span>
+              <span class="notif-meta">{{ n.date | date:'shortTime' }} - {{ n.status || 'Pendiente' }}</span>
             </div>
           </div>
         </div>
