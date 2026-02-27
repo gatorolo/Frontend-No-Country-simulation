@@ -78,8 +78,12 @@ export interface Patient {
     healthInsurance: string;
     locationLink: string;
     medications: Medication[];
-    authorizedCaregivers: number[];
-    status: 'Activo' | 'Internación' | 'Alta' | 'Pendiente';
+    authorizedCaregivers?: number[];
+    status: string | null;
+    city?: string | null;
+    zone?: string | null;
+    profilePhoto?: string | null;
+    assignedCaregiver?: string | null;
 }
 
 @Injectable({

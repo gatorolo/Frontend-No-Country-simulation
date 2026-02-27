@@ -19,6 +19,7 @@ export class CaregiversComponent implements OnInit {
 
   ngOnInit(): void {
     this.initForm();
+    this.loadCaregivers(); // ← carga desde la BD al iniciar
     this.matchingService.loadPosts().subscribe();
   }
 

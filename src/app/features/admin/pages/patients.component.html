@@ -59,7 +59,9 @@
         <tr>
           <th>Paciente</th>
           <th>Edad</th>
+          <th>Ciudad</th>
           <th>Obra Social</th>
+          <th>Cuidador Asignado</th>
           <th>Estado</th>
           <th>Acciones</th>
         </tr>
@@ -73,9 +75,17 @@
             </div>
           </td>
           <td>{{ p.age }}</td>
+          <td>{{ p.city || '—' }}</td>
           <td>{{ p.healthInsurance }}</td>
           <td>
-            <span class="status-pill" [class]="p.status.toLowerCase()">{{ p.status }}</span>
+            <span *ngIf="p.assignedCaregiver; else sinCuidador" class="caregiver-tag">
+              <span class="material-icons" style="font-size:14px;vertical-align:middle;">person</span>
+              {{ p.assignedCaregiver }}
+            </span>
+            <ng-template #sinCuidador><span style="color:#94a3b8;">Sin asignar</span></ng-template>
+          </td>
+          <td>
+            <span class="status-pill" [class]="p.status?.toLowerCase()">{{ p.status || 'Sin estado' }}</span>
           </td>
           <td class="actions">
             <button class="icon-btn view" title="Ver Ficha Médica" (click)="viewDetails(p)">
@@ -99,7 +109,7 @@
     <div class="medical-file-card glass-card">
       <div class="file-header">
         <h2>Ficha Médica: {{ selectedPatient.name }}</h2>
-        <span class="status-pill" [class]="selectedPatient.status.toLowerCase()">{{ selectedPatient.status }}</span>
+        <span class="status-pill" [class]="selectedPatient.status?.toLowerCase()">{{ selectedPatient.status }}</span>
       </div>
 
       <div class="file-grid">
@@ -108,16 +118,25 @@
           <p>{{ selectedPatient.diagnosis }}</p>
           <p><strong>Obra Social:</strong> {{ selectedPatient.healthInsurance }}</p>
           <p><strong>Edad:</strong> {{ selectedPatient.age }} años</p>
+          <p *ngIf="selectedPatient.city"><strong>Ciudad:</strong> {{ selectedPatient.city }}</p>
+          <p *ngIf="selectedPatient.zone"><strong>Zona:</strong> {{ selectedPatient.zone }}</p>
         </div>
 
-        <div class="info-block" *ngIf="selectedPatient.medications">
+        <div class="info-block" *ngIf="selectedPatient.assignedCaregiver">
+          <h4><span class="material-icons">badge</span> Cuidador Asignado</h4>
+          <p class="caregiver-tag" style="display:inline-flex;align-items:center;gap:6px;">
+            <span class="material-icons" style="font-size:18px;">person</span>
+            {{ selectedPatient.assignedCaregiver }}
+          </p>
+        </div>
+
+        <div class="info-block" *ngIf="selectedPatient.medications && selectedPatient.medications.length > 0">
           <h4><span class="material-icons">medication</span> Plan de Medicación</h4>
           <ul class="med-list">
             <li *ngFor="let med of selectedPatient.medications">
               <span class="med-name">{{ med.name }}</span>
               <span class="med-time">{{ med.schedule }}</span>
             </li>
-            <li *ngIf="selectedPatient.medications.length === 0" class="empty">No hay medicación registrada.</li>
           </ul>
         </div>
       </div>

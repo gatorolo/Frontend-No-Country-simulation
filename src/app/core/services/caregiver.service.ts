@@ -5,10 +5,11 @@ import { tap } from 'rxjs/operators';
 
 export interface Caregiver {
   id?: number;
-  fullName: string;
+  caregiverName?: string;  // campo real del backend
+  fullName?: string;       // campo usado en el formulario local
   specialty: string;
   dni?: string;
-  city: string;
+  city?: string;
   hourlyRate?: number;
   phone?: string;
   email?: string;
@@ -56,5 +57,5 @@ export class CaregiverService {
 
   getCaregiverById(id: number): Observable<any> {
     return this.http.get(`${this.apiUrl}/${id}`);
-}
+  }
 }
