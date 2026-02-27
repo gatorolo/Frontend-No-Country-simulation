@@ -1,0 +1,33 @@
+[33m57e14d3[m[33m ([m[1;36mHEAD[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m, [m[1;32mmain[m[33m)[m  segunda sincronización
+[33mfa93949[m[33m ([m[1;33mtag: [m[1;33mv1.0.1[m[33m)[m solucionando sincronización
+[33m3aac539[m[33m ([m[1;33mtag: [m[1;33mv1.0.0[m[33m)[m sincronizacion con la BD
+[33m06e303e[m sincronizando el backend con el frontend
+[33mee61a8d[m corrigiendo en el core
+[33m2c72be1[m adaptando modo claro/modo oscuro
+[33mde9817a[m[33m ([m[1;33mtag: [m[1;33mintegración-2[m[33m)[m comunicando notificaciones entre el admin y familyComponent
+[33m91b02e6[m[33m ([m[1;33mtag: [m[1;33mintegracion-1[m[33m)[m integración con el back y la BD de MySql
+[33m78252be[m git commit --amend --reset-author
+[33m042d84d[m[33m ([m[1;33mtag: [m[1;33mpunto-cero-estable[m[33m)[m Resguardando con tag
+[33md539766[m[33m ([m[1;33mtag: [m[1;33mpunto-cero[m[33m)[m punto-cero: checkpoint after approved notification fix
+[33m95736b3[m budget error solution
+[33mf55cd1b[m modo desarrollo active
+[33md4a4a4e[m modo desarrollo activo
+[33m28bdb03[m Patient component
+[33mfa6bec7[m ficha nuevo cuidador
+[33me41a42c[m Corrección en family component
+[33m50662fc[m *
+[33me22cf99[m volviendo al login
+[33m38e11d3[m Cambios en Family Component
+[33m41d8fe2[m resolviendo botón-Cuidadores Component
+[33mc55c31b[m corrigiendo colores en Family component
+[33ma367741[m #Family component done
+[33m3b690f6[m #Family Component done
+[33m4fb452e[m merge: bring master into main (keep master version)
+[33m260d49f[m[33m ([m[1;31morigin/master[m[33m, [m[1;32mmaster[m[33m)[m fix after deploy
+[33mac29612[m cambio de nombre- Configuración
+[33m8ad717c[m bug in pages/configuacionComponent
+[33m7ef5ba7[m sync origin-master
+[33mb66ab92[m chore: remove angular.json and vscode config from repo
+[33m0872b1c[m sync archivos
+[33m4101bef[m Delete .agent/rules directory
+[33m20a3135[m Initial commit
