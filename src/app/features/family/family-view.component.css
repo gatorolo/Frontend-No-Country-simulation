@@ -480,6 +480,31 @@
     font-weight: 600;
 }
 
+.btn-dismiss {
+    background: #fee2e2;
+    color: #ef4444;
+    border: 1px solid #fecaca;
+    padding: 0.35rem 0.8rem;
+    border-radius: 50px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s;
+}
+
+.btn-dismiss:hover {
+    background: #fecaca;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(239, 68, 68, 0.1);
+}
+
+.btn-dismiss .material-icons {
+    font-size: 16px;
+}
+
 
 .animate-fade {
     animation: fadeIn 0.4s ease-out;

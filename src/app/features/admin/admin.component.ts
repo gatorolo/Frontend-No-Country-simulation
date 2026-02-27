@@ -122,8 +122,6 @@ export class AdminComponent implements OnInit { // Implementamos OnInit
     }
 
     /*confirmarAsignacion(postId: number, caregiver: any) {
-        // 1. Llamamos al Backend para guardar en DB que la orden es "Confirmada" 
-        // y que el cuidador es Mariano
         this.serviceOrderService.confirmOrder(postId, caregiver.id, caregiver.fullName).subscribe({
             next: (ordenActualizada) => {
 

@@ -21,6 +21,7 @@ export class FamilyViewComponent implements OnInit {
   isLoading = true;
   errorMessage = '';
   private pendingCaregiver: any = null;
+  activeOrderId: number | null = null;
 
   constructor(
     private router: Router,
@@ -75,6 +76,10 @@ export class FamilyViewComponent implements OnInit {
       })
     ).subscribe();
 
+    // UI Sync Fix:
+    // - Corregir nombre "undefined" en notificaciones de familia
+    // - Reflejar info de notificación en `caregiver-info` (Especialidad, etc)
+    // - Verify the UI updates correctly
     // 3. Suscripción a Notificaciones Reales
     this.notificationService.notifications$.subscribe(notifs => {
       const familyNotifs = notifs.filter(n => n.recipientRole === 'family');
@@ -86,14 +91,14 @@ export class FamilyViewComponent implements OnInit {
         if (latest && latest.caregiverName) {
           console.log('📢 Nueva notificación: Asignando a', latest.caregiverName);
 
-          // 1. ESTA ES LA LÍNEA CLAVE:
           // Actualizamos la propiedad que el HTML usa en el *ngIf
           if (this.patientData) {
             this.patientData.caregiverName = latest.caregiverName;
+            this.patientData.caregiverSpecialty = latest.caregiverSpecialty;
 
-            // 2. Opcional: Si también usas el objeto caregiver para el badge
             this.patientData.caregiver = {
               fullName: latest.caregiverName,
+              specialty: latest.caregiverSpecialty || 'Acompañante Terapéutico Asignado',
               isVerified: true
             };
           }
@@ -115,7 +120,7 @@ export class FamilyViewComponent implements OnInit {
         this.initializePatientData(data);
         this.isLoading = false;
 
-        // 2. Buscamos la orden de Mariano
+        // 2. Sincronizamos con las órdenes activas para ver si hay cuidador
         this.syncWithActiveOrders();
       },
       error: (err) => {
@@ -135,7 +140,8 @@ export class FamilyViewComponent implements OnInit {
       location: data.locationLink || data.location,
       medications: data.medications || [],
       // Inicializamos caregiverName en null para que el HTML muestre "Buscando..."
-      caregiverName: data.caregiverName || null
+      caregiverName: null,
+      caregiverSpecialty: null
     };
   }
 
@@ -152,52 +158,33 @@ export class FamilyViewComponent implements OnInit {
       });
 
       if (myOrder) {
+        this.activeOrderId = myOrder.id;
         // Seteamos AMBAS propiedades para que cualquier parte del HTML lo vea
         this.patientData.caregiverName = myOrder.caregiverName;
+        this.patientData.caregiverSpecialty = myOrder.specialty || 'Acompañante Especiliazado';
         this.patientData.caregiver = {
           fullName: myOrder.caregiverName,
-          specialty: 'Especialista Asignado',
+          specialty: myOrder.specialty || 'Especialista Asignado',
           isVerified: true
         };
+      } else {
+        this.activeOrderId = null;
       }
     });
   }
   /*private syncWithActiveOrders() {
     this.matchingService.getActiveOrders().subscribe({
       next: (orders) => {
-        console.log('--- BUSCANDO A MARIANO ---');
-        console.log('Lista de órdenes recibidas:', orders);
-
-        if (!this.patientData) {
-          console.error('❌ Error: this.patientData es null');
-          return;
-        }
-
+        if (!this.patientData) return;
         const pName = (this.patientData.name || '').trim().toLowerCase();
-        console.log('Paciente en pantalla:', `"${pName}"`);
-
         const myOrder = orders.find(order => {
-          const pName = (this.patientData.name || '').trim().toLowerCase();
           const oName = (order.patientName || '').trim().toLowerCase();
-
-          // MATCH FLEXIBLE: Si uno contiene al otro (ej: "carlos" está en "carlos almuria")
-          const matchesName = pName.includes(oName) || oName.includes(pName);
-
-          // ESTADO: Según tu log, el estado que viene es 'Aprobado' o 'Publicado'
-          const isReady = order.status === 'Aprobado' || order.status === 'Publicado' || order.status === 'Confirmado';
-
-          return matchesName && isReady;
+          return (pName.includes(oName) || oName.includes(pName)) && order.status === 'Confirmado';
         });
-
         if (myOrder) {
-          console.log('✅ ¡LO ENCONTRAMOS!', myOrder.caregiverName);
           this.patientData.caregiverName = myOrder.caregiverName;
-          this.patientData.caregiver = { isVerified: true };
-        } else {
-          console.warn('❌ No hubo coincidencia. Revisa si el nombre o el estado "Confirmado" coinciden.');
         }
-      },
-      error: (err) => console.error('Error al obtener órdenes:', err)
+      }
     });
   }*/
 
@@ -265,8 +252,13 @@ export class FamilyViewComponent implements OnInit {
   toggleNotifications() {
     this.showNotifications = !this.showNotifications;
     if (this.showNotifications) {
+      // Marcamos todas las de familia como leídas al abrir el panel
+      this.notifications.forEach(n => {
+        if (!n.read) {
+          this.notificationService.markAsRead(n.id);
+        }
+      });
       this.unreadCount = 0;
-      // Ya no borramos automáticamente al abrir/cerrar, permitimos que el usuario lo haga explícitamente
     }
   }
 
@@ -278,6 +270,40 @@ export class FamilyViewComponent implements OnInit {
   clearNotifications() {
     this.notificationService.clearByRole('family');
     this.showNotifications = false;
+  }
+
+  dismissCaregiver() {
+    if (!this.activeOrderId) return;
+
+    import('sweetalert2').then(Swal => {
+      Swal.default.fire({
+        title: '¿Finalizar asignación?',
+        text: 'El cuidador ya no aparecerá como asignado a este paciente.',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#0ea5e9',
+        cancelButtonColor: '#ef4444',
+        confirmButtonText: 'Sí, finalizar',
+        cancelButtonText: 'Cancelar'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          this.matchingService.deletePost(this.activeOrderId!).subscribe({
+            next: () => {
+              this.activeOrderId = null;
+              if (this.patientData) {
+                this.patientData.caregiverName = null;
+                this.patientData.caregiver = null;
+              }
+              Swal.default.fire('¡Finalizado!', 'La asignación ha sido eliminada.', 'success');
+            },
+            error: (err) => {
+              console.error('Error al eliminar asignación:', err);
+              Swal.default.fire('Error', 'No se pudo eliminar la asignación.', 'error');
+            }
+          });
+        }
+      });
+    });
   }
 
   onEdit() {

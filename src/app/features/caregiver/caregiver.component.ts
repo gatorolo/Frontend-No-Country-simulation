@@ -95,7 +95,7 @@ export class CaregiverComponent implements OnInit {
 
 
     loadProfile() {
-        // Asumimos el ID 1 para Mariano según tu base de datos
+        // Cargamos el perfil del cuidador actual (ID 1 por defecto en esta versión)
         this.caregiverService.getCaregiverById(1).subscribe({
             next: (data) => {
                 // Mapeo robusto: Java a veces devuelve 'name' y el front usa 'fullName'
@@ -198,7 +198,8 @@ export class CaregiverComponent implements OnInit {
             this.clearedPostIds.push(id);
             this.saveClearedPostIds();
         }
-        this.notifications = this.notifications.filter(n => n.id !== id);
+        // Llamada al service para persistencia real
+        this.notificationService.removeNotification(id);
     }
 
     clearAllNotifications() {
@@ -225,6 +226,8 @@ export class CaregiverComponent implements OnInit {
         }
         this.showNotifications = false;
 
+        // Persistimos el estado de "leído"
+        this.notificationService.markAsRead(n.id);
     }
 
 
@@ -237,7 +240,7 @@ export class CaregiverComponent implements OnInit {
         if (!this.selectedNotification) return;
 
         const postId = this.selectedNotification.id;
-        const caregiverName = this.profileData?.fullName || 'Mariano';
+        const caregiverName = this.profileData?.caregiverName || this.profileData?.fullName || this.profileData?.name || 'Cuidador';
         const caregiverId = this.profileData?.id || 1;
 
         console.log('🚀 Postulando a:', caregiverName);

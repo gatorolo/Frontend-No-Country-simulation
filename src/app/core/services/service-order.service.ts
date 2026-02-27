@@ -15,13 +15,13 @@ export class ServiceOrderService {
     return this.http.post(this.apiUrl, orderData);
   }
 
-  // 2. NUEVO: Para que Lara apruebe a Mariano
+  // 2. Para confirmar una orden de servicio
   // Este método coincide con tu @PutMapping("/{id}/confirm") de Java
   confirmOrder(id: number, caregiverId: number, caregiverName: string): Observable<any> {
-    // Armamos la URL con los parámetros que espera el @RequestParam
+    // La URL correcta debe ser: baseUrl/id/confirm
     const url = `${this.apiUrl}/${id}/confirm?caregiverId=${caregiverId}&caregiverName=${caregiverName}`;
 
-    // El segundo parámetro {} es el cuerpo del mensaje (Body), que enviamos vacío
+    console.log('🔗 Llamando a:', url); // Para verificar que no diga /publish/ en la consola
     return this.http.put(url, {});
   }
 }

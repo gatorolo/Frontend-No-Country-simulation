@@ -108,16 +108,20 @@ export class AdminTopbarComponent implements OnInit {
             if (caregiverId) {
                 this.caregiverService.getCaregiverById(caregiverId).subscribe({
                     next: (cg) => {
+                        // Mapeo robusto del nombre (el backend puede usar distintos campos)
+                        const cgRealName = cg.fullName || cg.caregiverName || cg.name || 'Cuidador';
+                        const cgSpecialty = cg.specialty || 'Acompañante Especializado';
+
                         // 3. Notificación a la FAMILIA con datos reales
                         this.notificationService.addNotification({
                             title: '¡Cuidador Asignado!',
-                            message: `Se ha asignado a ${cg.fullName} (${cg.specialty}) para ${patientName}. Teléfono: ${cg.phone}`,
+                            message: `Se ha asignado a ${cgRealName} (${cgSpecialty}) para ${patientName}. Teléfono: ${cg.phone || 'N/A'}`,
                             type: 'success',
                             recipientRole: 'family',
                             relatedPostId: postId,
                             // Metadatos para actualización inmediata del UI
-                            caregiverName: cg.fullName,
-                            caregiverSpecialty: cg.specialty,
+                            caregiverName: cgRealName,
+                            caregiverSpecialty: cgSpecialty,
                             caregiverVerified: true
                         } as any);
                     },

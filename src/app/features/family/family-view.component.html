@@ -142,14 +142,24 @@
                             </div>
                             <div>
                                 <span class="cg-name" style="color: #0891b2; font-weight: bold; font-size: 1.1rem;">
-                                    {{ patientData.caregiverName }}
+                                    {{ patientData.caregiver?.caregiverName || patientData.caregiverName }}
                                 </span>
                                 <br>
-                                <span class="cg-specialty">Acompañante Terapéutico Asignado</span>
+                                <span class="cg-specialty">
+                                    {{ patientData.caregiverSpecialty || patientData.caregiver?.specialty ||
+                                    'Acompañante Terapéutico Asignado' }}
+                                </span>
                             </div>
 
-                            <div class="status-badge-verified" style="margin-top: 10px;">
-                                <span class="material-icons">verified</span> Cuidador Verificado
+                            <div class="caregiver-actions"
+                                style="margin-top: 15px; display: flex; gap: 10px; align-items: center;">
+                                <div class="status-badge-verified">
+                                    <span class="material-icons">verified</span> Cuidador Verificado
+                                </div>
+                                <button class="btn-dismiss" (click)="dismissCaregiver()" title="Finalizar Guardia">
+                                    <span class="material-icons">person_remove</span>
+                                    <span>Finalizar</span>
+                                </button>
                             </div>
                         </div>
 
