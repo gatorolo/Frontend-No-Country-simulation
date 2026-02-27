@@ -56,10 +56,10 @@ export class NotificationService {
     }
 
     // ESTE ES EL MÉTODO QUE USAREMOS PARA CREAR NOTIFICACIONES NUEVAS
-    addNotification(notification: Omit<Notification, 'id' | 'date' | 'read' | 'status'>) {
+    addNotification(notification: Omit<Notification, 'id' | 'date' | 'read'>) {
         const current = this.notificationsSource.getValue();
         const newNotif: Notification = {
-            status: 'Pendiente',
+            status: 'Pendiente', // Default
             ...notification,
             id: Date.now(),
             date: new Date(),

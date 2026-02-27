@@ -30,23 +30,23 @@
                         <div *ngIf="notifications.length === 0" class="empty-state">
                             No tienes nuevas notificaciones
                         </div>
-                        <div class="notif-item" *ngFor="let n of notifications"
-                            (click)="n.status !== 'Confirmado' ? openNotificationDetail(n) : null"
-                            [style.cursor]="n.status === 'Confirmado' ? 'default' : 'pointer'">
+                        <div class="notif-item" *ngFor="let n of notifications" (click)="openNotificationDetail(n)"
+                            style="cursor: pointer;">
 
                             <div class="notif-info">
-    <div class="notif-title-row">
-        <span class="notif-title">{{ n.title || (n.status === 'Confirmado' ? '¡Solicitud Aprobada!' : 'Nueva Guardia') }}</span>
-        
-        <button class="remove-notif-btn" (click)="removeNotification($event, n.id)">
-            <span class="material-icons">close</span>
-        </button>
-    </div>
-    
-    <span class="notif-desc">{{ n.message }}</span>
-    
-    <span class="notif-meta">{{ n.date | date:'shortTime' }}</span>
-</div>
+                                <div class="notif-title-row">
+                                    <span class="notif-title">{{ n.title || (n.status === 'Confirmado' ? '¡Solicitud
+                                        Aprobada!' : 'Nueva Guardia') }}</span>
+
+                                    <button class="remove-notif-btn" (click)="removeNotification($event, n.id)">
+                                        <span class="material-icons">close</span>
+                                    </button>
+                                </div>
+
+                                <span class="notif-desc">{{ n.message }}</span>
+
+                                <span class="notif-meta">{{ n.date | date:'shortTime' }}</span>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -124,7 +124,7 @@
         <div class="profile-static-grid">
             <div class="data-group">
                 <span class="data-label">Nombre Completo</span>
-                <span class="data-value">{{ profileData.fullName }}</span>
+                <span class="data-value">{{ profileData.caregiverName }}</span>
             </div>
             <div class="data-group">
                 <span class="data-label">DNI / Identificación</span>
@@ -134,9 +134,10 @@
                 <span class="data-label">Teléfono de Contacto</span>
                 <span class="data-value">{{ profileData.phone }}</span>
             </div>
-           <div class="data-group">
-           <label>Ciudad</label>
-                 <input type="text" formControlName="city"> </div>
+            <div class="data-group">
+                <span class="data-label">Ciudad</span>
+                <span class="data-value">{{ profileData.city }}</span>
+            </div>
             <div class="data-group">
                 <span class="data-label">Valor Hora Pactado</span>
                 <span class="data-value money">${{ profileData.hourlyRate | number }}</span>
@@ -221,112 +222,128 @@
                 <button class="close-btn" (click)="closeModal()">&times;</button>
             </div>
 
-        <form *ngIf="caregiverForm" [formGroup]="caregiverForm" (ngSubmit)="saveProfile()" class="edit-profile-form">
-    <div class="form-grid">
-        <div class="input-group">
-            <label>Nombre Completo</label>
-            <input type="text" formControlName="fullName">
-        </div>
-        
-        <div class="input-group">
-            <label>DNI</label>
-            <input type="text" formControlName="dni">
-        </div>
-        
-        <div class="input-group">
-            <label>Teléfono</label>
-            <input type="text" formControlName="phone">
-        </div>
+            <form *ngIf="caregiverForm" [formGroup]="caregiverForm" (ngSubmit)="saveProfile()"
+                class="edit-profile-form">
+                <div class="form-grid">
+                    <div class="input-group">
+                        <label>Nombre Completo</label>
+                        <input type="text" formControlName="caregiverName">
+                    </div>
 
-        <div class="input-group">
-            <label>Ciudad</label>
-            <input type="text" formControlName="city">
-        </div>
+                    <div class="input-group">
+                        <label>DNI</label>
+                        <input type="text" formControlName="dni">
+                    </div>
 
-        <div class="input-group">
-            <label>Especialidad</label>
-            <input type="text" formControlName="specialty">
-        </div>
-        
-        <div class="input-group">
-            <label>Valor Hora ($)</label>
-            <input type="number" formControlName="hourlyRate">
-        </div>
+                    <div class="input-group">
+                        <label>Teléfono</label>
+                        <input type="text" formControlName="phone">
+                    </div>
 
-        <div class="input-group full-width">
-            <label>Dirección Particular</label>
-            <input type="text" formControlName="address">
-        </div>
+                    <div class="input-group">
+                        <label>Ciudad</label>
+                        <input type="text" formControlName="city">
+                    </div>
 
-        <div class="input-group full-width">
-            <label>Datos de Cobro (CBU / Alias)</label>
-            <input type="text" formControlName="paymentTarget">
-        </div>
-    </div>
+                    <div class="input-group">
+                        <label>Especialidad</label>
+                        <input type="text" formControlName="specialty">
+                    </div>
 
-    <div class="modal-actions">
-        <button type="button" (click)="closeModal()">Cancelar</button>
-        <button type="submit" [disabled]="caregiverForm.invalid" class="btn-save">
-            Guardar Cambios
-        </button>
-    </div>
-</form>
+                    <div class="input-group">
+                        <label>Valor Hora ($)</label>
+                        <input type="number" formControlName="hourlyRate">
+                    </div>
 
-<div *ngIf="!caregiverForm">
-    <p>Cargando datos del perfil...</p>
-</div>
+                    <div class="input-group full-width">
+                        <label>Dirección Particular</label>
+                        <input type="text" formControlName="address">
+                    </div>
+
+                    <div class="input-group full-width">
+                        <label>Datos de Cobro (CBU / Alias)</label>
+                        <input type="text" formControlName="paymentTarget">
+                    </div>
+                </div>
+
+                <div class="modal-actions">
+                    <button type="button" (click)="closeModal()">Cancelar</button>
+                    <button type="submit" [disabled]="caregiverForm.invalid" class="btn-save">
+                        Guardar Cambios
+                    </button>
+                </div>
+            </form>
+
+            <div *ngIf="!caregiverForm">
+                <p>Cargando datos del perfil...</p>
+            </div>
         </div>
     </div>
 
     <!-- Notification Detail Modal -->
- <div class="modal-overlay" *ngIf="selectedNotification">
-    <div class="modal-content animate-scale-in">
-        <div class="modal-header">
-            <h2>{{ selectedNotification.patientName ? 'Detalles de la Guardia' : 'Información' }}</h2>
-            <button class="close-btn" (click)="closeNotificationDetail()">&times;</button>
-        </div>
+    <div class="modal-overlay" *ngIf="selectedNotification">
+        <div class="modal-content animate-scale-in">
+            <div class="modal-header">
+                <h2>{{ selectedNotification.patientName ? 'Detalles de la Guardia' : 'Información' }}</h2>
+                <button class="close-btn" (click)="closeNotificationDetail()">&times;</button>
+            </div>
 
-        <div *ngIf="selectedNotification.patientName; else infoOnly" class="detail-grid">
-            <div class="detail-item">
-                <span class="label">Paciente</span>
-                <span class="value">{{ selectedNotification.patientName }} ({{ selectedNotification.age }} años)</span>
+            <div *ngIf="selectedNotification.patientName; else infoOnly" class="detail-grid">
+                <div class="detail-item">
+                    <span class="label">Paciente</span>
+                    <span class="value">{{ selectedNotification.patientName }} ({{ selectedNotification.age }}
+                        años)</span>
+                </div>
+                <div class="detail-item">
+                    <span class="label">Zona / Ciudad</span>
+                    <span class="value">{{ selectedNotification.zone }}, {{ selectedNotification.city }}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="label">Horario</span>
+                    <span class="value">{{ selectedNotification.schedule }}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="label">Especialidad</span>
+                    <span class="value pill">{{ selectedNotification.specialty }}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="label">Complejidad</span>
+                    <span class="value">{{ selectedNotification.complexity }}</span>
+                </div>
             </div>
-            <div class="detail-item">
-                <span class="label">Zona / Ciudad</span>
-                <span class="value">{{ selectedNotification.zone }}, {{ selectedNotification.city }}</span>
-            </div>
-            <div class="detail-item">
-                <span class="label">Horario</span>
-                <span class="value">{{ selectedNotification.schedule }}</span>
-            </div>
-            <div class="detail-item">
-                <span class="label">Especialidad</span>
-                <span class="value pill">{{ selectedNotification.specialty }}</span>
-            </div>
-            <div class="detail-item">
-                <span class="label">Complejidad</span>
-                <span class="value">{{ selectedNotification.complexity }}</span>
-            </div>
-        </div>
 
-        <ng-template #infoOnly>
-            <div class="info-message-container" style="padding: 1.5rem; text-align: center;">
-                <span class="material-icons" style="font-size: 3rem; color: #4a90e2; margin-bottom: 1rem;">info</span>
-                <h3 style="margin-bottom: 1rem;">{{ selectedNotification.title }}</h3>
-                <p style="color: #666; line-height: 1.5;">{{ selectedNotification.message }}</p>
-            </div>
-        </ng-template>
+            <ng-template #infoOnly>
+                <div class="info-message-container" style="padding: 1.5rem; text-align: center;">
+                    <span class="material-icons"
+                        style="font-size: 3rem; color: #4a90e2; margin-bottom: 1rem;">info</span>
+                    <h3 style="margin-bottom: 1rem;">{{ selectedNotification.title }}</h3>
+                    <p style="color: #666; line-height: 1.5;">{{ selectedNotification.message }}</p>
+                </div>
+            </ng-template>
 
-        <div class="modal-actions" style="justify-content: center; margin-top: 2rem;">
-            <button *ngIf="selectedNotification.patientName" class="btn-apply" (click)="applyToService()">
-                <span>Postularme</span>
-                <span class="material-icons">send</span>
-            </button>
-            
-            <button *ngIf="!selectedNotification.patientName" class="btn-secondary" (click)="closeNotificationDetail()">
-                <span>Entendido</span>
-            </button>
+            <div class="modal-actions" style="justify-content: center; margin-top: 2rem;">
+                <!-- Acción segun el estado -->
+                <button
+                    *ngIf="selectedNotification.patientName && selectedNotification.status !== 'Postulado' && selectedNotification.status !== 'Confirmado'"
+                    class="btn-apply" (click)="applyToService()">
+                    <span>Postularme</span>
+                    <span class="material-icons">send</span>
+                </button>
+
+                <div *ngIf="selectedNotification.status === 'Postulado'" class="status-info-badge pending">
+                    <span class="material-icons">history</span>
+                    Ya te has postulado a este servicio
+                </div>
+
+                <div *ngIf="selectedNotification.status === 'Confirmado'" class="status-info-badge success">
+                    <span class="material-icons">check_circle</span>
+                    ¡Servicio Asignado! Eres el cuidador de este paciente
+                </div>
+
+                <button class="btn-secondary" (click)="closeNotificationDetail()">
+                    <span>Cerrar</span>
+                </button>
+            </div>
         </div>
     </div>
-</div>
 </div>

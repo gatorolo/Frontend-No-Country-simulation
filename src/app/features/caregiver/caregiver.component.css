@@ -752,3 +752,32 @@ td {
         grid-column: span 1;
     }
 }
+
+/* Status Info Badges for Modal */
+.status-info-badge {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 1rem 1.5rem;
+    border-radius: 12px;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    width: 100%;
+    justify-content: center;
+}
+
+.status-info-badge.pending {
+    background: #fff7ed;
+    color: #9a3412;
+    border: 1px solid #ffedd5;
+}
+
+.status-info-badge.success {
+    background: #f0fdf4;
+    color: #166534;
+    border: 1px solid #dcfce7;
+}
+
+.status-info-badge .material-icons {
+    font-size: 20px;
+}

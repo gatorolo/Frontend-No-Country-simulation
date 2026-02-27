@@ -3,6 +3,7 @@ import { FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ConfigService } from 'src/app/core/services/config.service';
 import { PatientService, Patient } from 'src/app/core/services/patient.service';
+import { MatchingService, ServicePost } from 'src/app/core/services/matching.service';
 import Swal from 'sweetalert2';
 
 @Component({
@@ -15,40 +16,72 @@ export class FamilyComponent implements OnInit {
     whatsappLink = '';
     currentPatientId: number | null = null;
 
-    availableCaregivers = [
-        { id: 101, fullName: 'Lara Martínez', specialty: 'Enfermería' },
-        { id: 102, fullName: 'Carlos Ruiz', specialty: 'Kinesiología' },
-        { id: 103, fullName: 'Elena Paz', specialty: 'Cuidadora Geriátrica' },
-        { id: 104, fullName: 'Carla Vuioner', specialty: 'Rehabilitación' }
-    ];
+    availableCaregivers: any[] = [];
 
     constructor(
         private fb: FormBuilder,
         private router: Router,
         private configService: ConfigService,
         private patientService: PatientService,
+        private matchingService: MatchingService, // Inyectamos MatchingService
         private route: ActivatedRoute
-
     ) { }
 
     ngOnInit(): void {
-        this.initForm(); // Solo inicializamos el formulario vacío
+        this.initForm();
         this.configService.config$.subscribe(config => {
             const num = config.general.whatsappNumber;
             this.whatsappLink = `https://wa.me/${num}`;
         });
 
-     
         this.route.paramMap.subscribe(params => {
             const idParam = params.get('id');
-            if (idParam !== null) { 
+            if (idParam !== null) {
                 const idVal = parseInt(idParam, 10);
                 this.currentPatientId = idVal;
-
                 this.cargarDatosParaEditar(idVal);
             } else {
                 this.currentPatientId = null;
             }
+        });
+
+        // Suscripción para integrar cuidadores reales confirmados
+        this.syncRealCaregivers();
+    }
+
+    private syncRealCaregivers() {
+        this.matchingService.posts$.subscribe((posts: ServicePost[]) => {
+            if (!posts) return;
+
+            const confirmedPosts = posts.filter((p: ServicePost) => p.status === 'Confirmado');
+
+            confirmedPosts.forEach((post: ServicePost) => {
+                // 1. Verificamos si el cuidador ya está en la lista (evitar duplicados)
+                const exists = this.availableCaregivers.some(cg => cg.id === post.caregiverId);
+
+                if (!exists && post.caregiverId && post.caregiverName) {
+                    // 2. Lo agregamos a la lista visible (El "Cuidador Designado" que pidió el usuario)
+                    this.availableCaregivers.push({
+                        id: post.caregiverId,
+                        fullName: post.caregiverName,
+                        specialty: post.specialty || 'Especialista Asignado'
+                    });
+                }
+
+                // 3. Si el post pertenece al paciente actual, lo autorizamos automáticamente en el form
+                // Hacemos un match por nombre ya que es el dato que tenemos en el post y el form
+                const currentName = this.familyForm.get('patientName')?.value?.toLowerCase();
+                const postPatientName = post.patientName?.toLowerCase();
+
+                if (currentName && postPatientName && (currentName.includes(postPatientName) || postPatientName.includes(currentName))) {
+                    const currentAuthorized = this.familyForm.get('authorizedCaregivers')?.value || [];
+                    if (post.caregiverId && !currentAuthorized.includes(post.caregiverId)) {
+                        this.familyForm.patchValue({
+                            authorizedCaregivers: [...currentAuthorized, post.caregiverId]
+                        });
+                    }
+                }
+            });
         });
     }
 
@@ -57,49 +90,51 @@ export class FamilyComponent implements OnInit {
 
         this.patientService.getPatientById(id).subscribe({
             next: (patient: any) => {
-                
                 this.familyForm.patchValue({
                     patientName: patient.name,
                     patientAge: patient.age,
                     diagnosis: patient.diagnosis,
                     healthInsurance: patient.healthInsurance,
-                    locationLink: patient.locationLink
+                    locationLink: patient.locationLink,
+                    authorizedCaregivers: patient.authorizedCaregivers || []
                 });
 
-            
                 if (patient.medications) {
                     this.cargarMedicaciones(patient.medications);
                 }
+
+                // Re-ejecutamos el sync por si cargamos el nombre después de los posts
+                this.syncRealCaregivers();
             },
             error: (err) => console.error('Error al cargar datos:', err)
         });
     }
 
     cargarMedicaciones(medications: any[]) {
-        const control = this.medications; 
+        const control = this.medications;
 
-       
+
         while (control.length !== 0) {
             control.removeAt(0);
         }
 
-     
+
         medications.forEach(med => {
             control.push(this.createMedicationGroup(med.name, med.schedule));
         });
     }
     private loadPatientData() {
-        
+
         if (this.currentPatientId === null) {
             console.warn('No hay ID para cargar datos');
             return;
         }
 
-        
+
         this.patientService.getPatientById(this.currentPatientId).subscribe({
             next: (patient) => {
                 if (patient) {
-                    
+
                     while (this.medications.length) {
                         this.medications.removeAt(0);
                     }
@@ -109,7 +144,7 @@ export class FamilyComponent implements OnInit {
                         this.medications.push(this.createMedicationGroup(m.name, m.schedule));
                     });
 
-                   
+
                     this.familyForm.patchValue({
                         patientName: patient.name,
                         patientAge: patient.age,
@@ -134,7 +169,7 @@ export class FamilyComponent implements OnInit {
             locationLink: ['', Validators.required],
 
             medications: this.fb.array([]),
-            authorizedCaregivers: [[], Validators.required]
+            authorizedCaregivers: [[]]
         });
     }
 
@@ -181,7 +216,7 @@ export class FamilyComponent implements OnInit {
                     },
                     error: (err) => {
                         console.warn('⚠️ Falló la actualización (posiblemente ID no existe), intentando crear...', err);
-                       
+
                         this.patientService.createPatient({ ...patientData, id: this.currentPatientId! }).subscribe({
                             next: (res) => {
                                 console.log('✅ Paciente creado con éxito (ID 23 forzado)');
@@ -192,7 +227,7 @@ export class FamilyComponent implements OnInit {
                     }
                 });
             } else {
-                
+
                 console.log('📝 Creando nuevo paciente');
                 this.patientService.createPatient(patientData).subscribe({
                     next: (res) => {
@@ -207,7 +242,7 @@ export class FamilyComponent implements OnInit {
             // Lógica de formulario inválido
             console.warn('Formulario no válido');
             alert('Por favor, completa los campos obligatorios.');
-        } 
+        }
     }
 
     onCaregiverToggle(id: number) {

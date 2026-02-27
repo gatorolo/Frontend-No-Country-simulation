@@ -86,18 +86,19 @@ export class MatchingService {
         );
     }
 
-    confirmPost(postId: number) {
-        const current = this.postsSource.getValue();
-        const index = current.findIndex(p => p.id === postId);
-        if (index !== -1) {
-            current[index] = {
-                ...current[index],
-                status: 'Confirmado'
-            };
-            this.postsSource.next([...current]);
-            return current[index];
-        }
-        return null;
+    // En matching.service.ts
+    confirmOrder(postId: number, caregiverId: any, caregiverName: string): Observable<any> {
+        // Si caregiverId no viene, le ponemos 0 o 1 para que Java no reciba 'undefined'
+        const idParaJava = caregiverId || 1;
+
+        const url = `${this.apiUrl}/${postId}/confirm?caregiverId=${idParaJava}&caregiverName=${caregiverName}`;
+
+        return this.http.put(url, {}).pipe(
+            tap(() => {
+                console.log(`✅ Guardia ${postId} confirmada`);
+                this.loadPosts().subscribe();
+            })
+        );
     }
 
     loadPosts(): Observable<ServicePost[]> {
@@ -114,6 +115,12 @@ export class MatchingService {
         return this.postsSource.getValue();
     }
 
+    getActiveOrders(): Observable<any[]> {
+        return this.http.get<any[]>(`${this.apiUrl}/active`);
+    }
+
+
+
     confirmCaregiver(postId: number): Observable<any> {
         // Esta es la URL que Java esperará para confirmar la guardia
         const url = `${this.apiUrl}/${postId}/confirm`;
@@ -122,6 +129,15 @@ export class MatchingService {
             tap(() => {
                 console.log(`✅ Guardia ${postId} confirmada en el servidor`);
                 // Opcional: refrescar la lista de posts
+                this.loadPosts().subscribe();
+            })
+        );
+    }
+
+    deletePost(postId: number): Observable<any> {
+        return this.http.delete(`${this.apiUrl}/${postId}`).pipe(
+            tap(() => {
+                console.log(`🗑️ Guardia ${postId} eliminada`);
                 this.loadPosts().subscribe();
             })
         );

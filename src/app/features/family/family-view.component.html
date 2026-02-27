@@ -134,20 +134,34 @@
 
                 <section class="info-card caregiver-card">
                     <h3 class="section-sub"><span class="material-icons">people_alt</span> Cuidador Asignado</h3>
+
                     <div class="caregiver-info">
-                        <div class="user-avatar">
-                            <span class="material-icons">person</span>
+                        <div *ngIf="patientData?.caregiverName; else searching" class="caregiver-assigned-layout">
+                            <div class="user-avatar">
+                                <span class="material-icons">person</span>
+                            </div>
+                            <div>
+                                <span class="cg-name" style="color: #0891b2; font-weight: bold; font-size: 1.1rem;">
+                                    {{ patientData.caregiverName }}
+                                </span>
+                                <br>
+                                <span class="cg-specialty">Acompañante Terapéutico Asignado</span>
+                            </div>
+
+                            <div class="status-badge-verified" style="margin-top: 10px;">
+                                <span class="material-icons">verified</span> Cuidador Verificado
+                            </div>
                         </div>
-                        <div>
-                            <span class="cg-name">{{ patientData?.caregiver?.fullName }}</span>
-                            <span class="cg-specialty">{{ patientData?.caregiver?.specialty }}</span>
-                        </div>
-                    </div>
-                    <div class="status-badge-verified" *ngIf="patientData?.caregiver?.isVerified">
-                        <span class="material-icons">verified</span> Cuidador Verificado
-                    </div>
-                    <div class="status-badge-pending" *ngIf="!patientData?.caregiver?.isVerified">
-                        <span class="material-icons">hourglass_empty</span> Búsqueda en curso
+
+                        <ng-template #searching>
+                            <div class="status-badge-pending">
+                                <span class="material-icons rotating">hourglass_empty</span>
+                                Búsqueda de profesional en curso...
+                            </div>
+                            <p class="subtitle" style="font-size: 0.8rem; margin-top: 8px;">
+                                Te notificaremos apenas Lara confirme la asignación.
+                            </p>
+                        </ng-template>
                     </div>
                 </section>
             </div>

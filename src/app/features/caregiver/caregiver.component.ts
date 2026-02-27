@@ -4,6 +4,7 @@ import { CaregiverService } from 'src/app/core/services/caregiver.service';
 import { ConfigService } from 'src/app/core/services/config.service';
 import { MatchingService } from 'src/app/core/services/matching.service';
 import { NotificationService } from 'src/app/core/services/notification.service';
+import Swal from 'sweetalert2';
 
 @Component({
     selector: 'app-caregiver-dashboard',
@@ -21,7 +22,7 @@ export class CaregiverComponent implements OnInit {
     // Static data for the professional profile
     profileData: any = {
         id: null,
-        fullName: '',
+        caregiverName: '',
         dni: '',
         phone: '',
         city: '',
@@ -97,6 +98,7 @@ export class CaregiverComponent implements OnInit {
         // Asumimos el ID 1 para Mariano según tu base de datos
         this.caregiverService.getCaregiverById(1).subscribe({
             next: (data) => {
+                // Mapeo robusto: Java a veces devuelve 'name' y el front usa 'fullName'
                 this.profileData = data;
                 console.log('✅ Perfil cargado correctamente:', this.profileData);
 
@@ -132,7 +134,7 @@ export class CaregiverComponent implements OnInit {
 
     openEditProfileModal() {
         this.caregiverForm.patchValue({
-            fullName: this.profileData.fullName,
+            caregiverName: this.profileData.caregiverName,
             dni: this.profileData.dni,
             phone: this.profileData.phone,
             address: this.profileData.address,
@@ -149,21 +151,36 @@ export class CaregiverComponent implements OnInit {
         if (this.caregiverForm.invalid) return;
 
         const caregiverId = this.profileData?.id || 1;
-
+        const formValues = this.caregiverForm.value;
 
         const payload = {
-            id: caregiverId,
-            ...this.caregiverForm.value,
+            ...this.profileData,       // Trae ID y otros campos
+            ...formValues,             // Trae caregiverName, city, etc.
+            // FORZAMOS LA SINCRONIZACIÓN:
+            caregiverName: formValues.caregiverName,
+            fullName: formValues.caregiverName, // Enviamos el mismo valor a ambas columnas por si acaso
             status: this.profileData.status || 'Activo'
         };
 
+        console.log('enviando payload:', payload);
+
         this.caregiverService.updateCaregiver(caregiverId, payload).subscribe({
             next: (res: any) => {
-                console.log('✅ Sincronización exitosa con la BD');
-                this.profileData = res;
+                // Actualizamos la vista con lo que devuelve el servidor
+                this.profileData = {
+                    ...res,
+                    caregiverName: res.caregiverName || res.fullName // Mapeo de seguridad
+                };
                 this.closeModal();
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Perfil actualizado',
+                    text: 'Los datos se han guardado correctamente',
+                    timer: 2000,
+                    showConfirmButton: false
+                });
             },
-            error: (err) => console.error('❌ Error de persistencia:', err)
+            error: (err) => console.error('Error al guardar:', err)
         });
     }
 
@@ -220,9 +237,6 @@ export class CaregiverComponent implements OnInit {
         if (!this.selectedNotification) return;
 
         const postId = this.selectedNotification.id;
-
-        // 1. Prioridad: fullName de la base de datos. 
-        // 2. Si no hay perfil cargado, usamos 'Mariano' (para que no salga Anónimo).
         const caregiverName = this.profileData?.fullName || 'Mariano';
         const caregiverId = this.profileData?.id || 1;
 
@@ -230,7 +244,12 @@ export class CaregiverComponent implements OnInit {
 
         this.matchingService.applyToPost(postId, caregiverId, caregiverName).subscribe({
             next: (response: any) => {
-                alert("¡Postulación enviada!");
+                Swal.fire({
+                    icon: 'success',
+                    title: '¡Postulación enviada!',
+                    text: 'El administrador revisará tu solicitud',
+                    confirmButtonColor: '#0ea5e9'
+                });
 
                 // Notificación para el ADMIN
                 this.notificationService.addNotification({
@@ -270,7 +289,7 @@ export class CaregiverComponent implements OnInit {
 
     private initCaregiverForm() {
         this.caregiverForm = this.fb.group({
-            fullName: [this.profileData.fullName || '', Validators.required],
+            caregiverName: [this.profileData.caregiverName || '', Validators.required],
             dni: [this.profileData.dni || '', Validators.required],
             phone: [this.profileData.phone || ''],
             city: [this.profileData.city || '', Validators.required],

@@ -35,6 +35,7 @@ export class FamilyViewComponent implements OnInit {
     // 1. WhatsApp Link
     this.configService.config$.subscribe(config => {
       this.whatsappLink = `https://wa.me/${config.general.whatsappNumber}`;
+      this.checkMatchingForPatient();
     });
 
     // 2. Escuchar el ID de la URL y Cargar Datos de forma robusta
@@ -77,42 +78,128 @@ export class FamilyViewComponent implements OnInit {
     // 3. Suscripción a Notificaciones Reales
     this.notificationService.notifications$.subscribe(notifs => {
       const familyNotifs = notifs.filter(n => n.recipientRole === 'family');
-      if (familyNotifs.length > this.notifications.length) {
-        const diff = familyNotifs.length - this.notifications.length;
-        this.unreadCount += diff;
-        const latest: any = familyNotifs[0];
-        if (latest && latest.caregiverName) {
-          const cgData = {
-            fullName: latest.caregiverName,
-            specialty: latest.caregiverSpecialty || '-',
-            isVerified: latest.caregiverVerified || false
-          };
 
+      // Si hay más notificaciones de las que teníamos antes, hay algo nuevo
+      if (familyNotifs.length > this.notifications.length) {
+        const latest: any = familyNotifs[0]; // Tomamos la última
+
+        if (latest && latest.caregiverName) {
+          console.log('📢 Nueva notificación: Asignando a', latest.caregiverName);
+
+          // 1. ESTA ES LA LÍNEA CLAVE:
+          // Actualizamos la propiedad que el HTML usa en el *ngIf
           if (this.patientData) {
-            this.patientData.caregiver = cgData;
-          } else {
-            this.pendingCaregiver = cgData;
+            this.patientData.caregiverName = latest.caregiverName;
+
+            // 2. Opcional: Si también usas el objeto caregiver para el badge
+            this.patientData.caregiver = {
+              fullName: latest.caregiverName,
+              isVerified: true
+            };
           }
-        } else if (latest?.relatedPostId) {
-          this.syncCaregiverById(latest.relatedPostId);
         }
+
+        // Actualizamos el contador de no leídas
+        this.unreadCount += (familyNotifs.length - this.notifications.length);
       }
+
       this.notifications = familyNotifs;
     });
   }
 
   fetchPatientData(id: number) {
+    this.isLoading = true;
     this.patientService.getPatientById(id).subscribe({
       next: (data) => {
-        this.patientData = data;
+        // 1. Usamos el inicializador (esto arregla el mapeo de campos)
+        this.initializePatientData(data);
         this.isLoading = false;
+
+        // 2. Buscamos la orden de Mariano
+        this.syncWithActiveOrders();
       },
       error: (err) => {
-        console.error('Error al cargar paciente por ID, intentando fallback...', err);
+        console.error('Error al cargar paciente:', err);
         this.tryFallback(id);
       }
     });
   }
+
+  private initializePatientData(data: any) {
+    this.patientData = {
+      ...data,
+      // Aseguramos que 'name' exista para que el .trim() no falle luego
+      name: data.name || data.patientName || 'Paciente',
+      age: data.age || data.patientAge || '-',
+      insurance: data.healthInsurance || data.insurance || '-',
+      location: data.locationLink || data.location,
+      medications: data.medications || [],
+      // Inicializamos caregiverName en null para que el HTML muestre "Buscando..."
+      caregiverName: data.caregiverName || null
+    };
+  }
+
+  private syncWithActiveOrders() {
+    this.matchingService.getActiveOrders().subscribe(orders => {
+      if (!this.patientData || !orders) return;
+
+      const pName = (this.patientData.name || '').trim().toLowerCase();
+
+      const myOrder = orders.find(order => {
+        const oName = (order.patientName || '').trim().toLowerCase();
+        // Match: El nombre coincide Y el estado es Confirmado
+        return (pName.includes(oName) || oName.includes(pName)) && order.status === 'Confirmado';
+      });
+
+      if (myOrder) {
+        // Seteamos AMBAS propiedades para que cualquier parte del HTML lo vea
+        this.patientData.caregiverName = myOrder.caregiverName;
+        this.patientData.caregiver = {
+          fullName: myOrder.caregiverName,
+          specialty: 'Especialista Asignado',
+          isVerified: true
+        };
+      }
+    });
+  }
+  /*private syncWithActiveOrders() {
+    this.matchingService.getActiveOrders().subscribe({
+      next: (orders) => {
+        console.log('--- BUSCANDO A MARIANO ---');
+        console.log('Lista de órdenes recibidas:', orders);
+
+        if (!this.patientData) {
+          console.error('❌ Error: this.patientData es null');
+          return;
+        }
+
+        const pName = (this.patientData.name || '').trim().toLowerCase();
+        console.log('Paciente en pantalla:', `"${pName}"`);
+
+        const myOrder = orders.find(order => {
+          const pName = (this.patientData.name || '').trim().toLowerCase();
+          const oName = (order.patientName || '').trim().toLowerCase();
+
+          // MATCH FLEXIBLE: Si uno contiene al otro (ej: "carlos" está en "carlos almuria")
+          const matchesName = pName.includes(oName) || oName.includes(pName);
+
+          // ESTADO: Según tu log, el estado que viene es 'Aprobado' o 'Publicado'
+          const isReady = order.status === 'Aprobado' || order.status === 'Publicado' || order.status === 'Confirmado';
+
+          return matchesName && isReady;
+        });
+
+        if (myOrder) {
+          console.log('✅ ¡LO ENCONTRAMOS!', myOrder.caregiverName);
+          this.patientData.caregiverName = myOrder.caregiverName;
+          this.patientData.caregiver = { isVerified: true };
+        } else {
+          console.warn('❌ No hubo coincidencia. Revisa si el nombre o el estado "Confirmado" coinciden.');
+        }
+      },
+      error: (err) => console.error('Error al obtener órdenes:', err)
+    });
+  }*/
 
   private tryFallback(requestedId: number) {
     this.patientService.getPatientsFromApi().subscribe({
@@ -133,22 +220,6 @@ export class FamilyViewComponent implements OnInit {
         this.errorMessage = 'Error al intentar recuperar la lista de pacientes.';
       }
     });
-  }
-
-  private initializePatientData(data: any) {
-    this.patientData = {
-      ...data,
-      name: data.name || data.patientName,
-      age: data.age || data.patientAge,
-      insurance: data.healthInsurance || data.insurance,
-      location: data.locationLink || data.location,
-      medications: (data.medications || []).map((m: any) => ({
-        ...m,
-        frequency: m.schedule || m.frequency
-      })),
-      caregiver: this.patientData?.caregiver || this.pendingCaregiver || { fullName: 'Buscando...', specialty: '-', isVerified: false }
-    };
-    this.checkMatchingForPatient();
   }
 
   private syncCaregiverById(postId: number) {

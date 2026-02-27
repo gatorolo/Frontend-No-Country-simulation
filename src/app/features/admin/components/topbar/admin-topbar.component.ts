@@ -84,7 +84,10 @@ export class AdminTopbarComponent implements OnInit {
             const caregiverId = this.selectedNotification.caregiverId;
             const caregiverName = this.selectedNotification.caregiverName || 'Cuidador';
 
-            this.matchingService.confirmPost(postId);
+            this.matchingService.confirmOrder(postId, caregiverId, caregiverName).subscribe({
+                next: () => console.log('✅ Guardia confirmada desde Topbar'),
+                error: (err) => console.error('❌ Error al confirmar desde Topbar:', err)
+            });
 
             // Actualizar estado de la notificación a Aprobado
             if (this.activeNotificationId) {
@@ -97,8 +100,9 @@ export class AdminTopbarComponent implements OnInit {
                 message: `Tu postulación para el servicio de ${patientName} ha sido aceptada por el administrador.`,
                 type: 'success',
                 recipientRole: 'caregiver',
-                relatedPostId: postId
-            });
+                relatedPostId: postId,
+                status: 'Confirmado'
+            } as any);
 
             // 2. Buscamos datos del cuidador para la familia
             if (caregiverId) {

@@ -15,12 +15,7 @@
       </div>
       <div class="stat-chart-mini">
         <svg viewBox="0 0 100 25" class="sparkline">
-          <path
-            d="M0 20 Q 20 5 40 15 T 80 10 T 100 15"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-          />
+          <path d="M0 20 Q 20 5 40 15 T 80 10 T 100 15" fill="none" stroke="currentColor" stroke-width="2" />
         </svg>
       </div>
     </div>
@@ -35,18 +30,9 @@
         </div>
         <div class="chart-box">
           <svg width="100%" height="200" viewBox="0 0 500 200">
-            <path
-              d="M0 150 C 100 100 150 180 250 120 S 350 50 500 80"
-              stroke="#3b82f6"
-              stroke-width="3"
-              fill="none"
-            />
-            <path
-              d="M0 180 C 100 160 150 190 250 150 S 350 120 500 140"
-              stroke="#10b981"
-              stroke-width="3"
-              fill="none"
-            />
+            <path d="M0 150 C 100 100 150 180 250 120 S 350 50 500 80" stroke="#3b82f6" stroke-width="3" fill="none" />
+            <path d="M0 180 C 100 160 150 190 250 150 S 350 120 500 140" stroke="#10b981" stroke-width="3"
+              fill="none" />
             <circle cx="250" cy="120" r="4" fill="#3b82f6" />
             <circle cx="250" cy="150" r="4" fill="#10b981" />
           </svg>
@@ -88,7 +74,7 @@
               <td>
                 <span class="badge" [ngClass]="item.status">{{
                   item.status
-                }}</span>
+                  }}</span>
               </td>
             </tr>
           </tbody>
@@ -115,10 +101,37 @@
       <div class="card actions-card">
         <h3>Control de guardias</h3>
         <div class="action-buttons">
-          <button
-            class="btn btn-primary full-width"
-            (click)="openPublishModal()"
-          >
+          <div class="card actions-card">
+            <h3>Postulaciones Pendientes</h3>
+            <div class="payment-list">
+
+              <div class="payment-item" *ngFor="let order of pendingPostulations">
+                <div class="pay-info">
+                  <div class="avatar-sm">
+                    {{ ( (order?.caregiverName || 'CU') + '' ) | slice:0:2 | uppercase }}
+                  </div>
+
+                  <div>
+                    <div class="pay-name">
+                      {{ order?.caregiverName || 'Mariano López' }}
+                    </div>
+                    <div class="pay-sub">
+                      Postulado para: {{ order?.patientName || 'Carlos Almuria' }}
+                    </div>
+                  </div>
+                </div>
+
+                <button class="btn-approve" (click)="confirmarAsignacion(order?.id || 1, order)">
+                  Aceptar
+                </button>
+                <button class="btn-delete-icon" (click)="deleteValidationRequest(order.id, $event)" title="Eliminar">
+                  <span class="material-icons">delete_outline</span>
+                </button>
+              </div>
+
+            </div>
+          </div>
+          <button class="btn btn-primary full-width" (click)="openPublishModal()">
             <span class="material-icons">add</span> Registrar Guardia
           </button>
           <button class="btn btn-outline full-width">
@@ -132,38 +145,25 @@
           <h3>Registro de Guardias</h3>
         </div>
         <div class="payment-list">
-          <div class="payment-item">
+          <div *ngIf="confirmedServices.length === 0" class="empty-state">
+            No hay guardias confirmadas hoy
+          </div>
+          <div class="payment-item" *ngFor="let service of confirmedServices">
             <div class="pay-info">
-              <div class="avatar-sm">AM</div>
+              <div class="avatar-sm">{{ (service.caregiverName || 'CU') | slice:0:2 | uppercase }}</div>
               <div>
-                <div class="pay-name">Ana Martínez</div>
-                <div class="pay-sub">Transferencia</div>
+                <div class="pay-name">{{ service.caregiverName }} <span class="badge-mini">Confirmado</span></div>
+                <div class="pay-sub">Paciente: {{ service.patientName }} | {{ service.schedule }}</div>
               </div>
             </div>
-            <div class="pay-amount">$245.70</div>
-          </div>
-          <div class="payment-item">
-            <div class="pay-info">
-              <div class="avatar-sm">JP</div>
-              <div>
-                <div class="pay-name">Jose Perez</div>
-                <div class="pay-sub">Recibo</div>
-              </div>
-            </div>
-            <div class="pay-amount">$8,112.00</div>
-          </div>
-
-          <div class="bank-item">
-            <span class="material-icons bank-icon">account_balance</span>
-            <span>Banco Nación</span>
-            <span class="bank-amount green">$465.70</span>
+            <button class="btn-delete-icon" (click)="deleteService(service.id, $event)" title="Eliminar">
+              <span class="material-icons">delete_outline</span>
+            </button>
           </div>
         </div>
       </div>
     </div>
   </div>
 </div>
-<app-publish-service
-  [isVisible]="showPublishModal"
-  (close)="closePublishModal()"
-></app-publish-service>
+<app-publish-service [isVisible]="showPublishModal" (published)="handlePublishSuccess()"
+  (canceled)="handleCancelPublish()"></app-publish-service>

@@ -10,7 +10,8 @@ import { NotificationService } from 'src/app/core/services/notification.service'
 })
 export class PublishServiceComponent {
     @Input() isVisible = false;
-    @Output() close = new EventEmitter<void>();
+    @Output() published = new EventEmitter<void>();
+    @Output() canceled = new EventEmitter<void>();
 
     serviceForm: FormGroup;
 
@@ -26,42 +27,41 @@ export class PublishServiceComponent {
         });
     }
 
-onSubmit() {
-    if (this.serviceForm.valid) {
-        const newService = this.serviceForm.value;
+    onSubmit() {
+        if (this.serviceForm.valid) {
+            const newService = this.serviceForm.value;
 
-        // 1. IMPORTANTE: Faltaba llamar al servicio aquí
-        this.matchingService.publishPost(newService).subscribe({
-            next: (response) => {
-                console.log('Datos reales de Java:', response);
+            // 1. IMPORTANTE: Faltaba llamar al servicio aquí
+            this.matchingService.publishPost(newService).subscribe({
+                next: (response) => {
+                    console.log('Datos reales de Java:', response);
 
-                // 2. Ahora 'response' existe y tiene el ID que devuelve el backend
-                this.notificationService.addNotification({
-                    title: '¡Nueva Guardia Disponible!',
-                    message: `Se busca personal para ${response.patientName} en ${response.city}.`,
-                    type: 'info',
-                    recipientRole: 'caregiver',
-                    relatedPostId: response.id // Esto es vital para que el cuidador pueda "Aplicar"
-                });
+                    // 2. Ahora 'response' existe y tiene el ID que devuelve el backend
+                    this.notificationService.addNotification({
+                        title: '¡Nueva Guardia Disponible!',
+                        message: `Se busca personal para ${response.patientName} en ${response.city}.`,
+                        type: 'info',
+                        recipientRole: 'caregiver',
+                        relatedPostId: response.id // Esto es vital para que el cuidador pueda "Aplicar"
+                    });
 
-                // 3. Limpiar y cerrar solo si el servidor respondió bien
-                this.serviceForm.reset({
-                    complexity: 'Baja',
-                    specialty: 'Enfermería'
-                });
-                this.close.emit();
-            },
-            error: (err) => {
-                console.error('Error al publicar en Java:', err);
-                alert('No se pudo publicar la guardia. Revisa la conexión con el servidor.');
-            }
-        }); 
+                    // 3. Limpiar y cerrar solo si el servidor respondió bien
+                    this.serviceForm.reset({
+                        complexity: 'Baja',
+                        specialty: 'Enfermería'
+                    });
+                    this.published.emit();
+                },
+                error: (err) => {
+                    console.error('Error al publicar en Java:', err);
+                    alert('No se pudo publicar la guardia. Revisa la conexión con el servidor.');
+                }
+            });
+        }
     }
-}
 
     onCancel() {
-        this.serviceForm.reset();
-        this.close.emit();
+        this.canceled.emit();
     }
-        
+
 }
