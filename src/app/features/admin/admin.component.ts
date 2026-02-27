@@ -199,6 +199,16 @@ export class AdminComponent implements OnInit { // Implementamos OnInit
         // Usamos el nuevo método del servicio que sí pasa los parámetros
         this.matchingService.confirmOrder(postId, idEncontrado, nombreEncontrado).subscribe({
             next: (res) => {
+                // Notificamos a la familia para que su UI se actualice
+                this.notificationService.addNotification({
+                    title: '¡Cuidador Asignado!',
+                    message: `${nombreEncontrado} ha sido asignado a la guardia.`,
+                    recipientRole: 'family',
+                    caregiverName: nombreEncontrado,
+                    caregiverVerified: true,
+                    relatedPostId: postId
+                } as any);
+
                 Swal.fire('¡Confirmado!', `Asignamos a ${nombreEncontrado}`, 'success');
             },
             error: (err) => console.error('Error 400 en Java:', err)
