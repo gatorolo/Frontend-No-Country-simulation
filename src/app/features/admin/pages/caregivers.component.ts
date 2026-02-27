@@ -12,8 +12,8 @@ export class CaregiversComponent implements OnInit {
   caregiverForm!: FormGroup;
   showAddForm = false;
   selectedCaregiver: any = null;
-
   caregivers: any[] = [];
+  uploadingPhotoForId: number | null = null;
 
   constructor(private fb: FormBuilder, private caregiverService: CaregiverService, private matchingService: MatchingService) { }
 
@@ -102,6 +102,29 @@ export class CaregiversComponent implements OnInit {
       },
       error: (err) => console.error('Error al cambiar estado', err)
     });
+  }
+
+  uploadCaregiverPhoto(event: any, cg: any) {
+    const file = event.target.files[0];
+    if (!file || !cg.id) return;
+
+    this.uploadingPhotoForId = cg.id;
+    const reader = new FileReader();
+    reader.onload = (e: any) => {
+      const base64 = e.target.result as string;
+      const updated = { ...cg, profilePhoto: base64 };
+      this.caregiverService.updateCaregiver(cg.id, updated).subscribe({
+        next: () => {
+          this.uploadingPhotoForId = null;
+          this.loadCaregivers();
+        },
+        error: (err) => {
+          this.uploadingPhotoForId = null;
+          console.error('Error al subir foto', err);
+        }
+      });
+    };
+    reader.readAsDataURL(file);
   }
 
   // Agregamos este método para traer los datos reales al iniciar

@@ -78,7 +78,12 @@
           <tr *ngFor="let cg of caregivers">
             <td>
               <div class="cg-user">
-                <span class="material-icons avatar">account_circle</span>
+                <ng-container *ngIf="cg.profilePhoto; else defaultIcon">
+                  <img [src]="cg.profilePhoto" alt="foto" class="cg-avatar">
+                </ng-container>
+                <ng-template #defaultIcon>
+                  <span class="material-icons avatar" style="font-size:36px;color:#94a3b8;">account_circle</span>
+                </ng-template>
                 <span>{{ cg.caregiverName || cg.fullName }}</span>
               </div>
             </td>
@@ -98,6 +103,13 @@
                 <button class="icon-btn status" title="Verificar" (click)="toggleVerification(cg)">
                   <span class="material-icons">{{ cg.status === 'Verificado' ? 'verified_user' : 'rule' }}</span>
                 </button>
+                <!-- Botón subir foto -->
+                <label class="icon-btn photo" title="Subir foto de perfil" style="cursor:pointer;margin:0;">
+                  <span class="material-icons" *ngIf="uploadingPhotoForId !== cg.id">add_a_photo</span>
+                  <span class="material-icons" *ngIf="uploadingPhotoForId === cg.id"
+                    style="animation:spin 1s linear infinite;">sync</span>
+                  <input type="file" accept="image/*" style="display:none;" (change)="uploadCaregiverPhoto($event, cg)">
+                </label>
               </div>
             </td>
           </tr>

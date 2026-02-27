@@ -192,6 +192,26 @@ td {
     background: #f1f5f9;
 }
 
+.icon-btn.photo {
+    color: #7c3aed;
+    background: #f5f3ff;
+    align-items: center;
+    justify-content: center;
+}
+
+.icon-btn.photo:hover {
+    background: #ede9fe;
+}
+
+.cg-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #e2e8f0;
+    flex-shrink: 0;
+}
+
 /* Animations */
 .animate-slide-down {
     animation: slideDown 0.3s ease-out;

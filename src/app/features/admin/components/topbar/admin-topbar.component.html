@@ -39,8 +39,8 @@
       </div>
     </div>
     <div class="user-profile">
-      <img src="assets/user-placeholder.png" alt="Profile" class="avatar" />
-      <span class="user-name">Lara M.</span>
+      <img [src]="userAvatar" alt="Profile" class="avatar" />
+      <span class="user-name">{{ userName }}</span>
     </div>
     <button class="icon-btn logout-btn" routerLink="/login" title="Cerrar Sesión">
       <span class="material-icons">logout</span>

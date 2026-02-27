@@ -16,8 +16,10 @@
     <button class="icon-btn">
       <span class="material-icons bell">notifications</span>
     </button>
-    <div class="user-profile">
-      <img src="assets/user-placeholder.png" alt="User" class="avatar">
+    <div class="user-profile" style="display:flex;align-items:center;gap:10px;">
+      <span style="font-size:14px;font-weight:600;color:#334155;">{{ userName }}</span>
+      <img [src]="userAvatar" alt="Avatar" class="avatar"
+        style="width:36px;height:36px;border-radius:50%;object-fit:cover;border:2px solid #e2e8f0;">
     </div>
   </div>
 </header>

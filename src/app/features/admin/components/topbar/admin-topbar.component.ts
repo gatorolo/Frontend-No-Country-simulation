@@ -2,6 +2,7 @@ import { Component, EventEmitter, OnInit, Output } from '@angular/core';
 import { MatchingService } from 'src/app/core/services/matching.service';
 import { NotificationService } from 'src/app/core/services/notification.service';
 import { CaregiverService } from 'src/app/core/services/caregiver.service';
+import { ProfileService } from 'src/app/core/services/profile.service';
 import Swal from 'sweetalert2';
 
 @Component({
@@ -16,14 +17,21 @@ export class AdminTopbarComponent implements OnInit {
     notifications: any[] = [];
     unreadCount = 0;
     showNotifications = false;
+    userName: string = 'Admin';
+    userAvatar: string = 'assets/user-placeholder.png';
 
     constructor(
         private matchingService: MatchingService,
         private notificationService: NotificationService,
-        private caregiverService: CaregiverService
+        private caregiverService: CaregiverService,
+        private profileService: ProfileService
     ) { }
 
     ngOnInit(): void {
+        // Suscripción al perfil del admin (avatar y nombre)
+        this.profileService.userName$.subscribe(n => this.userName = n);
+        this.profileService.userAvatar$.subscribe(a => this.userAvatar = a);
+
         // Suscripción a Notificaciones Reales vía NotificationService
         this.notificationService.notifications$.subscribe(allNotifs => {
             // Filtramos solo las que son para el ADMIN
