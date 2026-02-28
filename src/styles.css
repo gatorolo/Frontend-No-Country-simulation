@@ -157,3 +157,53 @@ h3 {
         bottom: 70px;
     }
 }
+
+/* --- PRINT MEDIA QUERIES --- */
+@media print {
+
+    body,
+    .dashboard-container {
+        background-color: white !important;
+        color: black !important;
+    }
+
+    .sidebar-container,
+    .topbar,
+    .btn-primary,
+    .btn-secondary,
+    .whatsapp-fab {
+        display: none !important;
+    }
+
+    .main-content,
+    .dashboard-container,
+    .admin-container {
+        padding: 0 !important;
+        margin: 0 !important;
+        width: 100% !important;
+        max-width: 100% !important;
+    }
+
+    .table-card {
+        box-shadow: none !important;
+        border: none !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    .data-table th,
+    .data-table td {
+        padding: 8px !important;
+        font-size: 10px !important;
+        border-bottom: 1px solid #ccc !important;
+    }
+
+    .table-container {
+        overflow: visible !important;
+    }
+
+    @page {
+        size: landscape;
+        margin: 1cm;
+    }
+}

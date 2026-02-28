@@ -1,4 +1,139 @@
 .dashboard-container {
-    margin-top: 3rem;
-    text-align: center;
+    padding: 2rem;
+    animation: fadeIn 0.3s ease;
+    min-height: 100vh;
+    background-color: var(--background, #f8fafc);
+}
+
+.page-title {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--dark, #0f172a);
+    margin-bottom: 0.5rem;
+}
+
+.table-card {
+    margin-top: 1.5rem;
+    padding-bottom: 1rem;
+    overflow: hidden;
+}
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem;
+    border-bottom: 1px solid var(--border, #e2e8f0);
+}
+
+.table-container {
+    width: 100%;
+    overflow-x: auto;
+    /* Responsive scroll */
+}
+
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.data-table th,
+.data-table td {
+    padding: 1rem 1.5rem;
+    text-align: left;
+    border-bottom: 1px solid var(--border, #e2e8f0);
+}
+
+.data-table th {
+    background-color: #f8fafc;
+    color: var(--gray, #64748b);
+    font-weight: 600;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.avatar-sm {
+    width: 32px;
+    height: 32px;
+    background-color: #e0e7ff;
+    color: #4f46e5;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 0.85rem;
+}
+
+/* Badges */
+.badge {
+    padding: 0.35rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.badge-green {
+    background-color: #d1fae5;
+    color: #059669;
+}
+
+.badge-orange {
+    background-color: #fef3c7;
+    color: #d97706;
+}
+
+.btn-primary {
+    background-color: var(--primary, #0ea5e9);
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-primary:hover {
+    background-color: #0284c7;
+}
+
+.btn-secondary {
+    background-color: white;
+    color: var(--gray, #64748b);
+    border: 1px solid var(--border, #e2e8f0);
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-secondary:hover {
+    background-color: #f8fafc;
+    color: var(--dark, #0f172a);
+}
+
+.btn-primary:disabled,
+.btn-secondary:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* Animación para el icono de descarga */
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.rotating-icon {
+    animation: spin 1s linear infinite;
+    display: inline-block;
 }

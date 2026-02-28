@@ -136,6 +136,10 @@ export class AdminComponent implements OnInit { // Implementamos OnInit
                     const grouped = new Map<number, any>();
 
                     for (let s of shifts) {
+                        if (!caregiverMap.has(s.caregiverId)) {
+                            continue; // Ignore orphaned shifts
+                        }
+
                         if (!grouped.has(s.caregiverId)) {
                             grouped.set(s.caregiverId, {
                                 caregiverId: s.caregiverId,

@@ -1,6 +1,90 @@
 <div class="dashboard-container">
-  <h1 class="page-title">Reportes</h1>
-  <div class="card">
-    <p>Analíticas y Reportes del Sistema</p>
+  <header class="header">
+    <h1 class="page-title">Historial y Reportes de Guardias</h1>
+  </header>
+
+  <div class="card table-card" style="margin-top: 1rem;">
+    <div class="card-header">
+      <h3>Registro Histórico Consolidado</h3>
+      <div style="display: flex; gap: 10px;">
+        <button class="btn btn-primary" (click)="loadReports()" [disabled]="isLoading">
+          <span class="material-icons" style="font-size: 18px; vertical-align: middle;">refresh</span> Refresh
+        </button>
+        <button class="btn btn-secondary" (click)="downloadPDF()" [disabled]="isLoading || reports.length === 0">
+          <span class="material-icons" style="font-size: 18px; vertical-align: middle;">picture_as_pdf</span> Descargar
+          PDF
+        </button>
+        <button class="btn btn-secondary" (click)="printReport()" [disabled]="isLoading || reports.length === 0">
+          <span class="material-icons" style="font-size: 18px; vertical-align: middle;">print</span> Imprimir
+        </button>
+      </div>
+    </div>
+
+    <!-- Spinner si está cargando -->
+    <div *ngIf="isLoading" style="text-align: center; padding: 2rem; color: #64748b;">
+      <span class="material-icons rotating-icon">sync</span>
+      <p>Procesando información...</p>
+    </div>
+
+    <!-- Tabla -->
+    <div class="table-container" id="report-table-container" [hidden]="isLoading">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>ID Guardia</th>
+            <th>Cuidador</th>
+            <th>Paciente</th>
+            <th>Inicio</th>
+            <th>Fin</th>
+            <th>Horas Trab.</th>
+            <th>Monto Generado</th>
+            <th>Pago a Cuidador</th>
+            <th>Cobro a Paciente</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngIf="reports.length === 0">
+            <td colspan="9" style="text-align: center; padding: 2rem; color: #64748b;">
+              No se encontraron registros de guardias en el sistema.
+            </td>
+          </tr>
+          <tr *ngFor="let r of reports">
+            <td style="font-weight: 500; color: #475569;">#{{ r.id }}</td>
+            <td>
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <div class="avatar-sm">
+                  <span class="material-icons" style="font-size: 16px;">badge</span>
+                </div>
+                {{ r.caregiverName }}
+              </div>
+            </td>
+            <td>{{ r.patientName }}</td>
+            <td style="color: #64748b; font-size: 0.9rem;">
+              {{ (r.startTime | date:'dd/MM HH:mm') || '...' }}
+            </td>
+            <td style="color: #64748b; font-size: 0.9rem;">
+              <span *ngIf="r.status === 'ACTIVA'" style="color: #10b981; font-weight: 500;">En Curso</span>
+              <span *ngIf="r.status !== 'ACTIVA'">{{ (r.endTime | date:'dd/MM HH:mm') || 'Abierta' }}</span>
+            </td>
+            <td style="text-align: center; font-weight: 500;">
+              {{ r.durationHours > 0 ? r.durationHours + ' hs' : '-' }}
+            </td>
+            <td style="font-weight: 600; color: #10b981;">
+              {{ r.earned > 0 ? ('$' + (r.earned | number:'1.2-2')) : '-' }}
+            </td>
+            <td>
+              <span [ngClass]="getPaymentBadgeClass(r.paymentStatus)">
+                {{ r.paymentStatus }}
+              </span>
+            </td>
+            <td>
+              <span [ngClass]="getPaymentBadgeClass(r.patientPaymentStatus)">
+                {{ r.patientPaymentStatus }}
+              </span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
   </div>
 </div>

@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output, OnInit, OnChanges, SimpleChanges } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatchingService } from 'src/app/core/services/matching.service';
 import { NotificationService } from 'src/app/core/services/notification.service';
@@ -9,7 +9,7 @@ import { PatientService, Patient } from 'src/app/core/services/patient.service';
     templateUrl: './publish-service.component.html',
     styleUrls: ['./publish-service.component.css']
 })
-export class PublishServiceComponent {
+export class PublishServiceComponent implements OnInit, OnChanges {
     @Input() isVisible = false;
     @Output() published = new EventEmitter<void>();
     @Output() canceled = new EventEmitter<void>();
@@ -36,6 +36,12 @@ export class PublishServiceComponent {
 
     ngOnInit(): void {
         this.loadPatients();
+    }
+
+    ngOnChanges(changes: SimpleChanges): void {
+        if (changes['isVisible'] && changes['isVisible'].currentValue === true) {
+            this.patientService.loadPatients();
+        }
     }
 
     loadPatients(): void {
