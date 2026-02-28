@@ -321,4 +321,15 @@ export class FamilyViewComponent implements OnInit {
   onCreateNew() {
     this.router.navigate(['/family']);
   }
+
+  getMapsLink(address: string): string {
+    if (!address) return '#';
+    // Si ya es un enlace web, lo retornamos tal cual
+    if (address.startsWith('http://') || address.startsWith('https://')) {
+      return address;
+    }
+    // Convertimos la dirección real a una URL de búsqueda de Google Maps
+    return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`;
+  }
 }
+

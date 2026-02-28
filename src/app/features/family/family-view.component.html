@@ -127,7 +127,11 @@
                 <section class="info-card location-card">
                     <h3 class="section-sub"><span class="material-icons">room</span> Ubicación</h3>
                     <p>El paciente se encuentra en el domicilio registrado.</p>
-                    <a [href]="patientData.location" target="_blank" class="map-link">
+                    <p *ngIf="patientData.location"
+                        style="font-weight: 500; font-size: 0.9rem; color: #475569; margin: 0.5rem 0;">
+                        {{ patientData.location }}
+                    </p>
+                    <a [href]="getMapsLink(patientData.location)" target="_blank" class="map-link">
                         <span class="material-icons">map</span> Ver en Google Maps
                     </a>
                 </section>

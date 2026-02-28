@@ -58,4 +58,13 @@ export class CaregiverService {
   getCaregiverById(id: number): Observable<any> {
     return this.http.get(`${this.apiUrl}/${id}`);
   }
+
+  // --- NUEVOS MÉTODOS PARA GUARDIAS (SHIFTS) ---
+  stopShift(payload: { caregiverId: number, patientName: string, durationSeconds: number }): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl.replace('/caregivers', '')}/shifts/stop`, payload);
+  }
+
+  getShiftHistory(caregiverId: number): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl.replace('/caregivers', '')}/shifts/caregiver/${caregiverId}`);
+  }
 }

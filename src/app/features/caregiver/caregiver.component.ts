@@ -37,10 +37,8 @@ export class CaregiverComponent implements OnInit {
         { id: 2, name: 'Marta García' }
     ];
 
-    shiftHistory = [
-        { patient: 'Roberto Sánchez', date: '08/02/2026', duration: '08:00 hs', earned: 12000 },
-        { patient: 'Roberto Sánchez', date: '09/02/2026', duration: '04:00 hs', earned: 6000 }
-    ];
+    shiftHistory: any[] = [];
+    private shiftSeconds = 0;
 
     private timerInterval: any;
 
@@ -67,6 +65,7 @@ export class CaregiverComponent implements OnInit {
         this.initShiftForm();
         this.loadProfile();
         this.initCaregiverForm();
+        this.loadShiftHistory(); // Carga el historial real de la base de datos
 
         // 1. Configuración de WhatsApp
         this.configService.config$.subscribe(config => {
@@ -318,12 +317,12 @@ export class CaregiverComponent implements OnInit {
 
     private startShift() {
         this.isShiftActive = true;
-        let seconds = 0;
+        this.shiftSeconds = 0;
         this.timerInterval = setInterval(() => {
-            seconds++;
-            const hrs = Math.floor(seconds / 3600);
-            const mins = Math.floor((seconds % 3600) / 60);
-            const secs = seconds % 60;
+            this.shiftSeconds++;
+            const hrs = Math.floor(this.shiftSeconds / 3600);
+            const mins = Math.floor((this.shiftSeconds % 3600) / 60);
+            const secs = this.shiftSeconds % 60;
             this.shiftDuration = `${this.pad(hrs)}:${this.pad(mins)}:${this.pad(secs)}`;
         }, 1000);
     }
@@ -333,16 +332,60 @@ export class CaregiverComponent implements OnInit {
         this.isShiftActive = false;
 
         const patientName = this.patients.find(p => p.id === +this.shiftForm.value.patientId)?.name || 'Desconocido';
+        const caregiverId = this.profileData?.id || 1;
 
-        this.shiftHistory.unshift({
-            patient: patientName,
-            date: new Date().toLocaleDateString(),
-            duration: this.shiftDuration.substring(0, 5) + ' hs',
-            earned: 6000
+        const payload = {
+            caregiverId: caregiverId,
+            patientName: patientName,
+            durationSeconds: this.shiftSeconds
+        };
+
+        Swal.fire({
+            title: 'Procesando pago...',
+            text: 'Calculando el total de la guardia',
+            allowOutsideClick: false,
+            didOpen: () => { Swal.showLoading(); }
         });
 
-        this.shiftForm.reset();
-        this.shiftDuration = '00:00:00';
+        this.caregiverService.stopShift(payload).subscribe({
+            next: (res) => {
+                Swal.close();
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Guardia Finalizada',
+                    text: `Ganancia calculada: $${res.earned.toFixed(2)}`,
+                    confirmButtonText: 'Aceptar'
+                });
+                this.shiftForm.reset();
+                this.shiftDuration = '00:00:00';
+                this.shiftSeconds = 0;
+                this.loadShiftHistory(); // Refresca el historial
+            },
+            error: (err) => {
+                Swal.close();
+                console.error('Error al finalizar guardia', err);
+                Swal.fire('Error', 'No se pudo registrar la guardia', 'error');
+            }
+        });
+    }
+
+    private loadShiftHistory() {
+        const caregiverId = this.profileData?.id || 1;
+        this.caregiverService.getShiftHistory(caregiverId).subscribe({
+            next: (history) => {
+                // Formateamos para que funcione con el HTML actual
+                this.shiftHistory = history.map(h => {
+                    const dateObj = new Date(h.endTime);
+                    return {
+                        patient: h.patientName,
+                        date: dateObj.toLocaleDateString(),
+                        duration: h.durationHours ? h.durationHours.toFixed(2) + ' hs' : '0 hs',
+                        earned: h.earned
+                    };
+                });
+            },
+            error: (err) => console.error('Error cargando historial de guardias', err)
+        });
     }
 
     private pad(num: number): string {
