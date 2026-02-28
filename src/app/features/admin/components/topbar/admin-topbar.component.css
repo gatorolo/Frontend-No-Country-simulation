@@ -102,6 +102,10 @@
     background-color: #f1f5f9;
 }
 
+:host-context(body.dark-mode) .user-profile:hover .user-name {
+    color: #1b191a;
+}
+
 .avatar {
     width: 36px;
     height: 36px;

@@ -5,7 +5,7 @@
   padding: 0 1.5rem;
   height: 64px;
   background-color: #ffffff;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
   font-family: 'Inter', sans-serif;
 }
 
@@ -34,7 +34,7 @@
 }
 
 .bell {
-transform: rotate3d(0, 0, 1, 15deg);
+  transform: rotate3d(0, 0, 1, 15deg);
 }
 
 .icon-btn {
@@ -44,10 +44,35 @@ transform: rotate3d(0, 0, 1, 15deg);
   color: #d4c1c1;
 }
 
+.user-profile {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 8px;
+  transition: background-color 0.2s;
+}
+
+.user-profile:hover {
+  background-color: #f1f5f9;
+}
+
+.user-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-color, #334155);
+}
+
+:host-context(body.dark-mode) .user-profile:hover .user-name {
+  color: #1b191a;
+}
+
 .user-profile .avatar {
   width: 36px;
   height: 36px;
   border-radius: 50%;
   object-fit: cover;
   background-color: #cea4a4;
+  border: 2px solid #e2e8f0;
 }

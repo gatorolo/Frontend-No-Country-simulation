@@ -10,8 +10,8 @@
                 <label for="email">Usuario / Email</label>
                 <div class="input-wrapper">
                     <span class="material-icons input-icon">person</span>
-                    <input type="text" id="email" placeholder="nombre@empresa.com" class="form-control"
-                        autocomplete="off">
+                    <input type="text" id="email" [(ngModel)]="username" name="username"
+                        placeholder="nombre@empresa.com" class="form-control" autocomplete="off" required>
                 </div>
             </div>
 
