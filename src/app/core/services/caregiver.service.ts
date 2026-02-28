@@ -60,9 +60,41 @@ export class CaregiverService {
   }
 
   // --- NUEVOS MÉTODOS PARA GUARDIAS (SHIFTS) ---
-  stopShift(payload: { caregiverId: number, patientName: string, durationSeconds: number }): Observable<any> {
+  startShift(payload: { caregiverId: number, patientName: string }): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl.replace('/caregivers', '')}/shifts/start`, payload);
+  }
+
+  stopShift(payload: { caregiverId: number, durationSeconds: number }): Observable<any> {
     return this.http.post<any>(`${this.apiUrl.replace('/caregivers', '')}/shifts/stop`, payload);
   }
+
+  getActiveShifts(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl.replace('/caregivers', '')}/shifts/active`);
+  }
+
+  getUnpaidShifts(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl.replace('/caregivers', '')}/shifts/unpaid`);
+  }
+
+  payShift(shiftId: number): Observable<any> {
+    return this.http.put<any>(`${this.apiUrl.replace('/caregivers', '')}/shifts/${shiftId}/pay`, {});
+  }
+
+  // --- NUEVOS MÉTODOS PARA FACTURACIÓN DE PACIENTE ---
+
+  getPatientUnpaidShifts(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl.replace('/caregivers', '')}/shifts/patient-unpaid`);
+  }
+
+  getUnpaidShiftsByPatientName(patientName: string): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl.replace('/caregivers', '')}/shifts/patient/${patientName}/unpaid`);
+  }
+
+  payPatientShift(shiftId: number): Observable<any> {
+    return this.http.put<any>(`${this.apiUrl.replace('/caregivers', '')}/shifts/${shiftId}/pay-patient`, {});
+  }
+
+  // ---------------------------------------------------
 
   getShiftHistory(caregiverId: number): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiUrl.replace('/caregivers', '')}/shifts/caregiver/${caregiverId}`);

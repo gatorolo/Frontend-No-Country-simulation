@@ -45,36 +45,36 @@
 
       <div class="card table-card">
         <div class="card-header">
-          <h3>Control de Pagos</h3>
-          <div class="filters">
-            <select>
-              <option>Cuentas</option>
-            </select>
-          </div>
+          <h3>Saldos Pendientes (Mes)</h3>
         </div>
         <table class="data-table">
           <thead>
             <tr>
-              <th>Documento</th>
-              <th>Descripción</th>
-              <th>Valor</th>
-              <th>Estado</th>
+              <th>Cuidador</th>
+              <th>Guardias Realizadas</th>
+              <th>Total Ganado</th>
+              <th>Acción</th>
             </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let item of validationRequests">
+            <tr *ngIf="unpaidSummary.length === 0">
+              <td colspan="4" style="text-align: center; color: #64748b; padding: 2rem;">No hay saldos pendientes de
+                pago</td>
+            </tr>
+            <tr *ngFor="let item of unpaidSummary">
               <td>
                 <div class="user-cell">
-                  <div class="avatar-xs"></div>
-                  {{ item.name }}
+                  <div class="avatar-xs">{{ item.caregiverId }}</div>
+                  {{ item.caregiverName }}
                 </div>
               </td>
-              <td>{{ item.doc }}</td>
-              <td class="font-bold">{{ item.value }}</td>
+              <td style="color: #64748b;">{{ item.shiftIds.length }} guardias en el mes</td>
+              <td class="font-bold" style="color: #10b981;">${{ item.totalEarned | number:'1.2-2' }}</td>
               <td>
-                <span class="badge" [ngClass]="item.status">{{
-                  item.status
-                  }}</span>
+                <button class="btn btn-primary" style="padding: 0.4rem 1rem; font-size: 0.85rem;"
+                  (click)="payCaregiver(item.caregiverId, item.shiftIds)">
+                  Liquidar Pago
+                </button>
               </td>
             </tr>
           </tbody>
@@ -83,15 +83,66 @@
 
       <div class="card table-card">
         <div class="card-header">
-          <h3>Resumen de Guardias</h3>
+          <h3>Facturación a Pacientes (Pendiente)</h3>
+        </div>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Paciente</th>
+              <th>Guardias Adeudadas</th>
+              <th>Deuda Total</th>
+              <th>Acción</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngIf="patientUnpaidSummary.length === 0">
+              <td colspan="4" style="text-align: center; color: #64748b; padding: 2rem;">No hay saldos pendientes de
+                cobrar a pacientes</td>
+            </tr>
+            <tr *ngFor="let item of patientUnpaidSummary">
+              <td>
+                <div class="user-cell">
+                  <div class="avatar-xs" style="background: #f59e0b;">{{ item.patientName ?
+                    item.patientName.substring(0, 1).toUpperCase() : 'P' }}
+                  </div>
+                  {{ item.patientName }}
+                </div>
+              </td>
+              <td style="color: #64748b;">{{ item.shiftIds?.length ? item.shiftIds.length : 0 }} guardias adeudadas</td>
+              <td class="font-bold" style="color: #f43f5e;">${{ item.totalDebt | number:'1.2-2' }}</td>
+              <td>
+                <button class="btn btn-outline"
+                  style="padding: 0.4rem 1rem; font-size: 0.85rem; border-color: #f43f5e; color: #f43f5e;"
+                  (click)="payPatient(item.patientName, item.shiftIds)">
+                  Registrar Cobro
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="card table-card">
+        <div class="card-header">
+          <h3>Guardias en Curso</h3>
         </div>
         <div class="list-items">
-          <div class="list-item" *ngFor="let pay of recentPayments">
+          <div *ngIf="activeShifts.length === 0" class="empty-state"
+            style="padding: 1.5rem; text-align: center; color: #64748b;">
+            No hay cuidadores en turno activo
+          </div>
+          <div class="list-item" *ngFor="let shift of activeShifts" style="justify-content: space-between;">
             <div class="user-cell">
-              <img src="assets/user-placeholder.png" class="avatar-sm" />
-              <span>{{ pay.name }}</span>
+              <span class="material-icons" style="color: #10b981; margin-right: 0.5rem;">schedule</span>
+              <div style="display: flex; flex-direction: column;">
+                <span style="font-weight: 500;">Cuidador ID: {{ shift.caregiverId }}</span>
+                <span style="font-size: 0.8rem; color: #64748b;">Paciente: {{ shift.patientName }}</span>
+              </div>
             </div>
-            <span class="amount-tag">{{ pay.amount }}</span>
+            <span class="amount-tag"
+              style="background: #e0f2fe; color: #0284c7; font-family: monospace; font-size: 1.1rem;">
+              {{ shift.displayTimer }}
+            </span>
           </div>
         </div>
       </div>

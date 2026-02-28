@@ -120,6 +120,20 @@
                         </div>
                     </div>
                 </section>
+
+                <!-- Tarjeta de Deuda de Paciente (Movida aquí) -->
+                <section class="info-card" style="border: 2px solid #fee2e2; background: #fef2f2; margin-top: 2rem;">
+                    <h3 class="section-sub" style="color: #ef4444;"><span class="material-icons">receipt_long</span>
+                        Facturación Pendiente</h3>
+                    <div style="margin-top: 0.5rem; text-align: center;">
+                        <span style="font-size: 0.95rem; color: #7f1d1d; display: block;">Deuda de Guardias
+                            Realizadas</span>
+                        <span style="font-size: 2.2rem; font-weight: bold; color: #ef4444;">${{ totalDebt |
+                            number:'1.2-2' }}</span>
+                        <p style="font-size: 0.8rem; color: #991b1b; margin-top: 0.3rem; line-height: 1.2;">Este monto
+                            es un cálculo de la asistencia del profesional. Próximamente Mercadopago.</p>
+                    </div>
+                </section>
             </div>
 
             <!-- Columna Lateral -->
@@ -178,6 +192,9 @@
                         </ng-template>
                     </div>
                 </section>
+
+
+
             </div>
         </div>
     </div>

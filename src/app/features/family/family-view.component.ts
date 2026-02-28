@@ -4,6 +4,7 @@ import { ConfigService } from 'src/app/core/services/config.service';
 import { PatientService } from 'src/app/core/services/patient.service';
 import { MatchingService } from 'src/app/core/services/matching.service';
 import { NotificationService } from 'src/app/core/services/notification.service';
+import { CaregiverService } from 'src/app/core/services/caregiver.service';
 import { tap } from 'rxjs/operators';
 
 @Component({
@@ -22,6 +23,7 @@ export class FamilyViewComponent implements OnInit {
   errorMessage = '';
   private pendingCaregiver: any = null;
   activeOrderId: number | null = null;
+  totalDebt: number = 0;
 
   constructor(
     private router: Router,
@@ -29,7 +31,8 @@ export class FamilyViewComponent implements OnInit {
     private configService: ConfigService,
     private patientService: PatientService,
     private matchingService: MatchingService,
-    private notificationService: NotificationService
+    private notificationService: NotificationService,
+    private caregiverService: CaregiverService
   ) { }
 
   ngOnInit(): void {
@@ -122,6 +125,9 @@ export class FamilyViewComponent implements OnInit {
 
         // 2. Sincronizamos con las órdenes activas para ver si hay cuidador
         this.syncWithActiveOrders();
+
+        // 3. Consultamos la deuda pendiente
+        this.fetchPatientDebt(data.name || (data as any)['patientName'] || 'Paciente');
       },
       error: (err) => {
         console.error('Error al cargar paciente:', err);
@@ -187,6 +193,17 @@ export class FamilyViewComponent implements OnInit {
       }
     });
   }*/
+
+  private fetchPatientDebt(patientName: string) {
+    if (!patientName) return;
+    this.caregiverService.getUnpaidShiftsByPatientName(patientName).subscribe({
+      next: (shifts) => {
+        // Acumulamos la deuda total
+        this.totalDebt = shifts.reduce((sum, shift) => sum + (shift.earned || 0), 0);
+      },
+      error: (err) => console.error('Error al cargar la deuda del paciente:', err)
+    });
+  }
 
   private tryFallback(requestedId: number) {
     this.patientService.getPatientsFromApi().subscribe({
@@ -307,8 +324,8 @@ export class FamilyViewComponent implements OnInit {
   }
 
   onEdit() {
-    if (this.patientData && this.patientData.id) {
-      this.router.navigate(['/family', this.patientData.id]);
+    if (this.patientData && this.patientData['id']) {
+      this.router.navigate(['/family', this.patientData['id']]);
     } else {
       this.router.navigate(['/family']);
     }

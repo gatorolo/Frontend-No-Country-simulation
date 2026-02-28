@@ -316,27 +316,44 @@ export class CaregiverComponent implements OnInit {
     }
 
     private startShift() {
-        this.isShiftActive = true;
-        this.shiftSeconds = 0;
-        this.timerInterval = setInterval(() => {
-            this.shiftSeconds++;
-            const hrs = Math.floor(this.shiftSeconds / 3600);
-            const mins = Math.floor((this.shiftSeconds % 3600) / 60);
-            const secs = this.shiftSeconds % 60;
-            this.shiftDuration = `${this.pad(hrs)}:${this.pad(mins)}:${this.pad(secs)}`;
-        }, 1000);
+        const patientName = this.patients.find(p => p.id === +this.shiftForm.value.patientId)?.name || 'Desconocido';
+        const caregiverId = this.profileData?.id || 1;
+
+        const payload = {
+            caregiverId: caregiverId,
+            patientName: patientName
+        };
+
+        this.caregiverService.startShift(payload).subscribe({
+            next: (res) => {
+                this.isShiftActive = true;
+                this.shiftSeconds = 0;
+                this.timerInterval = setInterval(() => {
+                    this.shiftSeconds++;
+                    const hrs = Math.floor(this.shiftSeconds / 3600);
+                    const mins = Math.floor((this.shiftSeconds % 3600) / 60);
+                    const secs = this.shiftSeconds % 60;
+                    this.shiftDuration = `${this.pad(hrs)}:${this.pad(mins)}:${this.pad(secs)}`;
+                }, 1000);
+
+                // Opción: Notificar al usuario que la guardia inició en servidor
+                console.log('Guardia iniciada en backend:', res);
+            },
+            error: (err) => {
+                console.error('Error al iniciar guardia en backend', err);
+                Swal.fire('Error', 'No se pudo iniciar la guardia en el servidor. Revisa tu conexión u otra guardia activa.', 'error');
+            }
+        });
     }
 
     private stopShift() {
         clearInterval(this.timerInterval);
         this.isShiftActive = false;
 
-        const patientName = this.patients.find(p => p.id === +this.shiftForm.value.patientId)?.name || 'Desconocido';
         const caregiverId = this.profileData?.id || 1;
 
         const payload = {
             caregiverId: caregiverId,
-            patientName: patientName,
             durationSeconds: this.shiftSeconds
         };
 

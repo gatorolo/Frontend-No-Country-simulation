@@ -3,6 +3,7 @@ import { NotificationService, Notification } from 'src/app/core/services/notific
 import Swal from 'sweetalert2';
 import { MatchingService, ServicePost } from 'src/app/core/services/matching.service';
 import { ServiceOrderService } from 'src/app/core/services/service-order.service';
+import { CaregiverService } from 'src/app/core/services/caregiver.service';
 
 @Component({
     selector: 'app-admin-dashboard',
@@ -38,8 +39,15 @@ export class AdminComponent implements OnInit { // Implementamos OnInit
     constructor(
         private notificationService: NotificationService,
         private matchingService: MatchingService,
-        private serviceOrderService: ServiceOrderService
+        private serviceOrderService: ServiceOrderService,
+        private caregiverService: CaregiverService
     ) { }
+
+    activeShifts: any[] = [];
+    unpaidSummary: any[] = [];
+    patientUnpaidSummary: any[] = []; // NUEVO: Resumen de deuda de pacientes
+    private pollInterval: any;
+    private timerInterval: any;
 
     ngOnInit(): void {
 
@@ -57,6 +65,171 @@ export class AdminComponent implements OnInit { // Implementamos OnInit
             this.confirmedServices = allPosts.filter(p => p.status === 'Confirmado');
             this.pendingPostulations = allPosts.filter(p => p.status === 'Postulado');
         });
+
+        this.loadActiveShifts();
+        this.loadUnpaidShifts();
+        this.loadPatientUnpaidShifts();
+
+        // Polling para traer guardias activas cada 10 segundos
+        this.pollInterval = setInterval(() => {
+            this.loadActiveShifts();
+            this.loadPatientUnpaidShifts();
+        }, 10000);
+
+        // Timer local para actualizar el reloj en pantalla cada segundo sin llamar al back
+        this.timerInterval = setInterval(() => {
+            this.updateShiftTimers();
+        }, 1000);
+    }
+
+    ngOnDestroy() {
+        if (this.pollInterval) clearInterval(this.pollInterval);
+        if (this.timerInterval) clearInterval(this.timerInterval);
+    }
+
+    // --- NUEVA LÓGICA DE GUARDIAS Y PAGOS ---
+
+    loadActiveShifts() {
+        this.caregiverService.getActiveShifts().subscribe({
+            next: (shifts) => {
+                // Al recibir del back, calculamos los segundos que pasaron
+                this.activeShifts = shifts.map(shift => {
+                    const start = new Date(shift.startTime).getTime();
+                    const now = new Date().getTime();
+                    const diffSeconds = Math.floor((now - start) / 1000);
+
+                    return {
+                        ...shift,
+                        runningSeconds: diffSeconds,
+                        displayTimer: this.formatTime(diffSeconds)
+                    };
+                });
+            },
+            error: (err) => console.error('Error cargando guardias activas', err)
+        });
+    }
+
+    updateShiftTimers() {
+        for (let shift of this.activeShifts) {
+            shift.runningSeconds++;
+            shift.displayTimer = this.formatTime(shift.runningSeconds);
+        }
+    }
+
+    loadUnpaidShifts() {
+        this.caregiverService.getUnpaidShifts().subscribe({
+            next: (shifts) => {
+                // Agrupamos por cuidador para el resumen
+                const grouped = new Map<number, any>();
+
+                for (let s of shifts) {
+                    if (!grouped.has(s.caregiverId)) {
+                        grouped.set(s.caregiverId, {
+                            caregiverId: s.caregiverId,
+                            caregiverName: 'Cuidador ' + s.caregiverId, // Opcional: Podrías buscar el nombre real si tu DB no lo trajo, pero asumimos que el front puede mapearlo
+                            totalEarned: 0,
+                            shiftIds: []
+                        });
+                    }
+                    const group = grouped.get(s.caregiverId);
+                    group.totalEarned += (s.earned || 0);
+                    group.shiftIds.push(s.id);
+                }
+
+                this.unpaidSummary = Array.from(grouped.values());
+            },
+            error: (err) => console.error('Error cargando guardias pendientes de pago', err)
+        });
+    }
+
+    payCaregiver(caregiverId: number, shiftIds: number[]) {
+        Swal.fire({
+            title: '¿Confirmar Pago?',
+            text: 'Pasarás este saldo a PAGADO. Más adelante aquí se integrará MercadoPago.',
+            icon: 'info',
+            showCancelButton: true,
+            confirmButtonText: 'Marcar como Pagado',
+            cancelButtonText: 'Cancelar'
+        }).then(result => {
+            if (result.isConfirmed) {
+                // Por cada shift ID pendiente de este cuidador, llamamos a payShift
+                let processed = 0;
+                shiftIds.forEach(id => {
+                    this.caregiverService.payShift(id).subscribe(() => {
+                        processed++;
+                        if (processed === shiftIds.length) {
+                            Swal.fire('¡Pagado!', 'Se ha liquidado el monto del cuidador.', 'success');
+                            this.loadUnpaidShifts(); // Refresco local
+                        }
+                    });
+                });
+            }
+        });
+    }
+
+    // --- NUEVO: lógica para facturación de pacientes ---
+
+    loadPatientUnpaidShifts() {
+        this.caregiverService.getPatientUnpaidShifts().subscribe({
+            next: (shifts) => {
+                const grouped = new Map<string, any>();
+
+                for (let s of shifts) {
+                    if (!grouped.has(s.patientName)) {
+                        grouped.set(s.patientName, {
+                            patientName: s.patientName,
+                            totalDebt: 0,
+                            shiftIds: []
+                        });
+                    }
+                    const group = grouped.get(s.patientName);
+                    // Suponemos que el costo del paciente es el mismo 'earned' del cuidador
+                    // Si tienes otra columna 'cost', reemplázala aquí
+                    group.totalDebt += (s.earned || 0);
+                    group.shiftIds.push(s.id);
+                }
+
+                this.patientUnpaidSummary = Array.from(grouped.values());
+            },
+            error: (err) => console.error('Error cargando deudas de pacientes', err)
+        });
+    }
+
+    payPatient(patientName: string, shiftIds: number[]) {
+        Swal.fire({
+            title: '¿Registrar Cobro?',
+            text: `Vas a registrar el cobro de la deuda de ${patientName}.`,
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Registrar',
+            cancelButtonText: 'Cancelar'
+        }).then(result => {
+            if (result.isConfirmed) {
+                let processed = 0;
+                shiftIds.forEach(id => {
+                    this.caregiverService.payPatientShift(id).subscribe(() => {
+                        processed++;
+                        if (processed === shiftIds.length) {
+                            Swal.fire('¡Cobrado!', 'Se actualizó la deuda del paciente a 0.', 'success');
+                            this.loadPatientUnpaidShifts();
+                        }
+                    });
+                });
+            }
+        });
+    }
+
+    // ---------------------------------------------------
+
+    formatTime(totalSeconds: number): string {
+        const hrs = Math.floor(totalSeconds / 3600);
+        const mins = Math.floor((totalSeconds % 3600) / 60);
+        const secs = totalSeconds % 60;
+        return `${this.pad(hrs)}:${this.pad(mins)}:${this.pad(secs)}`;
+    }
+
+    private pad(num: number): string {
+        return num < 10 ? '0' + num : num.toString();
     }
 
     toggleNotifications() {
