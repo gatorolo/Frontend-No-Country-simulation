@@ -42,10 +42,9 @@
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
-    margin-bottom: -2rem;
+    margin-bottom: 2rem;
+    padding-bottom: 1.5rem;
     border-bottom: 1px solid #e2e8f0;
-    padding-bottom: 0rem;
-    max-height: 15%;
 }
 
 .section-title {
@@ -338,6 +337,10 @@
     font-weight: 500;
 }
 
+:host-context(body.dark-mode) .data-value {
+    color: #ffffff;
+}
+
 .label-pill {
     background: #e0f2fe;
     color: var(--primary-dark);
@@ -345,6 +348,10 @@
     border-radius: 50px;
     font-size: 0.95rem;
     width: fit-content;
+}
+
+:host-context(body.dark-mode) .label-pill {
+    color: #1e293b;
 }
 
 .diagnosis-text {
@@ -398,11 +405,16 @@
     color: var(--text-light);
 }
 
+.side-column {
+    margin-top: -1.7rem;
+    /* Aproximado para que quede a 5px de la línea inferior del header (margin y padding) */
+}
+
 .info-card {
     background: #f8fafc;
-    padding: 1.5rem;
+    padding: 1.25rem;
     border-radius: 20px;
-    margin-bottom: 1.5rem;
+    margin-bottom: 1rem;
 }
 
 .map-link {

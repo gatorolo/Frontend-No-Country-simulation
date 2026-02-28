@@ -124,14 +124,14 @@
 
             <!-- Columna Lateral -->
             <div class="side-column">
-                <section class="info-card location-card">
+                <section class="info-card location-card" style="padding-bottom: 0.5rem;">
                     <h3 class="section-sub"><span class="material-icons">room</span> Ubicación</h3>
-                    <p>El paciente se encuentra en el domicilio registrado.</p>
                     <p *ngIf="patientData.location"
-                        style="font-weight: 500; font-size: 0.9rem; color: #475569; margin: 0.5rem 0;">
+                        style="font-weight: 500; font-size: 0.9rem; color: #475569; margin: 0.2rem 0;">
                         {{ patientData.location }}
                     </p>
-                    <a [href]="getMapsLink(patientData.location)" target="_blank" class="map-link">
+                    <a [href]="getMapsLink(patientData.location)" target="_blank" class="map-link"
+                        style="margin-top: 0.5rem; margin-bottom: 0.5rem;">
                         <span class="material-icons">map</span> Ver en Google Maps
                     </a>
                 </section>
