@@ -2,6 +2,7 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatchingService } from 'src/app/core/services/matching.service';
 import { NotificationService } from 'src/app/core/services/notification.service';
+import { PatientService, Patient } from 'src/app/core/services/patient.service';
 
 @Component({
     selector: 'app-publish-service',
@@ -14,8 +15,14 @@ export class PublishServiceComponent {
     @Output() canceled = new EventEmitter<void>();
 
     serviceForm: FormGroup;
+    patients: Patient[] = [];
 
-    constructor(private fb: FormBuilder, private matchingService: MatchingService, private notificationService: NotificationService) {
+    constructor(
+        private fb: FormBuilder,
+        private matchingService: MatchingService,
+        private notificationService: NotificationService,
+        private patientService: PatientService
+    ) {
         this.serviceForm = this.fb.group({
             patientName: ['', Validators.required],
             age: ['', [Validators.required, Validators.min(0)]],
@@ -25,6 +32,40 @@ export class PublishServiceComponent {
             complexity: ['Baja', Validators.required],
             specialty: ['Enfermería', Validators.required]
         });
+    }
+
+    ngOnInit(): void {
+        this.loadPatients();
+    }
+
+    loadPatients(): void {
+        this.patientService.patients$.subscribe({
+            next: (data) => {
+                this.patients = data;
+            },
+            error: (err) => {
+                console.error('Error al cargar pacientes', err);
+            }
+        });
+        // Asegurarnos de que el servicio haga la petición al backend si está vacío
+        this.patientService.loadPatients();
+    }
+
+    onPatientChange(event: Event): void {
+        const selectElement = event.target as HTMLSelectElement;
+        const selectedPatientName = selectElement.value;
+
+        // Buscamos el paciente completo en la lista usando el nombre
+        const selectedPatient = this.patients.find(p => p.name === selectedPatientName);
+
+        if (selectedPatient) {
+            // Autocompletamos los campos del formulario
+            this.serviceForm.patchValue({
+                age: selectedPatient.age,
+                city: selectedPatient.city || '',
+                zone: selectedPatient.zone || ''
+            });
+        }
     }
 
     onSubmit() {

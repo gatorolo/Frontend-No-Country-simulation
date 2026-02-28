@@ -8,7 +8,10 @@
         <form [formGroup]="serviceForm" (ngSubmit)="onSubmit()">
             <div class="form-group">
                 <label>Nombre del Paciente</label>
-                <input type="text" formControlName="patientName" placeholder="Ej: Roberto Sánchez">
+                <select formControlName="patientName" (change)="onPatientChange($event)">
+                    <option value="" disabled>Seleccione un paciente de la base de datos...</option>
+                    <option *ngFor="let p of patients" [value]="p.name">{{ p.name }}</option>
+                </select>
             </div>
 
             <div class="form-row">
