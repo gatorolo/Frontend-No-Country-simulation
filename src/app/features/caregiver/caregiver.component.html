@@ -194,6 +194,7 @@
                         <th>Fecha</th>
                         <th>Duración</th>
                         <th>Monto Acumulado</th>
+                        <th>Acciones</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -202,6 +203,12 @@
                         <td>{{ h.date }}</td>
                         <td>{{ h.duration }}</td>
                         <td class="money">${{ h.earned | number }}</td>
+                        <td>
+                            <button class="icon-btn" (click)="hideShift(h.id)" title="Ocultar del historial"
+                                style="color: #ef4444; padding: 0.5rem;">
+                                <span class="material-icons">delete_outline</span>
+                            </button>
+                        </td>
                     </tr>
                 </tbody>
             </table>

@@ -58,9 +58,11 @@ export class CaregiverComponent implements OnInit {
     ) { }
 
     clearedPostIds: number[] = [];
+    hiddenShiftIds: number[] = [];
 
     ngOnInit(): void {
         this.loadClearedPostIds();
+        this.loadHiddenShiftIds();
         this.initShiftForm();
         this.loadProfile();
         this.initCaregiverForm();
@@ -127,6 +129,21 @@ export class CaregiverComponent implements OnInit {
 
     private saveClearedPostIds() {
         localStorage.setItem('valora_cleared_posts', JSON.stringify(this.clearedPostIds));
+    }
+
+    private loadHiddenShiftIds() {
+        const saved = localStorage.getItem('valora_hidden_shifts');
+        if (saved) {
+            try {
+                this.hiddenShiftIds = JSON.parse(saved);
+            } catch (e) {
+                console.error('Error loading hidden shifts', e);
+            }
+        }
+    }
+
+    private saveHiddenShiftIds() {
+        localStorage.setItem('valora_hidden_shifts', JSON.stringify(this.hiddenShiftIds));
     }
 
 
@@ -394,18 +411,48 @@ export class CaregiverComponent implements OnInit {
         const caregiverId = this.profileData?.id || 1;
         this.caregiverService.getShiftHistory(caregiverId).subscribe({
             next: (history) => {
-                // Formateamos para que funcione con el HTML actual
-                this.shiftHistory = history.map(h => {
-                    const dateObj = new Date(h.endTime);
-                    return {
-                        patient: h.patientName,
-                        date: dateObj.toLocaleDateString(),
-                        duration: h.durationHours ? h.durationHours.toFixed(2) + ' hs' : '0 hs',
-                        earned: h.earned
-                    };
-                });
+                // Formateamos para que funcione con el HTML actual y filtramos los ocultos
+                this.shiftHistory = history
+                    .filter(h => !this.hiddenShiftIds.includes(h.id))
+                    .map(h => {
+                        const dateObj = new Date(h.endTime);
+                        return {
+                            id: h.id,
+                            patient: h.patientName,
+                            date: dateObj.toLocaleDateString(),
+                            duration: h.durationHours ? h.durationHours.toFixed(2) + ' hs' : '0 hs',
+                            earned: h.earned
+                        };
+                    });
             },
             error: (err) => console.error('Error cargando historial de guardias', err)
+        });
+    }
+
+    hideShift(shiftId: number) {
+        Swal.fire({
+            title: '¿Ocultar registro?',
+            text: 'Este registro ya no será visible en tu historial, pero no se borrará del sistema admin.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Sí, ocultar',
+            cancelButtonText: 'Cancelar'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                if (!this.hiddenShiftIds.includes(shiftId)) {
+                    this.hiddenShiftIds.push(shiftId);
+                    this.saveHiddenShiftIds();
+                    this.loadShiftHistory(); // Recargar la tabla sin este registro
+
+                    Swal.fire(
+                        'Oculto',
+                        'El registro ha sido removido de tu vista.',
+                        'success'
+                    );
+                }
+            }
         });
     }
 
