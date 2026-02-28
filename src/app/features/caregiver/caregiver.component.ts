@@ -4,6 +4,7 @@ import { CaregiverService } from 'src/app/core/services/caregiver.service';
 import { ConfigService } from 'src/app/core/services/config.service';
 import { MatchingService } from 'src/app/core/services/matching.service';
 import { NotificationService } from 'src/app/core/services/notification.service';
+import { PatientService } from 'src/app/core/services/patient.service';
 import Swal from 'sweetalert2';
 
 @Component({
@@ -32,10 +33,7 @@ export class CaregiverComponent implements OnInit {
         status: ''
     };
 
-    patients = [
-        { id: 1, name: 'Roberto Sánchez' },
-        { id: 2, name: 'Marta García' }
-    ];
+    patients: any[] = [];
 
     shiftHistory: any[] = [];
     private shiftSeconds = 0;
@@ -55,7 +53,8 @@ export class CaregiverComponent implements OnInit {
         private configService: ConfigService,
         private matchingService: MatchingService,
         private caregiverService: CaregiverService,
-        private notificationService: NotificationService
+        private notificationService: NotificationService,
+        private patientService: PatientService
     ) { }
 
     clearedPostIds: number[] = [];
@@ -70,6 +69,11 @@ export class CaregiverComponent implements OnInit {
         // 1. Configuración de WhatsApp
         this.configService.config$.subscribe(config => {
             this.whatsappLink = `https://wa.me/${config.general.whatsappNumber}`;
+        });
+
+        // Cargar Pacientes reales desde BD en vez del mock
+        this.patientService.patients$.subscribe(data => {
+            this.patients = data;
         });
 
         // 2. Suscripción a Notificaciones (La que maneja la campanita)

@@ -4,6 +4,7 @@ import Swal from 'sweetalert2';
 import { MatchingService, ServicePost } from 'src/app/core/services/matching.service';
 import { ServiceOrderService } from 'src/app/core/services/service-order.service';
 import { CaregiverService } from 'src/app/core/services/caregiver.service';
+import { DashboardService } from 'src/app/core/services/dashboard.service';
 
 @Component({
     selector: 'app-admin-dashboard',
@@ -20,27 +21,19 @@ export class AdminComponent implements OnInit { // Implementamos OnInit
     // REGISTRO DE GUARDIAS
     confirmedServices: ServicePost[] = [];
 
-    stats = [
-        { label: 'Acompañantes', value: '245', icon: 'groups', color: 'blue' },
-        { label: 'Pacientes/Familia', value: '1,372', icon: 'elderly_woman', color: 'orange' },
-        { label: 'Balance', value: '$105,265.75', icon: 'account_balance_wallet', color: 'green' }
-    ];
+    stats: any[] = [];
 
     validationRequests: any[] = [];
     pendingPostulations: ServicePost[] = [];
 
-    recentPayments = [
-        { name: 'Marcos Andrada', amount: '$300.00', status: 'paid' },
-        { name: 'José Tesuto', amount: '$45.00', status: 'paid' },
-        { name: 'Aurora Rodriguez', amount: '$320.00', status: 'paid' },
-        { name: 'Maria Aubeclasón', amount: '$-727.00', status: 'paid' }
-    ];
+    recentPayments: any[] = [];
 
     constructor(
         private notificationService: NotificationService,
         private matchingService: MatchingService,
         private serviceOrderService: ServiceOrderService,
-        private caregiverService: CaregiverService
+        private caregiverService: CaregiverService,
+        private dashboardService: DashboardService
     ) { }
 
     activeShifts: any[] = [];
@@ -64,6 +57,22 @@ export class AdminComponent implements OnInit { // Implementamos OnInit
         this.matchingService.posts$.subscribe(allPosts => {
             this.confirmedServices = allPosts.filter(p => p.status === 'Confirmado');
             this.pendingPostulations = allPosts.filter(p => p.status === 'Postulado');
+        });
+
+        this.dashboardService.getStats().subscribe(data => {
+            this.stats = [
+                { label: 'Acompañantes', value: data.totalCaregivers.toString(), icon: 'groups', color: 'blue' },
+                { label: 'Pacientes/Familia', value: data.totalPatients.toString(), icon: 'elderly_woman', color: 'orange' },
+                { label: 'Balance', value: `$${data.totalBalance.toLocaleString('es-AR')}`, icon: 'account_balance_wallet', color: 'green' }
+            ];
+        });
+
+        this.dashboardService.getRecentPayments().subscribe((data) => {
+            this.recentPayments = data.map(payment => ({
+                name: `Guardia #${payment.id} / $${payment.earned}`, // Simulating the payment description
+                amount: `+ $${payment.earned}`,
+                status: 'paid'
+            }));
         });
 
         this.loadActiveShifts();
@@ -117,28 +126,32 @@ export class AdminComponent implements OnInit { // Implementamos OnInit
     }
 
     loadUnpaidShifts() {
-        this.caregiverService.getUnpaidShifts().subscribe({
-            next: (shifts) => {
-                // Agrupamos por cuidador para el resumen
-                const grouped = new Map<number, any>();
+        this.caregiverService.getAllCaregivers().subscribe(caregivers => {
+            const caregiverMap = new Map<number, string>();
+            caregivers.forEach(c => caregiverMap.set(c.id!, c.caregiverName || c.fullName || 'Cuidador ' + c.id));
 
-                for (let s of shifts) {
-                    if (!grouped.has(s.caregiverId)) {
-                        grouped.set(s.caregiverId, {
-                            caregiverId: s.caregiverId,
-                            caregiverName: 'Cuidador ' + s.caregiverId, // Opcional: Podrías buscar el nombre real si tu DB no lo trajo, pero asumimos que el front puede mapearlo
-                            totalEarned: 0,
-                            shiftIds: []
-                        });
+            this.caregiverService.getUnpaidShifts().subscribe({
+                next: (shifts) => {
+                    // Agrupamos por cuidador para el resumen
+                    const grouped = new Map<number, any>();
+
+                    for (let s of shifts) {
+                        if (!grouped.has(s.caregiverId)) {
+                            grouped.set(s.caregiverId, {
+                                caregiverId: s.caregiverId,
+                                caregiverName: caregiverMap.get(s.caregiverId) || ('Cuidador ' + s.caregiverId),
+                                totalEarned: 0,
+                                shiftIds: []
+                            });
+                        }
+                        grouped.get(s.caregiverId).totalEarned += s.earned || 0;
+                        grouped.get(s.caregiverId).shiftIds.push(s.id);
                     }
-                    const group = grouped.get(s.caregiverId);
-                    group.totalEarned += (s.earned || 0);
-                    group.shiftIds.push(s.id);
-                }
 
-                this.unpaidSummary = Array.from(grouped.values());
-            },
-            error: (err) => console.error('Error cargando guardias pendientes de pago', err)
+                    this.unpaidSummary = Array.from(grouped.values());
+                },
+                error: (err) => console.error('Error cargando guardias impagas', err)
+            });
         });
     }
 

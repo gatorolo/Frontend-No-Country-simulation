@@ -1,5 +1,6 @@
+import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, interval } from 'rxjs';
 
 export interface Notification {
     id: number;
@@ -17,79 +18,64 @@ export interface Notification {
     providedIn: 'root'
 })
 export class NotificationService {
-    private storageKey = 'valora_notifications';
+    private apiUrl = 'http://localhost:8080/api/notifications';
     private notificationsSource = new BehaviorSubject<Notification[]>([]);
     notifications$ = this.notificationsSource.asObservable();
 
-    constructor() {
-        this.loadFromStorage();
-        // Sincronización entre pestañas
-        window.addEventListener('storage', (event) => {
-            if (event.key === this.storageKey) {
-                this.loadFromStorage();
-            }
+    constructor(private http: HttpClient) {
+        this.loadFromApi();
+        // Polling para mantener notificaciones sincronizadas desde la base de datos
+        interval(15000).subscribe(() => {
+            this.loadFromApi();
         });
     }
 
-    private loadFromStorage() {
-        const saved = localStorage.getItem(this.storageKey);
-        if (saved) {
-            try {
-                const parsed = JSON.parse(saved);
-                const formatted = parsed.map((n: any) => ({
+    private loadFromApi() {
+        this.http.get<Notification[]>(this.apiUrl).subscribe({
+            next: (data) => {
+                // MySQL devuelve las fechas en strings, las convertimos a objetos Date
+                const formatted = data.map((n: any) => ({
                     ...n,
                     date: new Date(n.date)
                 }));
                 this.notificationsSource.next(formatted);
-            } catch (e) {
-                console.error('Error al cargar notificaciones:', e);
-                this.notificationsSource.next([]);
-            }
-        } else {
-            this.notificationsSource.next([]); // Empezamos vacío si no hay nada guardado
-        }
+            },
+            error: (err) => console.error('Error al cargar notificaciones desde DB', err)
+        });
     }
 
-    private saveAndNext(notifications: Notification[]) {
-        localStorage.setItem(this.storageKey, JSON.stringify(notifications));
-        this.notificationsSource.next(notifications);
-    }
-
-    // ESTE ES EL MÉTODO QUE USAREMOS PARA CREAR NOTIFICACIONES NUEVAS
     addNotification(notification: Omit<Notification, 'id' | 'date' | 'read'>) {
-        const current = this.notificationsSource.getValue();
-        const newNotif: Notification = {
-            status: 'Pendiente', // Default
+        // Para enviar a la BD:
+        const payload = {
             ...notification,
-            id: Date.now(),
-            date: new Date(),
-            read: false
-        } as Notification;
-        // Las nuevas aparecen primero (unshift)
-        this.saveAndNext([newNotif, ...current]);
+            status: notification.status || 'Pendiente'
+        };
+        this.http.post<Notification>(this.apiUrl, payload).subscribe(() => {
+            this.loadFromApi();
+        });
     }
 
     updateNotificationStatus(id: number, status: Notification['status']) {
-        const current = this.notificationsSource.getValue();
-        const updated = current.map(n => n.id === id ? { ...n, status } : n);
-        this.saveAndNext(updated);
+        // No hay endpoint creado para actualizar el "estado" de una notificación aún, 
+        // pero podemos crear uno en Java o dejarlo pendiente:
+        console.warn('updateNotificationStatus aún no implementado en el Controller Java.');
     }
 
     markAsRead(id: number) {
-        const current = this.notificationsSource.getValue();
-        const updated = current.map(n => n.id === id ? { ...n, read: true } : n);
-        this.saveAndNext(updated);
+        this.http.put(`${this.apiUrl}/${id}/read`, {}).subscribe(() => {
+            this.loadFromApi();
+        });
     }
 
-    // Limpia las notificaciones por rol (ej: al vaciar la papelera)
     clearByRole(role: 'admin' | 'caregiver' | 'family') {
-        const current = this.notificationsSource.getValue();
-        const filtered = current.filter(n => n.recipientRole !== role);
-        this.saveAndNext(filtered);
+        this.http.delete(`${this.apiUrl}/role/${role}`).subscribe(() => {
+            this.loadFromApi();
+        });
     }
 
     removeNotification(id: number) {
-        const current = this.notificationsSource.getValue();
-        this.saveAndNext(current.filter(n => n.id !== id));
+        this.http.delete(`${this.apiUrl}/${id}`).subscribe(() => {
+            this.loadFromApi();
+        });
     }
 }

@@ -591,6 +591,57 @@
     margin-bottom: 1.5rem;
 }
 
+/* Clases dinámicas para la Deuda */
+.debt-card {
+    border: 2px solid transparent;
+    margin-top: 2rem;
+    transition: all 0.3s ease;
+}
+
+.debt-green {
+    border-color: #a7f3d0 !important;
+    background: #ecfdf5 !important;
+    color: #059669 !important;
+}
+
+.debt-green .section-sub,
+.debt-green .material-icons {
+    color: #059669 !important;
+}
+
+.debt-default {
+    border-color: #bae6fd !important;
+    background: #f0f9ff !important;
+    color: #0284c7 !important;
+}
+
+.debt-default .section-sub,
+.debt-default .material-icons {
+    color: #0284c7 !important;
+}
+
+.debt-orange {
+    border-color: #fed7aa !important;
+    background: #fff7ed !important;
+    color: #ea580c !important;
+}
+
+.debt-orange .section-sub,
+.debt-orange .material-icons {
+    color: #ea580c !important;
+}
+
+.debt-red {
+    border-color: #fecaca !important;
+    background: #fef2f2 !important;
+    color: #ef4444 !important;
+}
+
+.debt-red .section-sub,
+.debt-red .material-icons {
+    color: #ef4444 !important;
+}
+
 .empty-card h2 {
     color: var(--text-main);
     margin-bottom: 0.5rem;

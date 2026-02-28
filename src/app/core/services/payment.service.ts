@@ -1,5 +1,7 @@
+import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Observable, interval, of } from 'rxjs';
+import { catchError, startWith, switchMap, tap } from 'rxjs/operators';
 
 export interface Settlement {
     id: number;
@@ -23,21 +25,40 @@ export interface InsuranceBilling {
     providedIn: 'root'
 })
 export class PaymentService {
-    private settlementsSource = new BehaviorSubject<Settlement[]>([
-        { id: 1, caregiverName: 'Lara Martínez', amount: 48000, status: 'Procesado', invoiceUploaded: true },
-        { id: 2, caregiverName: 'Carlos Ruiz', amount: 32000, status: 'Pendiente', invoiceUploaded: true },
-        { id: 3, caregiverName: 'Elena Paz', amount: 15000, status: 'Factura Pendiente', invoiceUploaded: false },
-        { id: 4, caregiverName: 'Carla Vuioner', amount: 28000, status: 'Pendiente', invoiceUploaded: true }
-    ]);
+    private apiUrl = 'http://localhost:8080/api/payments';
 
-    private insuranceBillingSource = new BehaviorSubject<InsuranceBilling[]>([
-        { id: 1, patientName: 'Roberto Sánchez', insuranceName: 'OSDE 310', amount: 85000, presentationDate: new Date('2024-01-15'), daysDelayed: 25, status: 'Al día' },
-        { id: 2, patientName: 'Marta García', insuranceName: 'Swiss Medical', amount: 120000, presentationDate: new Date('2023-12-01'), daysDelayed: 70, status: 'Crítico' },
-        { id: 3, patientName: 'Ricardo Gómez', insuranceName: 'PAMI', amount: 45000, presentationDate: new Date('2023-12-28'), daysDelayed: 43, status: 'Atrasado' }
-    ]);
+    private settlementsSource = new BehaviorSubject<Settlement[]>([]);
+    private insuranceBillingSource = new BehaviorSubject<InsuranceBilling[]>([]);
 
     settlements$ = this.settlementsSource.asObservable();
     insuranceBilling$ = this.insuranceBillingSource.asObservable();
+
+    constructor(private http: HttpClient) {
+        this.loadSettlements().subscribe();
+        this.loadInsuranceBilling().subscribe();
+
+        interval(15000).pipe(
+            startWith(0),
+            switchMap(() => this.loadSettlements().pipe(catchError(() => of([]))))
+        ).subscribe();
+
+        interval(15000).pipe(
+            startWith(0),
+            switchMap(() => this.loadInsuranceBilling().pipe(catchError(() => of([]))))
+        ).subscribe();
+    }
+
+    private loadSettlements(): Observable<Settlement[]> {
+        return this.http.get<Settlement[]>(`${this.apiUrl}/settlements`).pipe(
+            tap(data => this.settlementsSource.next(data))
+        );
+    }
+
+    private loadInsuranceBilling(): Observable<InsuranceBilling[]> {
+        return this.http.get<InsuranceBilling[]>(`${this.apiUrl}/insurance-billing`).pipe(
+            tap(data => this.insuranceBillingSource.next(data))
+        );
+    }
 
     getKPIs() {
         const settlements = this.settlementsSource.getValue();
@@ -57,6 +78,7 @@ export class PaymentService {
         if (index !== -1) {
             list[index].status = 'Procesado';
             this.settlementsSource.next([...list]);
+            // En un futuro: This should be an API call to Java to close the debt.
         }
     }
 }

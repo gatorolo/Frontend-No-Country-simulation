@@ -6,6 +6,7 @@ import { MatchingService } from 'src/app/core/services/matching.service';
 import { NotificationService } from 'src/app/core/services/notification.service';
 import { CaregiverService } from 'src/app/core/services/caregiver.service';
 import { tap } from 'rxjs/operators';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-family-view',
@@ -24,6 +25,7 @@ export class FamilyViewComponent implements OnInit {
   private pendingCaregiver: any = null;
   activeOrderId: number | null = null;
   totalDebt: number = 0;
+  unpaidShiftIds: number[] = [];
 
   constructor(
     private router: Router,
@@ -127,7 +129,8 @@ export class FamilyViewComponent implements OnInit {
         this.syncWithActiveOrders();
 
         // 3. Consultamos la deuda pendiente
-        this.fetchPatientDebt(data.name || (data as any)['patientName'] || 'Paciente');
+        const pName = (data as any)['name'] || (data as any)['patientName'] || 'Paciente';
+        this.fetchPatientDebt(pName);
       },
       error: (err) => {
         console.error('Error al cargar paciente:', err);
@@ -198,8 +201,9 @@ export class FamilyViewComponent implements OnInit {
     if (!patientName) return;
     this.caregiverService.getUnpaidShiftsByPatientName(patientName).subscribe({
       next: (shifts) => {
-        // Acumulamos la deuda total
+        // Acumulamos la deuda total y los IDs de las guardias
         this.totalDebt = shifts.reduce((sum, shift) => sum + (shift.earned || 0), 0);
+        this.unpaidShiftIds = shifts.map(shift => shift.id).filter(id => id !== undefined);
       },
       error: (err) => console.error('Error al cargar la deuda del paciente:', err)
     });
@@ -329,6 +333,51 @@ export class FamilyViewComponent implements OnInit {
     } else {
       this.router.navigate(['/family']);
     }
+  }
+
+  getDebtColorClass(): string {
+    if (this.totalDebt === 0) {
+      return 'debt-green'; // Sin cargos
+    } else if (this.totalDebt >= 200000 && this.totalDebt <= 500000) {
+      return 'debt-orange'; // Naranja
+    } else if (this.totalDebt > 500000) {
+      return 'debt-red'; // Rojo
+    } else {
+      return 'debt-default'; // Entre 1 y 199.999 ARS
+    }
+  }
+
+  payDebt() {
+    if (this.unpaidShiftIds.length === 0) return;
+
+    Swal.fire({
+      title: '¿Proceder al pago?',
+      text: 'Se redirigirá al sistema de pago para saldar la deuda pendiente.',
+      icon: 'info',
+      showCancelButton: true,
+      confirmButtonText: 'Sí, Pagar',
+      cancelButtonText: 'Cancelar'
+    }).then((result: any) => {
+      if (result.isConfirmed) {
+        // En el futuro, aquí se lanza MercadoPago. Por ahora simulamos éxito pagando por la API.
+        const paymentRequests = this.unpaidShiftIds.map(id => this.caregiverService.payPatientShift(id));
+
+        import('rxjs').then(({ forkJoin }) => {
+          forkJoin(paymentRequests).subscribe({
+            next: () => {
+              Swal.fire('¡Pago Exitoso!', 'La cuenta regresó a $0.', 'success');
+              // Refrescar deuda
+              const pName = this.patientData.name || this.patientData['patientName'] || 'Paciente';
+              this.fetchPatientDebt(pName);
+            },
+            error: (err) => {
+              console.error('Error procesando pago:', err);
+              Swal.fire('Error', 'No se pudo procesar el pago.', 'error');
+            }
+          });
+        });
+      }
+    });
   }
 
   onLogout() {
