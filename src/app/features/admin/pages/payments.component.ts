@@ -19,30 +19,47 @@ export class PaymentsComponent implements OnInit {
 
   patientPayments: any[] = [];
 
+  // Local Storage Keys for hiding processed/paid rows
+  private readonly HIDDEN_SETTLEMENTS_KEY = 'valora_hidden_settlements';
+  private readonly HIDDEN_BILLING_KEY = 'valora_hidden_billing';
+  private readonly HIDDEN_PATIENT_PAYMENTS_KEY = 'valora_hidden_patient_payments';
+
+  hiddenSettlements: number[] = [];
+  hiddenBills: number[] = [];
+  hiddenPatientPayments: number[] = [];
+
   constructor(
     private paymentService: PaymentService,
     private reportsService: ReportsService
   ) { }
 
   ngOnInit(): void {
+    this.loadHiddenState();
     this.loadData();
     this.loadPatientPayments();
   }
 
+  private loadHiddenState() {
+    this.hiddenSettlements = JSON.parse(localStorage.getItem(this.HIDDEN_SETTLEMENTS_KEY) || '[]');
+    this.hiddenBills = JSON.parse(localStorage.getItem(this.HIDDEN_BILLING_KEY) || '[]');
+    this.hiddenPatientPayments = JSON.parse(localStorage.getItem(this.HIDDEN_PATIENT_PAYMENTS_KEY) || '[]');
+  }
+
   private loadData() {
     this.paymentService.settlements$.subscribe(s => {
-      this.settlements = s;
+      this.settlements = s.filter(item => !this.hiddenSettlements.includes(item.id));
       this.kpis = this.paymentService.getKPIs();
     });
     this.paymentService.insuranceBilling$.subscribe(b => {
-      this.billing = b;
+      this.billing = b.filter(item => !this.hiddenBills.includes(item.id));
     });
   }
 
   private loadPatientPayments() {
     this.reportsService.getShiftsHistory().subscribe({
       next: (data) => {
-        this.patientPayments = data;
+        // Filter out hidden IDs
+        this.patientPayments = data.filter(item => !this.hiddenPatientPayments.includes(item.id));
       },
       error: (err) => console.error('Error cargando los pagos de pacientes', err)
     });
@@ -90,5 +107,27 @@ export class PaymentsComponent implements OnInit {
       case 'Atrasado': return 'status-yellow';
       default: return 'status-green';
     }
+  }
+
+  // Métodos para Ocultar (Soft Delete en Frontend)
+  hideSettlement(id: number, event: Event) {
+    event.stopPropagation();
+    this.hiddenSettlements.push(id);
+    localStorage.setItem(this.HIDDEN_SETTLEMENTS_KEY, JSON.stringify(this.hiddenSettlements));
+    this.settlements = this.settlements.filter(s => s.id !== id);
+  }
+
+  hideBilling(id: number, event: Event) {
+    event.stopPropagation();
+    this.hiddenBills.push(id);
+    localStorage.setItem(this.HIDDEN_BILLING_KEY, JSON.stringify(this.hiddenBills));
+    this.billing = this.billing.filter(b => b.id !== id);
+  }
+
+  hidePatientPayment(id: number, event: Event) {
+    event.stopPropagation();
+    this.hiddenPatientPayments.push(id);
+    localStorage.setItem(this.HIDDEN_PATIENT_PAYMENTS_KEY, JSON.stringify(this.hiddenPatientPayments));
+    this.patientPayments = this.patientPayments.filter(p => p.id !== id);
   }
 }

@@ -89,13 +89,18 @@
                 </span>
               </td>
               <td>
-                <button *ngIf="s.status !== 'Procesado'" class="pay-btn" [disabled]="!s.invoiceUploaded"
-                  (click)="openReceiptModal(s)">
-                  <span class="material-icons">receipt_long</span> Procesar Pago
-                </button>
-                <span *ngIf="s.status === 'Procesado'" class="done-label">
-                  <span class="material-icons">check_circle</span> Pagado
-                </span>
+                <div class="action-cell">
+                  <button *ngIf="s.status !== 'Procesado'" class="pay-btn" [disabled]="!s.invoiceUploaded"
+                    (click)="openReceiptModal(s)">
+                    <span class="material-icons">receipt_long</span> Procesar
+                  </button>
+                  <span *ngIf="s.status === 'Procesado'" class="done-label">
+                    <span class="material-icons">check_circle</span> Pagado
+                  </span>
+                  <button class="hide-btn" (click)="hideSettlement(s.id, $event)" title="Ocultar de la lista">
+                    <span class="material-icons">visibility_off</span>
+                  </button>
+                </div>
               </td>
             </tr>
           </tbody>
@@ -116,7 +121,12 @@
               <span class="os-name">{{ item.insuranceName }}</span>
               <span class="patient-name">{{ item.patientName }}</span>
             </div>
-            <div class="amount-tag">${{ item.amount | number }}</div>
+            <div class="billing-actions">
+              <div class="amount-tag">${{ item.amount | number }}</div>
+              <button class="hide-btn sm-btn" (click)="hideBilling(item.id, $event)" title="Ocultar">
+                <span class="material-icons">close</span>
+              </button>
+            </div>
           </div>
           <div class="billing-footer">
             <div class="delay-info" [class]="getDelayClass(item.status)">
@@ -157,9 +167,14 @@
               </td>
               <td class="amount-cell">${{ p.earned | number:'1.2-2' }}</td>
               <td>
-                <span class="status-pill" [class]="p.patientPaymentStatus === 'PAGADO' ? 'uploaded' : 'missing'">
-                  {{ p.patientPaymentStatus === 'PAGADO' ? 'Pagado' : 'Falta Pagar' }}
-                </span>
+                <div class="action-cell flex-center">
+                  <span class="status-pill" [class]="p.patientPaymentStatus === 'PAGADO' ? 'uploaded' : 'missing'">
+                    {{ p.patientPaymentStatus === 'PAGADO' ? 'Pagado' : 'Falta Pagar' }}
+                  </span>
+                  <button class="hide-btn" (click)="hidePatientPayment(p.id, $event)" title="Ocultar de la lista">
+                    <span class="material-icons">visibility_off</span>
+                  </button>
+                </div>
               </td>
             </tr>
             <tr *ngIf="patientPayments.length === 0">
