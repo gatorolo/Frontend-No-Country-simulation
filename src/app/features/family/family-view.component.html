@@ -143,6 +143,20 @@
 
             <!-- Columna Lateral -->
             <div class="side-column">
+
+                <section class="info-card"
+                    style="padding-bottom: 1.5rem; text-align: center; background: #e0f2fe; border: 1px solid #bae6fd;">
+                    <h3 class="section-sub" style="justify-content: center; margin-bottom: 0.5rem;"><span
+                            class="material-icons">add_circle</span> Nuevo Servicio</h3>
+                    <p style="font-size: 0.85rem; color: #475569; margin-bottom: 1rem;">¿Necesita un especialista en un
+                        nuevo horario?</p>
+                    <button class="edit-btn"
+                        style="background: var(--primary); color: white; border: none; width: 100%; justify-content: center;"
+                        (click)="openRequestModal()">
+                        Solicitar Cuidador
+                    </button>
+                </section>
+
                 <section class="info-card location-card" style="padding-bottom: 0.5rem;">
                     <h3 class="section-sub"><span class="material-icons">room</span> Ubicación</h3>
                     <p *ngIf="patientData.location"
@@ -210,3 +224,53 @@
     <span class="whatsapp-tooltip">ADMIN 'Lara'</span>
     <img src="assets/whatsapp.svg" alt="WhatsApp" />
 </a>
+
+<!-- Modal para Solicitar Servicio -->
+<div class="modal-overlay" *ngIf="showRequestModal">
+    <div class="modal-content animate-scale-in">
+        <div class="modal-header">
+            <h2>Solicitar Nuevo Servicio</h2>
+            <button class="close-btn" (click)="closeRequestModal()">&times;</button>
+        </div>
+
+        <form [formGroup]="requestForm" (ngSubmit)="submitRequest()" class="service-form">
+            <p style="text-align: center; color: var(--text-light); margin-bottom: 1.5rem; font-size: 0.9rem;">
+                La solicitud será enviada a la administración para su publicación.
+            </p>
+
+            <div class="form-grid">
+                <div class="input-group full-width">
+                    <label>Especialidad Requerida</label>
+                    <select formControlName="specialty">
+                        <option value="Enfermería">Enfermería</option>
+                        <option value="Kinesiología">Kinesiología</option>
+                        <option value="Gerontología">Gerontología</option>
+                        <option value="Rehabilitación">Rehabilitación</option>
+                        <option value="Acompañante Terapéutico">Acompañante Terapéutico</option>
+                    </select>
+                </div>
+
+                <div class="input-group full-width">
+                    <label>Horario o Turno</label>
+                    <input type="text" formControlName="schedule" placeholder="Ej: Lunes a Viernes de 8 a 16hs">
+                </div>
+
+                <div class="input-group full-width">
+                    <label>Complejidad / Tareas</label>
+                    <select formControlName="complexity">
+                        <option value="Baja">Baja (Compañía, asistencia básica)</option>
+                        <option value="Media">Media (Aseo en cama, medicación oral)</option>
+                        <option value="Alta">Alta (Sondas, botón gástrico, curaciones)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="modal-actions" style="margin-top: 2rem;">
+                <button type="button" class="btn-cancel" (click)="closeRequestModal()">Cancelar</button>
+                <button type="submit" class="btn-submit" [disabled]="requestForm.invalid">
+                    Enviar Solicitud
+                </button>
+            </div>
+        </form>
+    </div>
+</div>

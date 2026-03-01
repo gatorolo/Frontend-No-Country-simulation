@@ -25,6 +25,7 @@ export class AdminComponent implements OnInit { // Implementamos OnInit
 
     validationRequests: any[] = [];
     pendingPostulations: ServicePost[] = [];
+    pendingPatientRequests: ServicePost[] = [];
 
     recentPayments: any[] = [];
 
@@ -58,6 +59,9 @@ export class AdminComponent implements OnInit { // Implementamos OnInit
             this.confirmedServices = allPosts.filter(p => p.status === 'Confirmado');
             this.pendingPostulations = allPosts.filter(p => p.status === 'Postulado');
         });
+
+        // NUEVO: Cargar solicitudes pendientes de pacientes
+        this.loadPendingRequests();
 
         this.dashboardService.getStats().subscribe(data => {
             this.stats = [
@@ -99,22 +103,57 @@ export class AdminComponent implements OnInit { // Implementamos OnInit
     // --- NUEVA LÓGICA DE GUARDIAS Y PAGOS ---
 
     loadActiveShifts() {
-        this.caregiverService.getActiveShifts().subscribe({
-            next: (shifts) => {
-                // Al recibir del back, calculamos los segundos que pasaron
-                this.activeShifts = shifts.map(shift => {
-                    const start = new Date(shift.startTime).getTime();
-                    const now = new Date().getTime();
-                    const diffSeconds = Math.floor((now - start) / 1000);
+        this.caregiverService.getAllCaregivers().subscribe(caregivers => {
+            const caregiverMap = new Map<number, string>();
+            caregivers.forEach(c => caregiverMap.set(c.id!, c.caregiverName || c.fullName || 'Cuidador ' + c.id));
 
-                    return {
-                        ...shift,
-                        runningSeconds: diffSeconds,
-                        displayTimer: this.formatTime(diffSeconds)
-                    };
+            this.caregiverService.getActiveShifts().subscribe({
+                next: (shifts) => {
+                    // Al recibir del back, calculamos los segundos que pasaron
+                    this.activeShifts = shifts.map(shift => {
+                        const start = new Date(shift.startTime).getTime();
+                        const now = new Date().getTime();
+                        const diffSeconds = Math.floor((now - start) / 1000);
+
+                        return {
+                            ...shift,
+                            caregiverName: caregiverMap.get(shift.caregiverId) || ('Cuidador ID: ' + shift.caregiverId),
+                            runningSeconds: diffSeconds,
+                            displayTimer: this.formatTime(diffSeconds)
+                        };
+                    });
+                },
+                error: (err) => console.error('Error cargando guardias activas', err)
+            });
+        });
+    }
+
+    forceStopShift(caregiverId: number, seconds: number, event: Event) {
+        event.stopPropagation();
+        Swal.fire({
+            title: '¿Forzar fin de guardia?',
+            text: 'Se detendrá el reloj y se calculará el pago para el cuidador.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Sí, finalizar',
+            cancelButtonText: 'Cancelar'
+        }).then(result => {
+            if (result.isConfirmed) {
+                this.caregiverService.stopShift({ caregiverId, durationSeconds: seconds }).subscribe({
+                    next: () => {
+                        Swal.fire('¡Finalizada!', 'La guardia ha sido cerrada mediante el administrador.', 'success');
+                        this.loadActiveShifts();
+                        this.loadUnpaidShifts();
+                        this.loadPatientUnpaidShifts();
+                    },
+                    error: (err) => {
+                        console.error('Error al forzar fin de guardia', err);
+                        Swal.fire('Error', 'No se pudo finalizar la guardia', 'error');
+                    }
                 });
-            },
-            error: (err) => console.error('Error cargando guardias activas', err)
+            }
         });
     }
 
@@ -276,6 +315,61 @@ export class AdminComponent implements OnInit { // Implementamos OnInit
             icon: 'success',
             timer: 2000,
             showConfirmButton: false
+        });
+    }
+
+    // --- NUEVA LÓGICA: Solicitudes Pendientes ---
+    loadPendingRequests() {
+        this.matchingService.getPendingRequests().subscribe({
+            next: (requests) => this.pendingPatientRequests = requests,
+            error: (err) => console.error('Error cargando solicitudes pendientes', err)
+        });
+    }
+
+    publishPatientRequest(id: number) {
+        Swal.fire({
+            title: '¿Publicar Solicitud?',
+            text: 'Esta solicitud será visible para todos los cuidadores al instante.',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Sí, Publicar',
+            cancelButtonText: 'Cancelar'
+        }).then(result => {
+            if (result.isConfirmed) {
+                this.matchingService.publishPendingRequest(id).subscribe({
+                    next: () => {
+                        Swal.fire('¡Publicado!', 'La guardia ha sido publicada.', 'success');
+
+                        // Notificar a todos los cuidadores sobre la nueva búsqueda
+                        const reqAsPost = this.pendingPatientRequests.find(req => req.id === id);
+                        if (reqAsPost) {
+                            this.notificationService.addNotification({
+                                title: '¡Nueva Guardia Disponible!',
+                                message: `Se busca especialista para el paciente ${reqAsPost.patientName}.`,
+                                type: 'info',
+                                recipientRole: 'caregiver',
+                                relatedPostId: id
+                            });
+                        }
+
+                        // Eliminar de la lista local inmediatamente para evitar doble clic
+                        this.pendingPatientRequests = this.pendingPatientRequests.filter(req => req.id !== id);
+
+                        // Refrescar desde el backend
+                        this.loadPendingRequests();
+
+                        // Opcional: limpiar notificaciones relacionadas a esta publicación (asumiendo lectura)
+                        const relatedNotif = this.notifications.find(n => n.message.includes('solicitado un cuidador'));
+                        if (relatedNotif) {
+                            this.notificationService.removeNotification(relatedNotif.id);
+                        }
+                    },
+                    error: (err) => {
+                        console.error('Error al publicar solicitud:', err);
+                        Swal.fire('Error', 'No se pudo publicar la solicitud.', 'error');
+                    }
+                });
+            }
         });
     }
 

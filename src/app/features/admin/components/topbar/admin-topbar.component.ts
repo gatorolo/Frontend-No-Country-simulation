@@ -4,6 +4,7 @@ import { NotificationService } from 'src/app/core/services/notification.service'
 import { CaregiverService } from 'src/app/core/services/caregiver.service';
 import { ProfileService } from 'src/app/core/services/profile.service';
 import Swal from 'sweetalert2';
+import { Router } from '@angular/router';
 
 @Component({
     selector: 'app-admin-topbar',
@@ -24,7 +25,8 @@ export class AdminTopbarComponent implements OnInit {
         private matchingService: MatchingService,
         private notificationService: NotificationService,
         private caregiverService: CaregiverService,
-        private profileService: ProfileService
+        private profileService: ProfileService,
+        private router: Router
     ) { }
 
     ngOnInit(): void {
@@ -56,9 +58,12 @@ export class AdminTopbarComponent implements OnInit {
 
     selectedNotification: any = null;
     activeNotificationId: number | null = null;
+    isPatientRequest: boolean = false;
 
     openNotificationDetail(notification: any) {
         this.activeNotificationId = notification.id;
+        this.isPatientRequest = (notification.title === 'Nueva Solicitud de Servicio');
+
         // Buscamos el post real para alimentar el modal de aprobación si hay un ID relacionado
         if (notification.relatedPostId) {
             const posts = this.matchingService.getPosts();
@@ -82,6 +87,11 @@ export class AdminTopbarComponent implements OnInit {
 
     closeNotificationDetail() {
         this.selectedNotification = null;
+    }
+
+    goToDashboard() {
+        this.closeNotificationDetail();
+        this.router.navigate(['/admin']);
     }
 
     approveAssignment() {

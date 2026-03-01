@@ -135,20 +135,70 @@
             <div class="user-cell">
               <span class="material-icons" style="color: #10b981; margin-right: 0.5rem;">schedule</span>
               <div style="display: flex; flex-direction: column;">
-                <span style="font-weight: 500;">Cuidador ID: {{ shift.caregiverId }}</span>
+                <span style="font-weight: 500;">{{ shift.caregiverName }}</span>
                 <span style="font-size: 0.8rem; color: #64748b;">Paciente: {{ shift.patientName }}</span>
               </div>
             </div>
-            <span class="amount-tag"
-              style="background: #e0f2fe; color: #0284c7; font-family: monospace; font-size: 1.1rem;">
-              {{ shift.displayTimer }}
-            </span>
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+              <span class="amount-tag"
+                style="background: #e0f2fe; color: #0284c7; font-family: monospace; font-size: 1.1rem;">
+                {{ shift.displayTimer }}
+              </span>
+              <button class="btn-delete-icon" (click)="forceStopShift(shift.caregiverId, shift.runningSeconds, $event)"
+                title="Forzar Fin">
+                <span class="material-icons" style="font-size: 1.3rem; color: #ef4444;">stop_circle</span>
+              </button>
+            </div>
           </div>
         </div>
       </div>
     </div>
 
     <div class="right-column">
+
+      <!-- NUEVO: TARJETA DE SOLICITUDES DE PACIENTES -->
+      <div class="card actions-card" style="margin-bottom: 1.5rem; background: #f0fdf4; border: 1px solid #bbf7d0;">
+        <h3 style="color: #166534;"><span class="material-icons"
+            style="font-size: 1.2rem; vertical-align: middle; margin-right: 5px;">assignment_ind</span> Solicitudes
+          Pendientes</h3>
+        <p style="font-size: 0.85rem; color: #166534; margin-bottom: 1rem;">Nuevas solicitudes de familias</p>
+
+        <div class="payment-list">
+          <div *ngIf="pendingPatientRequests.length === 0" class="empty-state" style="color: #166534;">
+            No hay nuevas solicitudes
+          </div>
+
+          <div class="payment-item" *ngFor="let req of pendingPatientRequests"
+            style="background: white; border: 1px solid #dcfce7; border-radius: 8px; padding: 10px; margin-bottom: 10px;">
+            <div class="pay-info" style="gap: 10px; flex-direction: column; align-items: flex-start;">
+              <div style="display: flex; align-items: center; gap: 8px; width: 100%;">
+                <div class="avatar-sm" style="background: #10b981; color: white;">
+                  {{ (req.patientName || 'PA') | slice:0:2 | uppercase }}
+                </div>
+                <div style="flex-grow: 1;">
+                  <div class="pay-name" style="font-size: 0.95rem;">{{ req.patientName }}</div>
+                  <div class="pay-sub" style="font-size: 0.8rem; color: #475569;">{{ req.city || req.zone || 'Sin
+                    ubicación' }}</div>
+                </div>
+              </div>
+
+              <div
+                style="width: 100%; font-size: 0.85rem; background: #f8fafc; padding: 8px; border-radius: 6px; margin-top: 5px;">
+                <strong>Especialidad:</strong> {{ req.specialty }}<br>
+                <strong>Horario:</strong> {{ req.schedule }}<br>
+                <strong>Complejidad:</strong> {{ req.complexity }}
+              </div>
+
+              <button class="btn-approve"
+                style="width: 100%; justify-content: center; background: #10b981; color: white;"
+                (click)="publishPatientRequest(req.id)">
+                Pubicar Búsqueda
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div class="card actions-card">
         <h3>Control de guardias</h3>
         <div class="action-buttons">

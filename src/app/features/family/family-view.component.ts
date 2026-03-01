@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ConfigService } from 'src/app/core/services/config.service';
 import { PatientService } from 'src/app/core/services/patient.service';
 import { MatchingService } from 'src/app/core/services/matching.service';
@@ -27,7 +28,11 @@ export class FamilyViewComponent implements OnInit {
   totalDebt: number = 0;
   unpaidShiftIds: number[] = [];
 
+  showRequestModal = false;
+  requestForm!: FormGroup;
+
   constructor(
+    private fb: FormBuilder,
     private router: Router,
     private route: ActivatedRoute,
     private configService: ConfigService,
@@ -42,6 +47,12 @@ export class FamilyViewComponent implements OnInit {
     this.configService.config$.subscribe(config => {
       this.whatsappLink = `https://wa.me/${config.general.whatsappNumber}`;
       this.checkMatchingForPatient();
+    });
+
+    this.requestForm = this.fb.group({
+      specialty: ['Enfermería', Validators.required],
+      schedule: ['', Validators.required],
+      complexity: ['Baja', Validators.required]
     });
 
     // 2. Escuchar el ID de la URL y Cargar Datos de forma robusta
@@ -396,6 +407,60 @@ export class FamilyViewComponent implements OnInit {
     }
     // Convertimos la dirección real a una URL de búsqueda de Google Maps
     return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`;
+  }
+
+  // ---- NUEVOS MÉTODOS PARA SOLICITUD DE SERVICIO ----
+  openRequestModal() {
+    this.showRequestModal = true;
+    this.requestForm.reset({
+      specialty: 'Enfermería',
+      complexity: 'Baja'
+    });
+  }
+
+  closeRequestModal() {
+    this.showRequestModal = false;
+  }
+
+  submitRequest() {
+    if (this.requestForm.invalid || !this.patientData) return;
+
+    const formValues = this.requestForm.value;
+
+    const requestPayload = {
+      patientName: this.patientData.name || this.patientData.patientName,
+      age: this.patientData.age || 0,
+      city: this.patientData.city || 'Ubicación Registrada', // Usamos un nombre más genérico
+      zone: this.patientData.zone || this.patientData.location || 'Consultar Perfil',
+      schedule: formValues.schedule,
+      complexity: formValues.complexity,
+      specialty: formValues.specialty
+    };
+
+    // Usamos el nuevo método requestService
+    this.matchingService.requestService(requestPayload).subscribe({
+      next: (res) => {
+        this.closeRequestModal();
+        Swal.fire({
+          icon: 'success',
+          title: '¡Solicitud Enviada!',
+          text: 'La administración revisará sus requerimientos y publicará la búsqueda a la brevedad.',
+          confirmButtonColor: '#0ea5e9'
+        });
+
+        // Opcional: Notificar a ADMIN
+        this.notificationService.addNotification({
+          title: 'Nueva Solicitud de Servicio',
+          message: `El paciente ${requestPayload.patientName} ha solicitado un cuidador (${requestPayload.specialty}).`,
+          type: 'info',
+          recipientRole: 'admin'
+        });
+      },
+      error: (err) => {
+        console.error('Error al solicitar servicio:', err);
+        Swal.fire('Error', 'No se pudo enviar la solicitud. Intente nuevamente.', 'error');
+      }
+    });
   }
 }
 

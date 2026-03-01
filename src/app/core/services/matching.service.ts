@@ -43,6 +43,22 @@ export class MatchingService {
         );
     }
 
+    requestService(post: any): Observable<ServicePost> {
+        return this.http.post<ServicePost>(`${this.apiUrl}/request`, post).pipe(
+            tap(() => this.loadPosts().subscribe())
+        );
+    }
+
+    getPendingRequests(): Observable<ServicePost[]> {
+        return this.http.get<ServicePost[]>(`${this.apiUrl}/pending`);
+    }
+
+    publishPendingRequest(id: number): Observable<ServicePost> {
+        return this.http.put<ServicePost>(`${this.apiUrl}/${id}/publish-request`, {}).pipe(
+            tap(() => this.loadPosts().subscribe())
+        );
+    }
+
     applyToPost(postId: number, caregiverId: number, caregiverName: string): Observable<ServicePost> {
         // 1. Limpieza de URL para evitar la doble barra //
         const cleanApiUrl = this.apiUrl.endsWith('/') ? this.apiUrl.slice(0, -1) : this.apiUrl;

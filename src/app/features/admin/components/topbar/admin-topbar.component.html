@@ -51,7 +51,7 @@
   <div class="modal-overlay" *ngIf="selectedNotification">
     <div class="modal-content animate-scale-in">
       <div class="modal-header">
-        <h2>Aprobar Asignación</h2>
+        <h2>{{ isPatientRequest ? 'Nueva Solicitud de Paciente' : 'Aprobar Asignación' }}</h2>
         <button class="close-btn" (click)="closeNotificationDetail()">&times;</button>
       </div>
 
@@ -83,10 +83,11 @@
       </div>
 
       <div class="modal-actions" style="justify-content: center; margin-top: 2rem; display: flex; gap: 1rem;">
-        <button class="btn-cancel" (click)="closeNotificationDetail()">Cancelar</button>
-        <button class="btn-approve" (click)="approveAssignment()">
-          <span>Aprobar Asignación</span>
-          <span class="material-icons">check_circle</span>
+        <button class="btn-cancel" (click)="closeNotificationDetail()">{{ isPatientRequest ? 'Cerrar' : 'Cancelar'
+          }}</button>
+        <button class="btn-approve" (click)="isPatientRequest ? goToDashboard() : approveAssignment()">
+          <span>{{ isPatientRequest ? 'Ir al Tablero' : 'Aprobar Asignación' }}</span>
+          <span class="material-icons" *ngIf="!isPatientRequest">check_circle</span>
         </button>
       </div>
     </div>
