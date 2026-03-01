@@ -148,7 +148,7 @@
 /* Layout Content */
 .main-content-grid {
     display: grid;
-    grid-template-columns: 1.8fr 1fr;
+    grid-template-columns: 1.2fr 1fr 1fr;
     gap: 2rem;
 }
 
@@ -225,8 +225,8 @@
 }
 
 .status-pill.missing {
-    background: #f1f5f9;
-    color: #64748b;
+    background: #fef2f2;
+    color: #ef4444;
 }
 
 .pay-btn {

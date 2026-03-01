@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { PaymentService, Settlement, InsuranceBilling } from 'src/app/core/services/payment.service';
+import { ReportsService } from 'src/app/core/services/reports.service';
 import Swal from 'sweetalert2';
 
 @Component({
@@ -16,10 +17,16 @@ export class PaymentsComponent implements OnInit {
   currentSettlement: Settlement | null = null;
   selectedFile: File | null = null;
 
-  constructor(private paymentService: PaymentService) { }
+  patientPayments: any[] = [];
+
+  constructor(
+    private paymentService: PaymentService,
+    private reportsService: ReportsService
+  ) { }
 
   ngOnInit(): void {
     this.loadData();
+    this.loadPatientPayments();
   }
 
   private loadData() {
@@ -29,6 +36,15 @@ export class PaymentsComponent implements OnInit {
     });
     this.paymentService.insuranceBilling$.subscribe(b => {
       this.billing = b;
+    });
+  }
+
+  private loadPatientPayments() {
+    this.reportsService.getShiftsHistory().subscribe({
+      next: (data) => {
+        this.patientPayments = data;
+      },
+      error: (err) => console.error('Error cargando los pagos de pacientes', err)
     });
   }
 

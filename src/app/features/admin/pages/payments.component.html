@@ -128,6 +128,49 @@
         </div>
       </div>
     </div>
+
+    <!-- Patient Payments Table -->
+    <div class="glass-card table-section patient-payments-section">
+      <h2 class="section-title">
+        <span class="material-icons">payments</span>
+        Estado de Pagos de Pacientes
+      </h2>
+      <div class="table-container" style="max-height: 400px; overflow-y: auto;">
+        <table class="premium-table">
+          <thead>
+            <tr>
+              <th>Paciente</th>
+              <th>Guardia / Cuidador</th>
+              <th>Monto a Cobrar</th>
+              <th>Estado</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let p of patientPayments">
+              <td>
+                <span class="caregiver-name" style="text-transform: capitalize;">{{ p.patientName }}</span>
+              </td>
+              <td style="text-transform: capitalize;">
+                {{ p.caregiverName }}
+                <br>
+                <small style="color: var(--text-light, #64748b);">{{ p.startTime | date:'dd/MM HH:mm' }}</small>
+              </td>
+              <td class="amount-cell">${{ p.earned | number:'1.2-2' }}</td>
+              <td>
+                <span class="status-pill" [class]="p.patientPaymentStatus === 'PAGADO' ? 'uploaded' : 'missing'">
+                  {{ p.patientPaymentStatus === 'PAGADO' ? 'Pagado' : 'Falta Pagar' }}
+                </span>
+              </td>
+            </tr>
+            <tr *ngIf="patientPayments.length === 0">
+              <td colspan="4" style="text-align: center; color: var(--text-light, #64748b); padding: 2rem;">
+                No hay pagos registrados aún.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
   </div>
 
   <!-- Receipt Upload Modal -->

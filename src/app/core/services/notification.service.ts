@@ -31,7 +31,10 @@ export class NotificationService {
     }
 
     private loadFromApi() {
-        this.http.get<Notification[]>(this.apiUrl).subscribe({
+        // Añadimos un timestamp para evitar que el navegador (Chrome/Edge) guarde en caché la respuesta
+        // y vuelva a mostrar notificaciones que ya fueron eliminadas de la base de datos.
+        const noCacheUrl = `${this.apiUrl}?t=${new Date().getTime()}`;
+        this.http.get<Notification[]>(noCacheUrl).subscribe({
             next: (data) => {
                 // MySQL devuelve las fechas en strings, las convertimos a objetos Date
                 const formatted = data.map((n: any) => ({
