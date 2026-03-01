@@ -245,7 +245,7 @@ export class AdminComponent implements OnInit { // Implementamos OnInit
                     group.shiftIds.push(s.id);
                 }
 
-                this.patientUnpaidSummary = Array.from(grouped.values());
+                this.patientUnpaidSummary = Array.from(grouped.values()).filter((g: any) => g.totalDebt > 0);
             },
             error: (err) => console.error('Error cargando deudas de pacientes', err)
         });

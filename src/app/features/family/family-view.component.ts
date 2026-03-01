@@ -309,8 +309,8 @@ export class FamilyViewComponent implements OnInit {
 
     import('sweetalert2').then(Swal => {
       Swal.default.fire({
-        title: '¿Finalizar asignación?',
-        text: 'El cuidador ya no aparecerá como asignado a este paciente.',
+        title: '¿Finalizar asignación y Guardia?',
+        text: 'Se detendrá el reloj del cuidador y ya no estará asignado a este paciente.',
         icon: 'warning',
         showCancelButton: true,
         confirmButtonColor: '#0ea5e9',
@@ -319,6 +319,10 @@ export class FamilyViewComponent implements OnInit {
         cancelButtonText: 'Cancelar'
       }).then((result) => {
         if (result.isConfirmed) {
+          // 1. Apagar reloj activo (si existe)
+          this.stopLiveShiftIfAny();
+
+          // 2. Eliminar asignación (Post)
           this.matchingService.deletePost(this.activeOrderId!).subscribe({
             next: () => {
               this.activeOrderId = null;
@@ -326,7 +330,7 @@ export class FamilyViewComponent implements OnInit {
                 this.patientData.caregiverName = null;
                 this.patientData.caregiver = null;
               }
-              Swal.default.fire('¡Finalizado!', 'La asignación ha sido eliminada.', 'success');
+              Swal.default.fire('¡Finalizado!', 'La asignación ha sido eliminada y la guardia cerrada.', 'success');
             },
             error: (err) => {
               console.error('Error al eliminar asignación:', err);
@@ -335,6 +339,35 @@ export class FamilyViewComponent implements OnInit {
           });
         }
       });
+    });
+  }
+
+  private stopLiveShiftIfAny() {
+    const pName = this.patientData?.name || this.patientData?.patientName;
+    if (!pName) return;
+
+    this.caregiverService.getActiveShifts().subscribe(shifts => {
+      const activeShift = shifts.find(s =>
+        s.patientName?.trim().toLowerCase() === pName.trim().toLowerCase() &&
+        s.status === 'ACTIVA'
+      );
+
+      if (activeShift) {
+        // Calcular segundos localmente para cerrar la guardia
+        const start = new Date(activeShift.startTime).getTime();
+        const now = new Date().getTime();
+        const seconds = Math.floor((now - start) / 1000);
+
+        const payload = {
+          caregiverId: activeShift.caregiverId,
+          durationSeconds: seconds
+        };
+
+        this.caregiverService.stopShift(payload).subscribe({
+          next: () => console.log('Guardia viva del cuidador detenida correctamente.'),
+          error: (err) => console.error('Error intentando detener la guardia viva:', err)
+        });
+      }
     });
   }
 

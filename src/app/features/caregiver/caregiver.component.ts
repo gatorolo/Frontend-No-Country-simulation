@@ -67,6 +67,7 @@ export class CaregiverComponent implements OnInit {
         this.loadProfile();
         this.initCaregiverForm();
         this.loadShiftHistory(); // Carga el historial real de la base de datos
+        this.checkActiveShift(); // IMPORTANTE: Recuperar guardia en curso si existe
 
         // 1. Configuración de WhatsApp
         this.configService.config$.subscribe(config => {
@@ -404,6 +405,50 @@ export class CaregiverComponent implements OnInit {
                 console.error('Error al finalizar guardia', err);
                 Swal.fire('Error', 'No se pudo registrar la guardia', 'error');
             }
+        });
+    }
+
+    private checkActiveShift() {
+        const caregiverId = this.profileData?.id || 1;
+        this.caregiverService.getActiveShifts().subscribe({
+            next: (shifts) => {
+                const myActiveShift = shifts.find(s => s.caregiverId === caregiverId && s.status === 'ACTIVA');
+                if (myActiveShift) {
+                    this.isShiftActive = true;
+                    // Calcular los segundos que pasaron desde que inició en el servidor
+                    const startDate = new Date(myActiveShift.startTime);
+                    const now = new Date().getTime();
+                    this.shiftSeconds = Math.floor((now - startDate.getTime()) / 1000);
+
+                    // Sincronizar UI Form
+                    const timeString = `${this.pad(startDate.getHours())}:${this.pad(startDate.getMinutes())}`;
+
+                    const syncFormTask = () => {
+                        const patientObj = this.patients.find(p => p.name?.trim().toLowerCase() === myActiveShift.patientName?.trim().toLowerCase());
+                        this.shiftForm.patchValue({
+                            patientId: patientObj ? patientObj.id : '',
+                            startTimeInput: timeString
+                        });
+                    };
+
+                    // En caso de que la lista de pacientes tarde unos milisegundos más en cargar
+                    if (this.patients.length > 0) {
+                        syncFormTask();
+                    } else {
+                        setTimeout(syncFormTask, 1000);
+                    }
+
+                    // Reanudar el reloj localmente
+                    this.timerInterval = setInterval(() => {
+                        this.shiftSeconds++;
+                        const hrs = Math.floor(this.shiftSeconds / 3600);
+                        const mins = Math.floor((this.shiftSeconds % 3600) / 60);
+                        const secs = this.shiftSeconds % 60;
+                        this.shiftDuration = `${this.pad(hrs)}:${this.pad(mins)}:${this.pad(secs)}`;
+                    }, 1000);
+                }
+            },
+            error: (err) => console.error('Error al recuperar estado de guardia actual', err)
         });
     }
 
