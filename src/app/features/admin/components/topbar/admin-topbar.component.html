@@ -85,9 +85,19 @@
       <div class="modal-actions" style="justify-content: center; margin-top: 2rem; display: flex; gap: 1rem;">
         <button class="btn-cancel" (click)="closeNotificationDetail()">{{ isPatientRequest ? 'Cerrar' : 'Cancelar'
           }}</button>
-        <button class="btn-approve" (click)="isPatientRequest ? goToDashboard() : approveAssignment()">
-          <span>{{ isPatientRequest ? 'Ir al Tablero' : 'Aprobar Asignación' }}</span>
-          <span class="material-icons" *ngIf="!isPatientRequest">check_circle</span>
+        <button class="btn-approve" (click)="isPatientRequest ? goToDashboard() : approveAssignment()"
+          [disabled]="!isPatientRequest && selectedNotification?.status === 'Aprobado'">
+
+          <ng-container *ngIf="isPatientRequest; else approvalText">
+            <span>Ir al Tablero</span>
+          </ng-container>
+
+          <ng-template #approvalText>
+            <span>{{ selectedNotification?.status === 'Aprobado' ? 'Ya Aprobado' : 'Aprobar Asignación' }}</span>
+            <span class="material-icons" *ngIf="selectedNotification?.status !== 'Aprobado'">check_circle</span>
+            <span class="material-icons" *ngIf="selectedNotification?.status === 'Aprobado'">done_all</span>
+          </ng-template>
+
         </button>
       </div>
     </div>

@@ -398,6 +398,14 @@
     box-shadow: 0 6px 16px rgba(16, 185, 129, 0.5);
 }
 
+.btn-approve:disabled {
+    background: #9ca3af;
+    cursor: not-allowed;
+    box-shadow: none;
+    opacity: 0.7;
+    transform: none;
+}
+
 .btn-cancel {
     background: white;
     color: #64748b;

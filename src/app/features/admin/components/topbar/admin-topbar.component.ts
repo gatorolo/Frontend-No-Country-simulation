@@ -107,10 +107,13 @@ export class AdminTopbarComponent implements OnInit {
                 error: (err) => console.error('❌ Error al confirmar desde Topbar:', err)
             });
 
-            // Actualizar estado de la notificación a Aprobado
+            // Actualizar estado de la notificación a Aprobado en DB
             if (this.activeNotificationId) {
                 this.notificationService.updateNotificationStatus(this.activeNotificationId, 'Aprobado');
             }
+
+            // Actualizar estado localmente para reflejar el cambio en la UI instantáneamente
+            this.selectedNotification.status = 'Aprobado';
 
             // 1. Notificación al CUIDADOR
             this.notificationService.addNotification({

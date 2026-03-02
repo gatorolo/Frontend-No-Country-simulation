@@ -22,6 +22,11 @@ export class NotificationService {
     private notificationsSource = new BehaviorSubject<Notification[]>([]);
     notifications$ = this.notificationsSource.asObservable();
 
+    // Notifier Audio Support
+    private notificationAudio = new Audio('assets/ding-dong.mp3');
+    private previousUnreadCount = 0;
+    private firstLoadComplete = false;
+
     constructor(private http: HttpClient) {
         this.loadFromApi();
         // Polling para mantener notificaciones sincronizadas desde la base de datos
@@ -42,6 +47,20 @@ export class NotificationService {
                     date: new Date(n.date)
                 }));
                 this.notificationsSource.next(formatted);
+
+                // Notification Sound Logic
+                const currentUnreadCount = formatted.filter(n => !n.read).length;
+
+                // Si hay más notificaciones no leídas ahora que en la recarga anterior,
+                // y no estamos en la primera carga (para evitar sonar al abrir la página)...
+                if (this.firstLoadComplete && currentUnreadCount > this.previousUnreadCount) {
+                    this.notificationAudio.play().catch(e => {
+                        console.warn('El navegador bloqueó el autoplay del sonido de la notificación. El usuario debe interactuar con la web primero.', e);
+                    });
+                }
+
+                this.previousUnreadCount = currentUnreadCount;
+                this.firstLoadComplete = true;
             },
             error: (err) => console.error('Error al cargar notificaciones desde DB', err)
         });
@@ -59,9 +78,14 @@ export class NotificationService {
     }
 
     updateNotificationStatus(id: number, status: Notification['status']) {
-        // No hay endpoint creado para actualizar el "estado" de una notificación aún, 
-        // pero podemos crear uno en Java o dejarlo pendiente:
-        console.warn('updateNotificationStatus aún no implementado en el Controller Java.');
+        // Enviar actualización de estado al nuevo endpoint del backend
+        this.http.put(`${this.apiUrl}/${id}/status`, { status }).subscribe({
+            next: () => {
+                console.log(`✅ Estado de notificación ${id} actualizado a ${status}`);
+                this.loadFromApi();
+            },
+            error: (err) => console.error('❌ Error al actualizar estado de notificación', err)
+        });
     }
 
     markAsRead(id: number) {
