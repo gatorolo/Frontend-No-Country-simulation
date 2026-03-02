@@ -70,7 +70,7 @@ export class AdminTopbarComponent implements OnInit {
             const postReal = posts.find(p => p.id === notification.relatedPostId);
 
             if (postReal) {
-                this.selectedNotification = postReal;
+                this.selectedNotification = { ...postReal, status: notification.status || 'Pendiente' };
             } else {
                 // Si no está en la lista local, usamos la notificación pero nos aseguramos de que tenga los campos
                 // Gracias a que ahora el cuidador envía metadatos, esto funcionará.
