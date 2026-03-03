@@ -65,6 +65,7 @@ export class CaregiverComponent implements OnInit {
 
     clearedPostIds: number[] = [];
     hiddenShiftIds: number[] = [];
+    caregiverDocuments: any[] = [];
 
     ngOnInit(): void {
         this.loadClearedPostIds();
@@ -74,6 +75,7 @@ export class CaregiverComponent implements OnInit {
         this.initCaregiverForm();
         this.loadShiftHistory(); // Carga el historial real de la base de datos
         this.checkActiveShift(); // IMPORTANTE: Recuperar guardia en curso si existe
+        this.loadDocuments(); // Cargar documentos del cuidador
 
         // 1. Configuración de WhatsApp
         this.configService.config$.subscribe(config => {
@@ -333,7 +335,16 @@ export class CaregiverComponent implements OnInit {
         // Escuchar cambios en el selector de paciente para mostrar su información 
         this.shiftForm.get('patientId')?.valueChanges.subscribe(id => {
             if (id) {
-                this.selectedPatientDetails = this.patients.find(p => p.id === +id);
+                const patientReal = this.patients.find(p => p.id === +id);
+                if (patientReal) {
+                    this.selectedPatientDetails = {
+                        ...patientReal,
+                        city: patientReal.city || patientReal.locationLink || 'No especificada',
+                        zone: patientReal.zone || 'No especificada'
+                    };
+                } else {
+                    this.selectedPatientDetails = null;
+                }
             } else {
                 this.selectedPatientDetails = null;
             }
@@ -535,9 +546,54 @@ export class CaregiverComponent implements OnInit {
         return num < 10 ? '0' + num : num.toString();
     }
 
+    loadDocuments() {
+        const userId = this.profileService.getUserId() || 1;
+        this.caregiverService.getCaregiverDocuments(userId).subscribe({
+            next: (docs) => this.caregiverDocuments = docs,
+            error: (err) => console.error('Error loading documents:', err)
+        });
+    }
+
+    getDocumentByType(type: string) {
+        return this.caregiverDocuments.find(d => d.type === type);
+    }
+
     onFileUpload(event: any, docType: string) {
         const file = event.target.files[0];
-        console.log(`Uploading ${docType}:`, file?.name);
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = (e: any) => {
+            const base64 = e.target.result;
+            const userId = this.profileData?.id || this.profileService.getUserId();
+            const caregiverName = this.profileData?.caregiverName || 'Cuidador';
+
+            const payload = {
+                caregiverId: userId,
+                caregiverName: caregiverName,
+                type: docType,
+                fileName: file.name,
+                content: base64
+            };
+
+            Swal.fire({
+                title: 'Subiendo documento...',
+                allowOutsideClick: false,
+                didOpen: () => Swal.showLoading()
+            });
+
+            this.caregiverService.uploadDocument(payload).subscribe({
+                next: () => {
+                    Swal.fire('¡Éxito!', 'Documento subido correctamente', 'success');
+                    this.loadDocuments();
+                },
+                error: (err) => {
+                    console.error('Error uploading document:', err);
+                    Swal.fire('Error', 'No se pudo subir el documento', 'error');
+                }
+            });
+        };
+        reader.readAsDataURL(file);
     }
 
     uploadProfilePhoto(event: any) {

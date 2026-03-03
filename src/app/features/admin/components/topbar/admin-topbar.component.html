@@ -60,7 +60,7 @@
       </div>
 
       <div class="detail-grid" *ngIf="!isRegistrationRequest">
-        <div class="detail-item">
+        <div class="detail-item" *ngIf="!isPatientRequest">
           <span class="label">Cuidador Postulado</span>
           <span class="value">{{ selectedNotification.caregiverName }}</span>
         </div>

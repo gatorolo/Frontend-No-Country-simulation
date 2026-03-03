@@ -88,7 +88,22 @@ export class AdminTopbarComponent implements OnInit {
             if (postReal) {
                 this.selectedNotification = { ...postReal, status: notification.status || 'Pendiente' };
             } else {
-                this.selectedNotification = notification;
+                if (this.isPatientRequest) {
+                    this.matchingService.getPendingRequests().subscribe({
+                        next: (requests) => {
+                            const req = requests.find(r => r.id === notification.relatedPostId);
+                            if (req) {
+                                this.selectedNotification = { ...req, status: notification.status || 'Pendiente' };
+                            } else {
+                                this.selectedNotification = notification;
+                            }
+                        },
+                        error: () => this.selectedNotification = notification
+                    });
+                    this.selectedNotification = notification; // Fallback till API resolves
+                } else {
+                    this.selectedNotification = notification;
+                }
             }
         } else {
             this.selectedNotification = notification;

@@ -1,6 +1,96 @@
 <div class="dashboard-container">
-      <h1 class="page-title">Documentos</h1>
-      <div class="card">
-        <p>Repositorio Documental y Validaciones</p>
+  <div class="header-section">
+    <div>
+      <h1 class="page-title">Repositorio Documental</h1>
+      <p class="page-subtitle">Gestión centralizada de legajos de cuidadores</p>
+    </div>
+    <button class="btn-refresh" (click)="loadAllDocuments()" [class.loading]="loading">
+      <span class="material-icons">refresh</span> Actualizar
+    </button>
+  </div>
+
+  <!-- Grid de Tarjetas de Cuidadores -->
+  <div class="caregivers-grid" *ngIf="!selectedGroup && groupedDocuments.length > 0">
+    <div class="caregiver-card" *ngFor="let group of groupedDocuments" (click)="selectCaregiver(group)">
+      <div class="card-hover-overlay">
+        <span class="material-icons">visibility</span>
+        <span>Ver Documentos</span>
+      </div>
+
+      <div class="card-content">
+        <div class="avatar-circle">
+          {{ group.caregiverName.charAt(0).toUpperCase() }}
+        </div>
+        <h3 class="caregiver-name">{{ group.caregiverName }}</h3>
+        <p class="docs-count">
+          <span class="material-icons">folder</span>
+          {{ group.documents.length }} documentos cargados
+        </p>
+        <div class="last-upload">
+          <span class="material-icons">update</span>
+          Última carga: {{ group.lastUpload | date:'dd/MM/yyyy' }}
+        </div>
+      </div>
+
+      <div class="card-footer">
+        <div class="status-indicator" [class.complete]="group.documents.length >= 3">
+          {{ group.documents.length >= 3 ? 'Legajo Completo' : 'Legajo Parcial' }}
+        </div>
       </div>
     </div>
+  </div>
+
+  <!-- Vista de Detalle del Cuidador -->
+  <div class="detail-view" *ngIf="selectedGroup">
+    <div class="detail-header">
+      <button class="back-btn" (click)="closeDetail()">
+        <span class="material-icons">arrow_back</span> Volver al listado
+      </button>
+      <div class="caregiver-info">
+        <h2>{{ selectedGroup.caregiverName }}</h2>
+        <span class="caregiver-id">ID de Sistema: {{ selectedGroup.caregiverId }}</span>
+      </div>
+    </div>
+
+    <div class="documents-list">
+      <div class="doc-item" *ngFor="let doc of selectedGroup.documents">
+        <div class="doc-icon">
+          <span class="material-icons">{{
+            doc.type === 'INSURANCE' ? 'shield' : 'description'
+            }}</span>
+        </div>
+        <div class="doc-main">
+          <span class="doc-type">{{
+            doc.type === 'DNI_FRONT' ? 'DNI Frente' :
+            doc.type === 'DNI_BACK' ? 'DNI Dorso' :
+            doc.type === 'INSURANCE' ? 'Seguro Mala Praxis' : doc.type
+            }}</span>
+          <span class="doc-filename">{{ doc.fileName }}</span>
+        </div>
+        <div class="doc-meta">
+          <span class="upload-date">{{ doc.uploadDate | date:'dd/MM/yyyy HH:mm' }}</span>
+        </div>
+        <div class="doc-actions">
+          <button class="action-btn view-btn" (click)="viewDocument(doc)" title="Ver">
+            <span class="material-icons">visibility</span>
+          </button>
+          <button class="action-btn delete-btn" (click)="deleteDocument(doc.id)" title="Eliminar">
+            <span class="material-icons">delete</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Empty State -->
+  <div class="empty-state" *ngIf="!loading && groupedDocuments.length === 0">
+    <span class="material-icons">folder_open</span>
+    <p>No hay documentos cargados en el sistema por el momento.</p>
+  </div>
+
+  <!-- Loading -->
+  <div class="loading-overlay" *ngIf="loading">
+    <div class="spinner"></div>
+    <p>Cargando repositorio...</p>
+  </div>
+</div>

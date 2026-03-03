@@ -199,19 +199,50 @@
             <span class="material-icons">folder_shared</span> Documentación Cargada
         </h3>
         <div class="docs-grid">
-            <div class="doc-card">
-                <span class="material-icons">description</span>
-                <div>
-                    <span class="doc-name">Fotocopia de DNI (Frente/Dorso)</span>
-                    <span class="doc-status uploaded">Archivo Verificado</span>
+            <div class="doc-card" [class.uploaded]="getDocumentByType('DNI_FRONT')">
+                <span class="material-icons">{{ getDocumentByType('DNI_FRONT') ? 'check_circle' : 'description'
+                    }}</span>
+                <div style="flex-grow: 1;">
+                    <span class="doc-name">Fotocopia de DNI (Frente)</span>
+                    <span class="doc-status" [class.uploaded]="getDocumentByType('DNI_FRONT')">
+                        {{ getDocumentByType('DNI_FRONT') ? 'Archivo Cargado' : 'Pendiente de Carga' }}
+                    </span>
                 </div>
+                <input type="file" #dniFrontInput (change)="onFileUpload($event, 'DNI_FRONT')" style="display: none;"
+                    accept="image/*,.pdf">
+                <button class="icon-btn" (click)="dniFrontInput.click()" style="color: var(--primary);">
+                    <span class="material-icons">{{ getDocumentByType('DNI_FRONT') ? 'sync' : 'upload' }}</span>
+                </button>
             </div>
-            <div class="doc-card">
-                <span class="material-icons">shield</span>
-                <div>
-                    <span class="doc-name">Seguro de Mala Praxis</span>
-                    <span class="doc-status uploaded">Póliza Vigente</span>
+
+            <div class="doc-card" [class.uploaded]="getDocumentByType('DNI_BACK')">
+                <span class="material-icons">{{ getDocumentByType('DNI_BACK') ? 'check_circle' : 'description' }}</span>
+                <div style="flex-grow: 1;">
+                    <span class="doc-name">Fotocopia de DNI (Dorso)</span>
+                    <span class="doc-status" [class.uploaded]="getDocumentByType('DNI_BACK')">
+                        {{ getDocumentByType('DNI_BACK') ? 'Archivo Cargado' : 'Pendiente de Carga' }}
+                    </span>
                 </div>
+                <input type="file" #dniBackInput (change)="onFileUpload($event, 'DNI_BACK')" style="display: none;"
+                    accept="image/*,.pdf">
+                <button class="icon-btn" (click)="dniBackInput.click()" style="color: var(--primary);">
+                    <span class="material-icons">{{ getDocumentByType('DNI_BACK') ? 'sync' : 'upload' }}</span>
+                </button>
+            </div>
+
+            <div class="doc-card" [class.uploaded]="getDocumentByType('INSURANCE')">
+                <span class="material-icons">{{ getDocumentByType('INSURANCE') ? 'check_circle' : 'shield' }}</span>
+                <div style="flex-grow: 1;">
+                    <span class="doc-name">Seguro de Mala Praxis</span>
+                    <span class="doc-status" [class.uploaded]="getDocumentByType('INSURANCE')">
+                        {{ getDocumentByType('INSURANCE') ? 'Póliza Cargada' : 'Pendiente de Carga' }}
+                    </span>
+                </div>
+                <input type="file" #insuranceInput (change)="onFileUpload($event, 'INSURANCE')" style="display: none;"
+                    accept="image/*,.pdf">
+                <button class="icon-btn" (click)="insuranceInput.click()" style="color: var(--primary);">
+                    <span class="material-icons">{{ getDocumentByType('INSURANCE') ? 'sync' : 'upload' }}</span>
+                </button>
             </div>
         </div>
     </div>

@@ -118,8 +118,9 @@ export class FamilyViewComponent implements OnInit {
             this.patientData.caregiver = {
               fullName: latest.caregiverName,
               specialty: latest.caregiverSpecialty || 'Acompañante Terapéutico Asignado',
-              isVerified: true
+              isVerified: false // Default pending until API responds
             };
+            this.fetchCaregiverStatus(latest.caregiverName);
           }
         }
 
@@ -188,8 +189,9 @@ export class FamilyViewComponent implements OnInit {
         this.patientData.caregiver = {
           fullName: myOrder.caregiverName,
           specialty: myOrder.specialty || 'Especialista Asignado',
-          isVerified: true
+          isVerified: false
         };
+        this.fetchCaregiverStatus(myOrder.caregiverName);
       } else {
         this.activeOrderId = null;
       }
@@ -279,9 +281,30 @@ export class FamilyViewComponent implements OnInit {
       this.patientData.caregiver = {
         fullName: nombreCuidador,
         specialty: service.specialty || 'Especialista en Gerontología',
-        isVerified: service.status === 'Confirmado'
+        isVerified: false
       };
+      this.fetchCaregiverStatus(nombreCuidador);
     }
+  }
+
+  private fetchCaregiverStatus(caregiverName: string) {
+    if (!caregiverName || !this.patientData || !this.patientData.caregiver) return;
+
+    this.caregiverService.getAllCaregivers().subscribe({
+      next: (caregivers) => {
+        const matched = caregivers.find(c =>
+          (c.caregiverName?.trim().toLowerCase() === caregiverName.trim().toLowerCase()) ||
+          (c.fullName?.trim().toLowerCase() === caregiverName.trim().toLowerCase())
+        );
+
+        if (matched) {
+          // Status in the backend is usually 'Verificado' or a boolean `true`
+          const isVer = matched.status === 'Verificado' || matched.status === true;
+          this.patientData.caregiver.isVerified = isVer;
+        }
+      },
+      error: (err) => console.error('Error fetching caregiver status for Family View:', err)
+    });
   }
 
   toggleNotifications() {
@@ -489,7 +512,8 @@ export class FamilyViewComponent implements OnInit {
           title: 'Nueva Solicitud de Servicio',
           message: `El paciente ${requestPayload.patientName} ha solicitado un cuidador (${requestPayload.specialty}).`,
           type: 'info',
-          recipientRole: 'admin'
+          recipientRole: 'admin',
+          relatedPostId: res.id
         });
       },
       error: (err) => {

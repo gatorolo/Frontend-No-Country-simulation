@@ -190,8 +190,12 @@
 
                             <div class="caregiver-actions"
                                 style="margin-top: 15px; display: flex; gap: 10px; align-items: center;">
-                                <div class="status-badge-verified">
+                                <div *ngIf="patientData.caregiver?.isVerified" class="status-badge-verified">
                                     <span class="material-icons">verified</span> Cuidador Verificado
+                                </div>
+                                <div *ngIf="patientData.caregiver && !patientData.caregiver.isVerified"
+                                    class="status-badge-pending">
+                                    <span class="material-icons">hourglass_empty</span> En validación
                                 </div>
                                 <button class="btn-dismiss" (click)="dismissCaregiver()" title="Finalizar Guardia">
                                     <span class="material-icons">person_remove</span>

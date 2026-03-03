@@ -348,3 +348,55 @@
 .btn-delete-icon .material-icons {
     font-size: 1.25rem;
 }
+
+/* --- Pending Requests Styles --- */
+.request-item-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 10px;
+    margin-bottom: 10px;
+}
+
+.request-info-layout {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+}
+
+.request-header-layout {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+}
+
+.request-avatar {
+    background: #10b981;
+    color: white;
+}
+
+.request-name {
+    font-size: 0.95rem;
+    color: var(--text-color);
+}
+
+.request-subtext {
+    font-size: 0.8rem;
+    color: var(--text-light);
+}
+
+.request-details-box {
+    width: 100%;
+    font-size: 0.85rem;
+    background: var(--bg-color);
+    color: var(--text-color);
+    padding: 8px;
+    border-radius: 6px;
+    margin-top: 5px;
+    border: 1px solid var(--border-color);
+}
+
+
+

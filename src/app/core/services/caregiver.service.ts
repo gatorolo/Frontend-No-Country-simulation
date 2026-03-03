@@ -24,12 +24,10 @@ export interface Caregiver {
 export class CaregiverService {
   private apiUrl = 'http://localhost:8080/api/caregivers';
 
-
   private caregiversSource = new BehaviorSubject<Caregiver[]>([]);
   caregivers$ = this.caregiversSource.asObservable();
 
   constructor(private http: HttpClient) { }
-
 
   getAllCaregivers(): Observable<Caregiver[]> {
     return this.http.get<Caregiver[]>(this.apiUrl).pipe(
@@ -81,7 +79,6 @@ export class CaregiverService {
   }
 
   // --- NUEVOS MÉTODOS PARA FACTURACIÓN DE PACIENTE ---
-
   getPatientUnpaidShifts(): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiUrl.replace('/caregivers', '')}/shifts/patient-unpaid`);
   }
@@ -94,9 +91,24 @@ export class CaregiverService {
     return this.http.put<any>(`${this.apiUrl.replace('/caregivers', '')}/shifts/${shiftId}/pay-patient`, {});
   }
 
-  // ---------------------------------------------------
-
   getShiftHistory(caregiverId: number): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiUrl.replace('/caregivers', '')}/shifts/caregiver/${caregiverId}`);
+  }
+
+  // --- NUEVOS MÉTODOS PARA DOCUMENTOS ---
+  uploadDocument(document: any): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl.replace('/caregivers', '')}/documents/upload`, document);
+  }
+
+  getCaregiverDocuments(caregiverId: number): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl.replace('/caregivers', '')}/documents/caregiver/${caregiverId}`);
+  }
+
+  getAllDocuments(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl.replace('/caregivers', '')}/documents/all`);
+  }
+
+  deleteDocument(id: number): Observable<any> {
+    return this.http.delete<any>(`${this.apiUrl.replace('/caregivers', '')}/documents/${id}`);
   }
 }
