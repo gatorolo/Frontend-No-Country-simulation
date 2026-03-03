@@ -23,22 +23,60 @@
 
   <div class="dashboard-main-grid">
     <div class="left-column">
-      <div class="card metrics-card">
+      <div class="card metrics-card" style="display: flex; flex-direction: column;">
         <div class="card-header">
-          <h3>Métricas de Gestión</h3>
-          <button class="btn-link">Métricas 30 días ></button>
+          <h3>Rentabilidad en Vivo <span class="badge-mini"
+              style="background:#10b981; color:white; animation: pulse 2s infinite">LIVE</span></h3>
+          <button class="btn-link" routerLink="/admin/payments">Ver Liquidaciones ></button>
         </div>
-        <div class="chart-box">
-          <svg width="100%" height="200" viewBox="0 0 500 200">
-            <path d="M0 150 C 100 100 150 180 250 120 S 350 50 500 80" stroke="#3b82f6" stroke-width="3" fill="none" />
-            <path d="M0 180 C 100 160 150 190 250 150 S 350 120 500 140" stroke="#10b981" stroke-width="3"
-              fill="none" />
-            <circle cx="250" cy="120" r="4" fill="#3b82f6" />
-            <circle cx="250" cy="150" r="4" fill="#10b981" />
+
+        <div class="chart-box"
+          style="flex: 1; display: flex; align-items: center; justify-content: center; position: relative;">
+          <!-- SVG DONUT CHART -->
+          <svg width="200" height="200" viewBox="0 0 100 100"
+            style="transform: rotate(-90deg); filter: drop-shadow(0px 10px 15px rgba(0,0,0,0.1));">
+            <!-- Circulo Base (Gris Claro) -->
+            <circle cx="50" cy="50" r="40" fill="transparent" stroke="#f1f5f9" stroke-width="12" />
+
+            <!-- Circulo de Costos (Rojo Suave) -->
+            <circle cx="50" cy="50" r="40" fill="transparent" stroke="#fecdd3" stroke-width="12" pathLength="100"
+              [attr.stroke-dasharray]="dashArrayCost" style="transition: stroke-dasharray 1s ease-in-out;" />
+
+            <!-- Circulo de Margen (Verde Valora) -->
+            <circle cx="50" cy="50" r="40" fill="transparent" stroke="#10b981" stroke-width="12" pathLength="100"
+              [attr.stroke-dasharray]="dashArrayMargin" [attr.stroke-dashoffset]="-costPercentage"
+              style="transition: stroke-dasharray 1s ease-in-out, stroke-dashoffset 1s ease-in-out; stroke-linecap: round;" />
           </svg>
-          <div class="chart-legend">
-            <span><span class="dot blue"></span> Ingresos</span>
-            <span><span class="dot green"></span> Gastos</span>
+
+          <!-- TEXTO EN EL CENTRO DEL DONUT -->
+          <div
+            style="position: absolute; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+            <span
+              style="font-size: 0.75rem; color: #64748b; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px;">Margen
+              Valora</span>
+            <span
+              style="font-size: 1.6rem; font-weight: 800; color: #0f172a; font-family: monospace; letter-spacing: -0.5px;">
+              ${{ valoraMargin | number:'1.2-2' }}
+            </span>
+          </div>
+        </div>
+
+        <div class="chart-legend"
+          style="display: flex; justify-content: space-between; border-top: 1px solid #e2e8f0; margin-top: 1rem; padding-top: 1rem;">
+          <div style="display: flex; flex-direction: column;">
+            <span style="font-size: 0.8rem; color: #64748b; display: flex; align-items: center; gap: 4px;">
+              <span class="dot" style="background: #10b981;"></span> Ingresos (AF)
+            </span>
+            <span style="font-weight: 600; font-family: monospace;">${{ totalPatientDebt | number:'1.2-2' }}</span>
+          </div>
+
+          <div style="display: flex; flex-direction: column; text-align: right;">
+            <span
+              style="font-size: 0.8rem; color: #64748b; display: flex; align-items: center; justify-content: flex-end; gap: 4px;">
+              <span class="dot" style="background: #fecdd3;"></span> Costos (Cuidadores)
+            </span>
+            <span style="font-weight: 600; font-family: monospace; color: #f43f5e;">-${{ totalCaregiverDebt |
+              number:'1.2-2' }}</span>
           </div>
         </div>
       </div>

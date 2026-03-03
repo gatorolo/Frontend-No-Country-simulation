@@ -34,6 +34,8 @@ export class PatientsComponent implements OnInit {
     this.patientForm = this.fb.group({
       name: ['', Validators.required],
       age: [0, [Validators.required, Validators.min(0)]],
+      city: [''],
+      zone: [''],
       diagnosis: ['', Validators.required],
       healthInsurance: ['', Validators.required],
       locationLink: [''],
@@ -67,6 +69,8 @@ export class PatientsComponent implements OnInit {
     this.patientForm.patchValue({
       name: patient.name,
       age: patient.age,
+      city: patient.city,
+      zone: patient.zone,
       diagnosis: patient.diagnosis,
       healthInsurance: patient.healthInsurance,
       locationLink: patient.locationLink,
@@ -110,5 +114,19 @@ export class PatientsComponent implements OnInit {
         error: (err) => console.error('Error al crear', err)
       });
     }
+  }
+
+  getMapsLink(link: string): string {
+    if (!link) return '';
+    // If it's already a full URL, trust it
+    if (link.startsWith('http://') || link.startsWith('https://')) {
+      return link;
+    }
+    // If it looks like a short link (www.something.com)
+    if (link.startsWith('www.')) {
+      return `https://${link}`;
+    }
+    // Otherwise, treat it as a raw street address and search Google Maps
+    return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(link)}`;
   }
 }

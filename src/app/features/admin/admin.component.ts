@@ -40,6 +40,15 @@ export class AdminComponent implements OnInit { // Implementamos OnInit
     activeShifts: any[] = [];
     unpaidSummary: any[] = [];
     patientUnpaidSummary: any[] = []; // NUEVO: Resumen de deuda de pacientes
+
+    // --- NUEVO: MÉTRICAS DE RENTABILIDAD EN TIEMPO REAL ---
+    totalPatientDebt: number = 0;
+    totalCaregiverDebt: number = 0;
+    valoraMargin: number = 0;
+    costPercentage: number = 50; // Para el gráfico Donut (0-100)
+    marginPercentage: number = 50; // Para el gráfico Donut (0-100)
+    dashArrayCost: string = '50, 100'; // Propiedad SVG para la porción roja
+    dashArrayMargin: string = '50, 100'; // Propiedad SVG para la porción verde
     private pollInterval: any;
     private timerInterval: any;
 
@@ -118,10 +127,13 @@ export class AdminComponent implements OnInit { // Implementamos OnInit
                         return {
                             ...shift,
                             caregiverName: caregiverMap.get(shift.caregiverId) || ('Cuidador ID: ' + shift.caregiverId),
+                            hourlyRate: caregivers.find(c => c.id === shift.caregiverId)?.hourlyRate || 3000, // Recuperamos el valor por hora (o 3000 por defecto)
                             runningSeconds: diffSeconds,
                             displayTimer: this.formatTime(diffSeconds)
                         };
                     });
+
+                    this.calculateGlobalMetrics(); // Recalculamos totales iniciales
                 },
                 error: (err) => console.error('Error cargando guardias activas', err)
             });
@@ -158,9 +170,29 @@ export class AdminComponent implements OnInit { // Implementamos OnInit
     }
 
     updateShiftTimers() {
+        // En cada "tick" de 1 segundo, sumamos fracciones de centavos a las métrcas
+        let addedCost = 0;
+        let addedRevenue = 0;
+
         for (let shift of this.activeShifts) {
             shift.runningSeconds++;
             shift.displayTimer = this.formatTime(shift.runningSeconds);
+
+            // Costo por segundo del cuidador
+            const costPerSecond = (shift.hourlyRate || 3000) / 3600;
+            addedCost += costPerSecond;
+
+            // Asumimos que a la familia se le cobra un 40% adicional (Mark-up estándar de agencias)
+            // IMPORTANTE: Modifica este multiplicador según la verdadera regla de negocio de Valora
+            const revenuePerSecond = costPerSecond * 1.40;
+            addedRevenue += revenuePerSecond;
+        }
+
+        if (addedCost > 0 || addedRevenue > 0) {
+            this.totalCaregiverDebt += addedCost;
+            this.totalPatientDebt += addedRevenue;
+            this.valoraMargin = this.totalPatientDebt - this.totalCaregiverDebt;
+            this.updateDonutChart();
         }
     }
 
@@ -246,6 +278,7 @@ export class AdminComponent implements OnInit { // Implementamos OnInit
                 }
 
                 this.patientUnpaidSummary = Array.from(grouped.values()).filter((g: any) => g.totalDebt > 0);
+                this.calculateGlobalMetrics(); // Recalcular con los nuevos datos recibidos
             },
             error: (err) => console.error('Error cargando deudas de pacientes', err)
         });
@@ -273,6 +306,55 @@ export class AdminComponent implements OnInit { // Implementamos OnInit
                 });
             }
         });
+    }
+
+    // ---------------------------------------------------
+    // --- LÓGICA DE GRÁFICOS Y CÁLCULOS GLOBALES ---
+
+    calculateGlobalMetrics() {
+        // 1. Sumar deuda histórica de pacientes
+        const pastRevenue = this.patientUnpaidSummary.reduce((sum, item) => sum + (item.totalDebt || 0), 0);
+
+        // 2. Sumar deuda histórica con cuidadores
+        const pastCost = this.unpaidSummary.reduce((sum, item) => sum + (item.totalEarned || 0), 0);
+
+        // 3. Sumar deuda 'viva' (de las guardias corriendo ahora mismo)
+        let liveRevenue = 0;
+        let liveCost = 0;
+
+        this.activeShifts.forEach(shift => {
+            const cost = ((shift.hourlyRate || 3000) / 3600) * shift.runningSeconds;
+            const revenue = cost * 1.40; // 40% de mark-up
+
+            liveCost += cost;
+            liveRevenue += revenue;
+        });
+
+        // 4. Asignar los totales a las variables reactivas de la UI
+        this.totalPatientDebt = pastRevenue + liveRevenue;
+        this.totalCaregiverDebt = pastCost + liveCost;
+        this.valoraMargin = this.totalPatientDebt - this.totalCaregiverDebt;
+
+        this.updateDonutChart();
+    }
+
+    updateDonutChart() {
+        if (this.totalPatientDebt <= 0) {
+            this.costPercentage = 0;
+            this.marginPercentage = 0;
+            this.dashArrayCost = '0, 100';
+            this.dashArrayMargin = '0, 100';
+            return;
+        }
+
+        // ¿Qué porcentaje de los Ingresos Totales se va en Costos vs Ganancia Pura?
+        this.costPercentage = (this.totalCaregiverDebt / this.totalPatientDebt) * 100;
+        this.marginPercentage = (this.valoraMargin / this.totalPatientDebt) * 100;
+
+        // Formato para circulo SVG completo (circunferencia aprox 100, no es exacto matemáticamente pero sirve para el pathLength="100")
+        // El formato es "Longitud_del_Trazo, Espacio_Vacio"
+        this.dashArrayCost = `${this.costPercentage}, 100`;
+        this.dashArrayMargin = `${this.marginPercentage}, 100`;
     }
 
     // ---------------------------------------------------

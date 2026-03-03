@@ -83,6 +83,35 @@
                     </div>
                 </div>
 
+                <!-- NUEVO: DETALLES DEL PACIENTE ASIGNADO -->
+                <div *ngIf="selectedPatientDetails && !isShiftActive" class="patient-detail-card"
+                    style="margin-top: -1rem; margin-bottom: 2rem; padding: 1rem; border-radius: 8px; background: rgba(59, 130, 246, 0.05); border: 1px solid rgba(59, 130, 246, 0.1);">
+                    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                        <span class="material-icons" style="color: #3b82f6; font-size: 20px;">info</span>
+                        <span style="font-weight: 600; color: #1e293b; font-size: 0.95rem;">Información del
+                            Paciente</span>
+                    </div>
+                    <div
+                        style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; font-size: 0.85rem; color: #475569;">
+                        <div>
+                            <strong>Ciudad:</strong> {{ selectedPatientDetails.city || 'No especificada' }}
+                        </div>
+                        <div>
+                            <strong>Zona:</strong> {{ selectedPatientDetails.zone || 'No especificada' }}
+                        </div>
+                        <div style="grid-column: span 2;">
+                            <strong>Obra Social:</strong> {{ selectedPatientDetails.healthInsurance || 'Particular' }}
+                        </div>
+                        <div *ngIf="selectedPatientDetails.locationLink" style="grid-column: span 2; margin-top: 4px;">
+                            <a [href]="getMapsLink(selectedPatientDetails.locationLink)" target="_blank"
+                                rel="noopener noreferrer"
+                                style="color: #3b82f6; display: flex; align-items: center; gap: 4px; text-decoration: none;">
+                                <span class="material-icons" style="font-size: 16px;">map</span> Ver Dirección en Mapa
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="input-group" style="margin-bottom: 2rem;">
                     <label>Informe de Guardia (Novedades)</label>
                     <textarea formControlName="notes" rows="4"

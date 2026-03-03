@@ -38,6 +38,9 @@ export class CaregiverComponent implements OnInit {
     shiftHistory: any[] = [];
     private shiftSeconds = 0;
 
+    // Nueva propiedad para mostrar info del paciente en la UI
+    selectedPatientDetails: any = null;
+
     private timerInterval: any;
 
     notifications: any[] = [];
@@ -308,6 +311,15 @@ export class CaregiverComponent implements OnInit {
             startTimeInput: ['', Validators.required],
             notes: ['']
         });
+
+        // Escuchar cambios en el selector de paciente para mostrar su información 
+        this.shiftForm.get('patientId')?.valueChanges.subscribe(id => {
+            if (id) {
+                this.selectedPatientDetails = this.patients.find(p => p.id === +id);
+            } else {
+                this.selectedPatientDetails = null;
+            }
+        });
     }
 
 
@@ -508,5 +520,16 @@ export class CaregiverComponent implements OnInit {
     onFileUpload(event: any, docType: string) {
         const file = event.target.files[0];
         console.log(`Uploading ${docType}:`, file?.name);
+    }
+
+    getMapsLink(link: string): string {
+        if (!link) return '';
+        if (link.startsWith('http://') || link.startsWith('https://')) {
+            return link;
+        }
+        if (link.startsWith('www.')) {
+            return `https://${link}`;
+        }
+        return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(link)}`;
     }
 }
