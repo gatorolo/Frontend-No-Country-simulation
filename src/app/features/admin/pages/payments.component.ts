@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { PaymentService, Settlement, InsuranceBilling } from 'src/app/core/services/payment.service';
 import { ReportsService } from 'src/app/core/services/reports.service';
+import { CaregiverService } from 'src/app/core/services/caregiver.service';
 import Swal from 'sweetalert2';
 
 @Component({
@@ -30,7 +31,8 @@ export class PaymentsComponent implements OnInit {
 
   constructor(
     private paymentService: PaymentService,
-    private reportsService: ReportsService
+    private reportsService: ReportsService,
+    private caregiverService: CaregiverService
   ) { }
 
   ngOnInit(): void {
@@ -46,10 +48,50 @@ export class PaymentsComponent implements OnInit {
   }
 
   private loadData() {
-    this.paymentService.settlements$.subscribe(s => {
-      this.settlements = s.filter(item => !this.hiddenSettlements.includes(item.id));
-      this.kpis = this.paymentService.getKPIs();
+    this.reportsService.getShiftsHistory().subscribe({
+      next: (shifts) => {
+        // Objeto temporal para agrupar liquidaciones por nombre de cuidador
+        const aggregated: Record<string, { totalAmount: number, unpaidShiftIds: number[], status: 'Pendiente' | 'Procesado' }> = {};
+
+        shifts.forEach(shift => {
+          const name = shift.caregiverName || 'Desconocido';
+
+          if (!aggregated[name]) {
+            aggregated[name] = { totalAmount: 0, unpaidShiftIds: [], status: 'Procesado' };
+          }
+
+          // Si el turno está PENDIENTE
+          if (shift.paymentStatus === 'PENDIENTE') {
+            aggregated[name].totalAmount += (shift.earned || 0);
+            aggregated[name].unpaidShiftIds.push(shift.id);
+            aggregated[name].status = 'Pendiente';
+          }
+          // Si el turno está PAGADO pero este cuidador no tiene nada "Pendiente" y tiene historial, sumaremos el histórico
+          else if (shift.paymentStatus === 'PAGADO' && aggregated[name].status !== 'Pendiente') {
+            aggregated[name].totalAmount += (shift.earned || 0);
+          }
+        });
+
+        // Convertir el objeto agrupado al array esperado por el HTML
+        this.settlements = Object.keys(aggregated).map((caregiverName, index) => {
+          const data = aggregated[caregiverName];
+          return {
+            id: index + 1000, // ID artificial para el frontend array (el UUID no importa para render)
+            caregiverName: caregiverName,
+            amount: data.totalAmount,
+            status: data.status,
+            invoiceUploaded: data.status === 'Pendiente', // Simularemos que tienen factura si tienen deuda para que pague
+            unpaidShiftIds: data.unpaidShiftIds // Guardamos las ids reales de backend para enviarlas a pagar
+          } as any;
+        }).filter(item => !this.hiddenSettlements.includes(item.id));
+
+        // Recalcular KPIs si se requiere, de momento solo totalToPay
+        this.kpis.totalToPay = this.settlements.reduce((acc, curr) => acc + (curr.status === 'Pendiente' ? curr.amount : 0), 0);
+      },
+      error: (err) => console.error('Error agrupando las liquidaciones reales', err)
     });
+
+    this.kpis = this.paymentService.getKPIs();
     this.paymentService.insuranceBilling$.subscribe(b => {
       this.billing = b.filter(item => !this.hiddenBills.includes(item.id));
     });
@@ -81,12 +123,30 @@ export class PaymentsComponent implements OnInit {
   }
 
   confirmPayment() {
-    if (this.currentSettlement) {
-      this.paymentService.processPayment(this.currentSettlement.id);
-      // Simulate notification
-      console.log('Payment processed. Notification sent to caregiver.');
+    if (this.currentSettlement && (this.currentSettlement as any).unpaidShiftIds?.length > 0) {
+      const shiftIds: number[] = (this.currentSettlement as any).unpaidShiftIds;
+
+      const requests = shiftIds.map(id => this.caregiverService.payShift(id).toPromise());
+
+      Promise.all(requests).then(() => {
+        Swal.fire({
+          icon: 'success',
+          title: 'Liquidación exitosa',
+          text: `Se procesaron los pagos de ${this.currentSettlement!.caregiverName}`,
+          toast: true,
+          position: 'top-end',
+          timer: 3000,
+          showConfirmButton: false
+        });
+        this.closeModal();
+        this.loadData(); // Refrescar con la Base de datos
+      }).catch(err => {
+        console.error('Error liquidando', err);
+        Swal.fire('Error', 'Hubo un problema procesando la liquidación.', 'error');
+      });
+    } else {
+      // Si no hay ids pendientes, solo cerramos
       this.closeModal();
-      // In a real app, logic for file upload would go here
     }
   }
 

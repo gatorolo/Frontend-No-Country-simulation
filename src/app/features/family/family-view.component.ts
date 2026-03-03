@@ -6,6 +6,7 @@ import { PatientService } from 'src/app/core/services/patient.service';
 import { MatchingService } from 'src/app/core/services/matching.service';
 import { NotificationService } from 'src/app/core/services/notification.service';
 import { CaregiverService } from 'src/app/core/services/caregiver.service';
+import { ProfileService } from 'src/app/core/services/profile.service';
 import { tap } from 'rxjs/operators';
 import Swal from 'sweetalert2';
 
@@ -39,7 +40,8 @@ export class FamilyViewComponent implements OnInit {
     private patientService: PatientService,
     private matchingService: MatchingService,
     private notificationService: NotificationService,
-    private caregiverService: CaregiverService
+    private caregiverService: CaregiverService,
+    private profileService: ProfileService
   ) { }
 
   ngOnInit(): void {
@@ -65,11 +67,12 @@ export class FamilyViewComponent implements OnInit {
           this.currentPatientId = Number(idParam);
           this.fetchPatientData(this.currentPatientId);
         } else {
-          // Fallback si no hay ID en la URL
+          // Fallback al ID de sesión autenticada o en su defecto 1
+          this.currentPatientId = this.profileService.getUserId() || 1;
           this.patientService.getPatientsFromApi().subscribe({
             next: (patients) => {
               if (patients && patients.length > 0) {
-                // Buscamos el último o el que coincida con el current
+                // Buscamos el paciente asignado al ID
                 const p = patients.find(patient => (patient as any).id === this.currentPatientId) || patients[patients.length - 1];
                 if (p) {
                   this.initializePatientData(p);

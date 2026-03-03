@@ -3,6 +3,7 @@ import { MatchingService } from 'src/app/core/services/matching.service';
 import { NotificationService } from 'src/app/core/services/notification.service';
 import { CaregiverService } from 'src/app/core/services/caregiver.service';
 import { ProfileService } from 'src/app/core/services/profile.service';
+import { RegistrationService } from 'src/app/core/services/registration.service';
 import Swal from 'sweetalert2';
 import { Router } from '@angular/router';
 
@@ -26,6 +27,7 @@ export class AdminTopbarComponent implements OnInit {
         private notificationService: NotificationService,
         private caregiverService: CaregiverService,
         private profileService: ProfileService,
+        private registrationService: RegistrationService,
         private router: Router
     ) { }
 
@@ -59,21 +61,33 @@ export class AdminTopbarComponent implements OnInit {
     selectedNotification: any = null;
     activeNotificationId: number | null = null;
     isPatientRequest: boolean = false;
+    isRegistrationRequest: boolean = false;
+    registrationRawData: any = null;
 
     openNotificationDetail(notification: any) {
         this.activeNotificationId = notification.id;
         this.isPatientRequest = (notification.title === 'Nueva Solicitud de Servicio');
+        this.isRegistrationRequest = (notification.type === 'registration');
+        this.registrationRawData = null;
 
         // Buscamos el post real para alimentar el modal de aprobación si hay un ID relacionado
-        if (notification.relatedPostId) {
+        if (this.isRegistrationRequest) {
+            this.selectedNotification = notification;
+            this.registrationService.getPendingRequests().subscribe(requests => {
+                const req = requests.find(r => r.id === notification.relatedPostId);
+                if (req) {
+                    this.selectedNotification.registrationRole = req.role;
+                    this.registrationRawData = JSON.parse(req.rawData);
+                }
+            });
+        }
+        else if (notification.relatedPostId) {
             const posts = this.matchingService.getPosts();
             const postReal = posts.find(p => p.id === notification.relatedPostId);
 
             if (postReal) {
                 this.selectedNotification = { ...postReal, status: notification.status || 'Pendiente' };
             } else {
-                // Si no está en la lista local, usamos la notificación pero nos aseguramos de que tenga los campos
-                // Gracias a que ahora el cuidador envía metadatos, esto funcionará.
                 this.selectedNotification = notification;
             }
         } else {
@@ -92,6 +106,48 @@ export class AdminTopbarComponent implements OnInit {
     goToDashboard() {
         this.closeNotificationDetail();
         this.router.navigate(['/admin']);
+    }
+
+    approveRegistration() {
+        if (!this.selectedNotification?.relatedPostId) return;
+
+        this.registrationService.approveRequest(this.selectedNotification.relatedPostId).subscribe({
+            next: () => {
+                Swal.fire('Aprobado', 'El usuario ha sido cargado oficialmente en el sistema.', 'success');
+                this.notificationService.updateNotificationStatus(this.activeNotificationId!, 'Aprobado');
+                this.closeNotificationDetail();
+                this.notificationService.markAsRead(this.activeNotificationId!);
+            },
+            error: (err) => {
+                Swal.fire('Error', 'Hubo un error al aprobar la solicitud.', 'error');
+                console.error(err);
+            }
+        });
+    }
+
+    rejectRegistration() {
+        if (!this.selectedNotification?.relatedPostId) return;
+
+        Swal.fire({
+            title: '¿Rechazar Solicitud?',
+            text: 'Esta acción descartará el registro permanentemente.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Sí, rechazar'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                this.registrationService.rejectRequest(this.selectedNotification.relatedPostId!).subscribe({
+                    next: () => {
+                        Swal.fire('Rechazado', 'La solicitud ha sido descartada.', 'success');
+                        this.notificationService.updateNotificationStatus(this.activeNotificationId!, 'Rechazado');
+                        this.closeNotificationDetail();
+                    },
+                    error: (err) => console.error(err)
+                });
+            }
+        });
     }
 
     approveAssignment() {

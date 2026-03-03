@@ -5,6 +5,7 @@ import { ConfigService } from 'src/app/core/services/config.service';
 import { MatchingService } from 'src/app/core/services/matching.service';
 import { NotificationService } from 'src/app/core/services/notification.service';
 import { PatientService } from 'src/app/core/services/patient.service';
+import { ProfileService } from 'src/app/core/services/profile.service';
 import Swal from 'sweetalert2';
 
 @Component({
@@ -49,6 +50,7 @@ export class CaregiverComponent implements OnInit {
     caregiverForm!: FormGroup;
     showModal: boolean = false;
     showProfileModal: boolean = false;
+    uploadingPhoto: boolean = false;
 
 
     constructor(
@@ -57,7 +59,8 @@ export class CaregiverComponent implements OnInit {
         private matchingService: MatchingService,
         private caregiverService: CaregiverService,
         private notificationService: NotificationService,
-        private patientService: PatientService
+        private patientService: PatientService,
+        private profileService: ProfileService
     ) { }
 
     clearedPostIds: number[] = [];
@@ -104,8 +107,8 @@ export class CaregiverComponent implements OnInit {
 
 
     loadProfile() {
-        // Cargamos el perfil del cuidador actual (ID 1 por defecto en esta versión)
-        this.caregiverService.getCaregiverById(1).subscribe({
+        const userId = this.profileService.getUserId() || 1;
+        this.caregiverService.getCaregiverById(userId).subscribe({
             next: (data) => {
                 // Mapeo robusto: Java a veces devuelve 'name' y el front usa 'fullName'
                 this.profileData = data;
@@ -174,7 +177,7 @@ export class CaregiverComponent implements OnInit {
     saveProfile() {
         if (this.caregiverForm.invalid) return;
 
-        const caregiverId = this.profileData?.id || 1;
+        const caregiverId = this.profileData?.id || this.profileService.getUserId();
         const formValues = this.caregiverForm.value;
 
         const payload = {
@@ -244,10 +247,25 @@ export class CaregiverComponent implements OnInit {
         const postReal = this.posts.find(p => p.id === n.relatedPostId);
 
         if (postReal) {
-            this.selectedNotification = postReal; // Aquí el modal tendrá patientName, zone, etc.
+            this.selectedNotification = { ...postReal }; // Clonar para evitar mutar el origen
         } else {
-            this.selectedNotification = n; // Fallback a la notificación
+            this.selectedNotification = { ...n }; // Fallback a la notificación
         }
+
+        // --- NUEVO: Extraer Dirección de la Base de Pacientes ---
+        if (this.selectedNotification.patientName) {
+            const patientData = this.patients.find(
+                p => p.name?.trim().toLowerCase() === this.selectedNotification.patientName.trim().toLowerCase()
+            );
+
+            if (patientData) {
+                this.selectedNotification.locationLink = patientData.locationLink;
+                // Si el paciente tiene una dirección explícita también la agreamos, sino usamos locationLink crudo
+                this.selectedNotification.address = patientData.address || '';
+            }
+        }
+        // --------------------------------------------------------
+
         this.showNotifications = false;
 
         // Persistimos el estado de "leído"
@@ -265,7 +283,7 @@ export class CaregiverComponent implements OnInit {
 
         const postId = this.selectedNotification.id;
         const caregiverName = this.profileData?.caregiverName || this.profileData?.fullName || this.profileData?.name || 'Cuidador';
-        const caregiverId = this.profileData?.id || 1;
+        const caregiverId = this.profileData?.id || this.profileService.getUserId();
 
         console.log('🚀 Postulando a:', caregiverName);
 
@@ -351,7 +369,7 @@ export class CaregiverComponent implements OnInit {
 
     private startShift() {
         const patientName = this.patients.find(p => p.id === +this.shiftForm.value.patientId)?.name || 'Desconocido';
-        const caregiverId = this.profileData?.id || 1;
+        const caregiverId = this.profileData?.id || this.profileService.getUserId();
 
         const payload = {
             caregiverId: caregiverId,
@@ -384,7 +402,7 @@ export class CaregiverComponent implements OnInit {
         clearInterval(this.timerInterval);
         this.isShiftActive = false;
 
-        const caregiverId = this.profileData?.id || 1;
+        const caregiverId = this.profileData?.id || this.profileService.getUserId();
 
         const payload = {
             caregiverId: caregiverId,
@@ -421,7 +439,7 @@ export class CaregiverComponent implements OnInit {
     }
 
     private checkActiveShift() {
-        const caregiverId = this.profileData?.id || 1;
+        const caregiverId = this.profileData?.id || this.profileService.getUserId();
         this.caregiverService.getActiveShifts().subscribe({
             next: (shifts) => {
                 const myActiveShift = shifts.find(s => s.caregiverId === caregiverId && s.status === 'ACTIVA');
@@ -465,7 +483,7 @@ export class CaregiverComponent implements OnInit {
     }
 
     private loadShiftHistory() {
-        const caregiverId = this.profileData?.id || 1;
+        const caregiverId = this.profileData?.id || this.profileService.getUserId();
         this.caregiverService.getShiftHistory(caregiverId).subscribe({
             next: (history) => {
                 // Formateamos para que funcione con el HTML actual y filtramos los ocultos
@@ -520,6 +538,50 @@ export class CaregiverComponent implements OnInit {
     onFileUpload(event: any, docType: string) {
         const file = event.target.files[0];
         console.log(`Uploading ${docType}:`, file?.name);
+    }
+
+    uploadProfilePhoto(event: any) {
+        const file = event.target.files[0];
+        if (!file || !this.profileData?.id) return;
+
+        this.uploadingPhoto = true;
+        const reader = new FileReader();
+
+        reader.onload = (e: any) => {
+            const base64 = e.target.result as string;
+
+            // Send exactly the same payload used in saveProfile, plus the new photo
+            const payload = {
+                ...this.profileData,
+                profilePhoto: base64
+            };
+
+            this.caregiverService.updateCaregiver(this.profileData.id, payload).subscribe({
+                next: (res: any) => {
+                    this.uploadingPhoto = false;
+                    // Update the active UI so the modal displays the new image smoothly
+                    this.profileData = {
+                        ...res,
+                        caregiverName: res.caregiverName || res.fullName
+                    };
+
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Foto Actualizada',
+                        text: 'Tu foto de perfil se guardó correctamente',
+                        timer: 2000,
+                        showConfirmButton: false
+                    });
+                },
+                error: (err) => {
+                    this.uploadingPhoto = false;
+                    console.error('Error al subir foto:', err);
+                    Swal.fire('Error', 'No pudimos procesar la imagen', 'error');
+                }
+            });
+        };
+
+        reader.readAsDataURL(file);
     }
 
     getMapsLink(link: string): string {

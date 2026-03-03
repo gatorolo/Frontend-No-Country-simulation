@@ -51,11 +51,15 @@
   <div class="modal-overlay" *ngIf="selectedNotification">
     <div class="modal-content animate-scale-in">
       <div class="modal-header">
-        <h2>{{ isPatientRequest ? 'Nueva Solicitud de Paciente' : 'Aprobar Asignación' }}</h2>
+        <h2>
+          <ng-container *ngIf="isRegistrationRequest">Solicitud de Registro</ng-container>
+          <ng-container *ngIf="!isRegistrationRequest">{{ isPatientRequest ? 'Nueva Solicitud de Paciente' : 'Aprobar
+            Asignación' }}</ng-container>
+        </h2>
         <button class="close-btn" (click)="closeNotificationDetail()">&times;</button>
       </div>
 
-      <div class="detail-grid">
+      <div class="detail-grid" *ngIf="!isRegistrationRequest">
         <div class="detail-item">
           <span class="label">Cuidador Postulado</span>
           <span class="value">{{ selectedNotification.caregiverName }}</span>
@@ -82,23 +86,87 @@
         </div>
       </div>
 
+      <div class="detail-grid" *ngIf="isRegistrationRequest && registrationRawData">
+        <div class="detail-item">
+          <span class="label">Tipo de Usuario</span>
+          <span class="value pill">{{ selectedNotification.registrationRole === 'CAREGIVER' ? 'Cuidador / Acompañante' :
+            'Paciente / Familia' }}</span>
+        </div>
+        <div class="detail-item">
+          <span class="label">Nombre Completo</span>
+          <span class="value">{{ registrationRawData.caregiverName || registrationRawData.name }}</span>
+        </div>
+        <div class="detail-item" *ngIf="registrationRawData.dni">
+          <span class="label">DNI</span>
+          <span class="value">{{ registrationRawData.dni }}</span>
+        </div>
+        <div class="detail-item" *ngIf="registrationRawData.specialty">
+          <span class="label">Especialidad</span>
+          <span class="value">{{ registrationRawData.specialty }}</span>
+        </div>
+        <div class="detail-item" *ngIf="registrationRawData.phone">
+          <span class="label">Teléfono</span>
+          <span class="value">{{ registrationRawData.phone }}</span>
+        </div>
+        <div class="detail-item" *ngIf="registrationRawData.hourlyRate">
+          <span class="label">Valor Hora Pretendido</span>
+          <span class="value">${{ registrationRawData.hourlyRate }}</span>
+        </div>
+        <div class="detail-item" *ngIf="registrationRawData.address || registrationRawData.city">
+          <span class="label">Ubicación / Ciudad</span>
+          <span class="value">{{ registrationRawData.address || registrationRawData.city }}</span>
+        </div>
+
+        <!-- Datos de Paciente -->
+        <div class="detail-item" *ngIf="registrationRawData.age">
+          <span class="label">Edad</span>
+          <span class="value">{{ registrationRawData.age }} años</span>
+        </div>
+        <div class="detail-item" *ngIf="registrationRawData.healthInsurance">
+          <span class="label">Obra Social</span>
+          <span class="value">{{ registrationRawData.healthInsurance }}</span>
+        </div>
+        <div class="detail-item" *ngIf="registrationRawData.diagnosis" style="grid-column: span 2;">
+          <span class="label">Diagnóstico</span>
+          <span class="value" style="white-space: pre-wrap;">{{ registrationRawData.diagnosis }}</span>
+        </div>
+      </div>
+
       <div class="modal-actions" style="justify-content: center; margin-top: 2rem; display: flex; gap: 1rem;">
-        <button class="btn-cancel" (click)="closeNotificationDetail()">{{ isPatientRequest ? 'Cerrar' : 'Cancelar'
-          }}</button>
-        <button class="btn-approve" (click)="isPatientRequest ? goToDashboard() : approveAssignment()"
-          [disabled]="!isPatientRequest && selectedNotification?.status === 'Aprobado'">
 
-          <ng-container *ngIf="isPatientRequest; else approvalText">
-            <span>Ir al Tablero</span>
-          </ng-container>
+        <!-- BOTONES PARA REGISTROS -->
+        <ng-container *ngIf="isRegistrationRequest">
+          <button class="btn-cancel" style="background-color: #fee2e2; color: #ef4444; border: 1px solid #fca5a5;"
+            (click)="rejectRegistration()">
+            Rechazar
+          </button>
+          <button class="btn-approve" (click)="approveRegistration()"
+            [disabled]="selectedNotification?.status === 'Aprobado' || selectedNotification?.status === 'Rechazado'">
+            <span>{{ selectedNotification?.status === 'Aprobado' ? 'Ya Aprobado' : (selectedNotification?.status ===
+              'Rechazado' ? 'Ya Rechazado' : 'Aprobar Registro') }}</span>
+          </button>
+        </ng-container>
 
-          <ng-template #approvalText>
-            <span>{{ selectedNotification?.status === 'Aprobado' ? 'Ya Aprobado' : 'Aprobar Asignación' }}</span>
-            <span class="material-icons" *ngIf="selectedNotification?.status !== 'Aprobado'">check_circle</span>
-            <span class="material-icons" *ngIf="selectedNotification?.status === 'Aprobado'">done_all</span>
-          </ng-template>
+        <!-- BOTONES PARA ASIGNACIONES NORMALES -->
+        <ng-container *ngIf="!isRegistrationRequest">
+          <button class="btn-cancel" (click)="closeNotificationDetail()">{{ isPatientRequest ? 'Cerrar' : 'Cancelar'
+            }}</button>
+          <button class="btn-approve" (click)="isPatientRequest ? goToDashboard() : approveAssignment()"
+            [disabled]="!isPatientRequest && selectedNotification?.status === 'Aprobado'">
 
-        </button>
+            <ng-container *ngIf="isPatientRequest; else approvalText">
+              <span>Ir al Tablero</span>
+            </ng-container>
+
+            <ng-template #approvalText>
+              <span>{{ selectedNotification?.status === 'Aprobado' ? 'Ya Aprobado' : 'Aprobar Asignación' }}</span>
+              <span class="material-icons" *ngIf="selectedNotification?.status !== 'Aprobado'">check_circle</span>
+              <span class="material-icons" *ngIf="selectedNotification?.status === 'Aprobado'">done_all</span>
+            </ng-template>
+
+          </button>
+        </ng-container>
+
       </div>
     </div>
   </div>

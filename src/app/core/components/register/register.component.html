@@ -1,0 +1,148 @@
+<div class="login-container">
+    <div class="login-card" style="max-width: 500px; padding: 2rem;">
+        <div class="brand">
+            <img src="assets/logoV3.png" alt="Valora Logo" class="brand-logo" style="height: 70px;">
+            <p>Solicitud de Registro</p>
+        </div>
+
+        <form (submit)="onSubmit(); $event.preventDefault()">
+            <div class="form-group">
+                <label for="role">Quiero registrarme como:</label>
+                <div class="input-wrapper">
+                    <span class="material-icons input-icon">badge</span>
+                    <select id="role" [(ngModel)]="selectedRole" name="role" class="form-control">
+                        <option value="CAREGIVER">Cuidador / Acompañante</option>
+                        <option value="PATIENT">Paciente / Familia</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- SHARED FIELDS -->
+            <div class="form-group">
+                <label for="fullName">Nombre Completo</label>
+                <div class="input-wrapper">
+                    <span class="material-icons input-icon">person</span>
+                    <input type="text" id="fullName" [(ngModel)]="fullName" name="fullName" placeholder="Ej: Juan Pérez"
+                        class="form-control" autocomplete="off" required>
+                </div>
+            </div>
+
+            <!-- CAREGIVER FIELDS -->
+            <ng-container *ngIf="selectedRole === 'CAREGIVER'">
+                <div class="form-group">
+                    <label for="dni">DNI</label>
+                    <div class="input-wrapper">
+                        <span class="material-icons input-icon">badge</span>
+                        <input type="text" id="dni" [(ngModel)]="dni" name="dni" placeholder="Ej: 35123456"
+                            class="form-control" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="specialty">Especialidad</label>
+                    <div class="input-wrapper">
+                        <span class="material-icons input-icon">medical_services</span>
+                        <select id="specialty" [(ngModel)]="specialty" name="specialty" class="form-control" required>
+                            <option value="" disabled selected>Selecciona tu especialidad</option>
+                            <option value="Enfermería">Enfermería</option>
+                            <option value="Kinesiología">Kinesiología</option>
+                            <option value="Cuidadora Geriátrica">Cuidadora Geriátrica</option>
+                            <option value="Acompañante Terapéutico">Acompañante Terapéutico</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="phone">Teléfono</label>
+                    <div class="input-wrapper">
+                        <span class="material-icons input-icon">phone</span>
+                        <input type="text" id="phone" [(ngModel)]="phone" name="phone" placeholder="Ej: 3415551234"
+                            class="form-control" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="hourlyRate">Valor Hora Pretendido ($)</label>
+                    <div class="input-wrapper">
+                        <span class="material-icons input-icon">payments</span>
+                        <input type="number" id="hourlyRate" [(ngModel)]="hourlyRate" name="hourlyRate"
+                            placeholder="Ej: 3000" class="form-control" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="address">Ciudad de Residencia</label>
+                    <div class="input-wrapper">
+                        <span class="material-icons input-icon">location_on</span>
+                        <input type="text" id="address" [(ngModel)]="address" name="address" placeholder="Ej: Rosario"
+                            class="form-control" required>
+                    </div>
+                </div>
+            </ng-container>
+
+            <!-- PATIENT FIELDS -->
+            <ng-container *ngIf="selectedRole === 'PATIENT'">
+                <div class="form-group">
+                    <label for="age">Edad del Paciente</label>
+                    <div class="input-wrapper">
+                        <span class="material-icons input-icon">cake</span>
+                        <input type="number" id="age" [(ngModel)]="age" name="age" placeholder="Ej: 75"
+                            class="form-control" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="healthInsurance">Obra Social o Prepaga</label>
+                    <div class="input-wrapper">
+                        <span class="material-icons input-icon">health_and_safety</span>
+                        <input type="text" id="healthInsurance" [(ngModel)]="healthInsurance" name="healthInsurance"
+                            placeholder="Ej: OSDE, PAMI, IPS" class="form-control" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="diagnosis">Diagnóstico o Motivo de cuidado</label>
+                    <div class="input-wrapper">
+                        <span class="material-icons input-icon">description</span>
+                        <textarea id="diagnosis" [(ngModel)]="diagnosis" name="diagnosis"
+                            placeholder="Breve descripción del paciente..." class="form-control"
+                            style="min-height: 80px; padding-top: 10px;" required></textarea>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="city">Ciudad</label>
+                    <div class="input-wrapper">
+                        <span class="material-icons input-icon">location_city</span>
+                        <input type="text" id="city" [(ngModel)]="city" name="city" placeholder="Ej: Córdoba Capital"
+                            class="form-control" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="locationLink">Dirección Exacta</label>
+                    <div class="input-wrapper">
+                        <span class="material-icons input-icon">home</span>
+                        <input type="text" id="locationLink" [(ngModel)]="locationLink" name="locationLink"
+                            placeholder="Ej: Av. San Martín 1500" class="form-control" required>
+                    </div>
+                </div>
+            </ng-container>
+
+            <!-- MESSAGES -->
+            <div *ngIf="successMessage" class="alert success"
+                style="background-color: #dcfce7; color: #166534; padding: 1rem; border-radius: 8px; margin-bottom: 1rem; display: flex; align-items: center; gap: 8px;">
+                <span class="material-icons">check_circle</span>
+                {{ successMessage }}
+            </div>
+
+            <div *ngIf="errorMessage" class="alert error"
+                style="background-color: #fee2e2; color: #991b1b; padding: 1rem; border-radius: 8px; margin-bottom: 1rem; display: flex; align-items: center; gap: 8px;">
+                <span class="material-icons">error</span>
+                {{ errorMessage }}
+            </div>
+
+            <button type="submit" class="btn-login" [disabled]="isLoading" style="margin-top: 1rem;">
+                <span *ngIf="!isLoading">Enviar Solicitud</span>
+                <div *ngIf="isLoading" class="spinner"></div>
+            </button>
+
+            <div class="actions" style="margin-top: 1.5rem; text-align: center;">
+                <a routerLink="/login" class="forgot-pass" style="color: #64748b; font-size: 0.9rem;">Volver al Inicio
+                    de Sesión</a>
+            </div>
+        </form>
+    </div>
+</div>

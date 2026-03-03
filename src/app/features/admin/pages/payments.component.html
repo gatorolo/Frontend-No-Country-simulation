@@ -90,7 +90,7 @@
               </td>
               <td>
                 <div class="action-cell">
-                  <button *ngIf="s.status !== 'Procesado'" class="pay-btn" [disabled]="!s.invoiceUploaded"
+                  <button *ngIf="s.status !== 'Procesado'" class="pay-btn" [disabled]="s.amount === 0"
                     (click)="openReceiptModal(s)">
                     <span class="material-icons">receipt_long</span> Procesar
                   </button>

@@ -273,7 +273,8 @@ td {
 
 .profile-static-grid .data-label {
     font-size: 0.75rem;
-    color: #64748b;
+    color: var(--text-color, #64748b);
+    opacity: 0.8;
     text-transform: uppercase;
     font-weight: 700;
     letter-spacing: 0.5px;
@@ -282,7 +283,7 @@ td {
 .profile-static-grid .data-value {
     font-size: 1.05rem;
     font-weight: 500;
-    color: #1e293b;
+    color: var(--text-color, #1e293b);
 }
 
 .docs-grid {
@@ -297,8 +298,8 @@ td {
     align-items: center;
     gap: 1rem;
     padding: 1rem;
-    background: white;
-    border: 1px solid #e2e8f0;
+    background: var(--card-bg, white);
+    border: 1px solid var(--border-color, #e2e8f0);
     border-radius: 12px;
 }
 
@@ -311,7 +312,7 @@ td {
     display: block;
     font-weight: 600;
     font-size: 0.9rem;
-    color: #1e293b;
+    color: var(--text-color, #1e293b);
 }
 
 .doc-status.uploaded {
@@ -551,12 +552,15 @@ td {
 }
 
 .modal-content {
-    background: white;
+    background: var(--card-bg, white);
+    color: var(--text-color, #1e293b);
     padding: 2rem;
     border-radius: 16px;
     width: 100%;
     max-width: 500px;
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    max-height: 85vh;
+    overflow-y: auto;
 }
 
 .animate-scale-in {
@@ -596,7 +600,8 @@ td {
     background: none;
     border: none;
     font-size: 1.5rem;
-    color: #94a3b8;
+    color: var(--text-color, #94a3b8);
+    opacity: 0.7;
     cursor: pointer;
     transition: color 0.2s;
 }
@@ -620,13 +625,14 @@ td {
     font-size: 0.75rem;
     text-transform: uppercase;
     font-weight: 700;
-    color: #64748b;
+    color: var(--text-color, #64748b);
+    opacity: 0.8;
 }
 
 .detail-item .value {
     font-size: 1.1rem;
     font-weight: 500;
-    color: #1e293b;
+    color: var(--text-color, #1e293b);
 }
 
 .detail-item .value.pill {
@@ -665,11 +671,31 @@ td {
     transform: translateY(0);
 }
 
+.btn-secondary {
+    padding: 0.75rem 1.5rem;
+    background: var(--bg-color, #f1f5f9);
+    color: var(--text-color, #475569);
+    border: 1px solid var(--border-color, transparent);
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.2s;
+}
+
+.btn-secondary:hover {
+    background: var(--card-bg, #e2e8f0);
+    border-color: var(--text-color, #94a3b8);
+}
+
 /* Edit Profile Styles */
 .edit-profile-btn {
-    background: white;
-    border: 1px solid #e2e8f0;
-    color: #475569;
+    background: var(--bg-color, white);
+    border: 1px solid var(--border-color, #e2e8f0);
+    color: var(--text-color, #475569);
     padding: 0.5rem 1rem;
     border-radius: 8px;
     font-size: 0.85rem;
@@ -715,9 +741,9 @@ td {
 
 .btn-cancel {
     padding: 0.75rem 1.5rem;
-    background: #f1f5f9;
-    color: #475569;
-    border: none;
+    background: var(--bg-color, #f1f5f9);
+    color: var(--text-color, #475569);
+    border: 1px solid var(--border-color, transparent);
     border-radius: 8px;
     font-weight: 600;
     cursor: pointer;
