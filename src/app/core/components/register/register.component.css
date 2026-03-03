@@ -139,3 +139,20 @@
         transform: rotate(360deg);
     }
 }
+
+@media (max-width: 640px) {
+    .login-container {
+        padding: 1rem;
+        height: auto;
+        min-height: 100vh;
+    }
+
+    .login-card {
+        padding: 1.5rem;
+        gap: 1rem;
+    }
+
+    .brand h1 {
+        font-size: 1.5rem;
+    }
+}

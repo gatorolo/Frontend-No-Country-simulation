@@ -16,12 +16,14 @@ export interface ServicePost {
     caregiverId?: number;
 }
 
+import { API_BASE_URL } from '../constants/api.constants';
+
 @Injectable({
     providedIn: 'root'
 })
 export class MatchingService {
 
-    private apiUrl = 'http://localhost:8080/api/service-orders';
+    private apiUrl = `${API_BASE_URL}/service-orders`;
 
     private postsSource = new BehaviorSubject<ServicePost[]>([]);
 

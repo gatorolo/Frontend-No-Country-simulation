@@ -34,7 +34,7 @@
         0 4px 6px -1px rgba(0, 0, 0, 0.05),
         0 2px 4px -1px rgba(0, 0, 0, 0.03),
         0 0 0 1px rgba(255, 255, 255, 0.5) inset;
-   
+
     border: 1px solid rgba(255, 255, 255, 0.6);
     display: flex;
     flex-direction: column;
@@ -156,5 +156,27 @@
 @keyframes spin {
     to {
         transform: rotate(360deg);
+    }
+}
+
+@media (max-width: 640px) {
+    .login-container {
+        padding: 1rem;
+        height: auto;
+        min-height: 100vh;
+    }
+
+    .login-card {
+        padding: 1.5rem;
+        gap: 1.5rem;
+        max-width: 100%;
+    }
+
+    .brand h1 {
+        font-size: 1.5rem;
+    }
+
+    .brand p {
+        margin-left: 0;
     }
 }

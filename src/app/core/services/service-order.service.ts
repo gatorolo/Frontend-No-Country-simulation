@@ -2,12 +2,14 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 
+import { API_BASE_URL } from '../constants/api.constants';
+
 @Injectable({
   providedIn: 'root'
 })
 export class ServiceOrderService {
 
-  private apiUrl = 'http://localhost:8080/api/service-orders';
+  private apiUrl = `${API_BASE_URL}/service-orders`;
 
   constructor(private http: HttpClient) { }
 

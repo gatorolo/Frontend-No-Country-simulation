@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
+import { API_BASE_URL } from '../../constants/api.constants';
 
 @Component({
     selector: 'app-register',
@@ -66,7 +67,7 @@ export class RegisterComponent {
             rawData: JSON.stringify(payload)
         };
 
-        this.http.post('http://localhost:8080/api/registrations', requestBody).subscribe({
+        this.http.post(`${API_BASE_URL}/registrations`, requestBody).subscribe({
             next: (res) => {
                 this.isLoading = false;
                 this.successMessage = '¡Solicitud enviada con éxito! Un administrador revisará tus datos.';

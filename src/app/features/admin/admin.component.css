@@ -400,3 +400,88 @@
 
 
 
+/* --- Media Queries para Mobile First --- */
+@media (max-width: 768px) {
+    .dashboard-container {
+        padding: 1rem;
+        gap: 1.25rem;
+    }
+
+    .page-title {
+        font-size: 1.5rem;
+    }
+
+    .stats-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+    }
+
+    .stat-card {
+        padding: 1rem;
+    }
+
+    .stat-value {
+        font-size: 1.5rem;
+    }
+
+    .dashboard-main-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .card {
+        padding: 1rem;
+    }
+
+    .data-table thead {
+        display: none;
+        /* Ocultar cabeceras en móviles */
+    }
+
+    .data-table tr {
+        display: block;
+        border-bottom: 2px solid #f1f5f9;
+        margin-bottom: 1rem;
+    }
+
+    .data-table td {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.5rem 0;
+        border-top: none;
+        text-align: right;
+    }
+
+    .data-table td::before {
+        content: attr(data-label);
+        font-weight: 600;
+        color: #94a3b8;
+        padding-right: 1rem;
+        text-align: left;
+    }
+
+    .avatar-sm {
+        width: 28px;
+        height: 28px;
+    }
+
+    .btn {
+        padding: 0.6rem;
+        font-size: 0.9rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .stat-card {
+        text-align: center;
+        align-items: center;
+    }
+
+    .page-title {
+        text-align: center;
+    }
+}

@@ -21,11 +21,13 @@ export interface InsuranceBilling {
     status: 'Al día' | 'Atrasado' | 'Crítico';
 }
 
+import { API_BASE_URL } from '../constants/api.constants';
+
 @Injectable({
     providedIn: 'root'
 })
 export class PaymentService {
-    private apiUrl = 'http://localhost:8080/api/payments';
+    private apiUrl = `${API_BASE_URL}/payments`;
 
     private settlementsSource = new BehaviorSubject<Settlement[]>([]);
     private insuranceBillingSource = new BehaviorSubject<InsuranceBilling[]>([]);

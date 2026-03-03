@@ -2,12 +2,14 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 
+import { API_BASE_URL } from '../constants/api.constants';
+
 @Injectable({
     providedIn: 'root'
 })
 export class DashboardService {
 
-    private apiUrl = 'http://localhost:8080/api/dashboard';
+    private apiUrl = `${API_BASE_URL}/dashboard`;
 
     constructor(private http: HttpClient) { }
 

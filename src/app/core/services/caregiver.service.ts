@@ -18,11 +18,13 @@ export interface Caregiver {
   status?: string | boolean;
 }
 
+import { API_BASE_URL } from '../constants/api.constants';
+
 @Injectable({
   providedIn: 'root'
 })
 export class CaregiverService {
-  private apiUrl = 'http://localhost:8080/api/caregivers';
+  private apiUrl = `${API_BASE_URL}/caregivers`;
 
   private caregiversSource = new BehaviorSubject<Caregiver[]>([]);
   caregivers$ = this.caregiversSource.asObservable();

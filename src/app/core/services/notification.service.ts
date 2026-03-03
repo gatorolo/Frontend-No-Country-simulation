@@ -14,11 +14,13 @@ export interface Notification {
     status?: 'Pendiente' | 'Aprobado' | 'Rechazado' | 'Completado';
 }
 
+import { API_BASE_URL } from '../constants/api.constants';
+
 @Injectable({
     providedIn: 'root'
 })
 export class NotificationService {
-    private apiUrl = 'http://localhost:8080/api/notifications';
+    private apiUrl = `${API_BASE_URL}/notifications`;
     private notificationsSource = new BehaviorSubject<Notification[]>([]);
     notifications$ = this.notificationsSource.asObservable();
 

@@ -86,11 +86,13 @@ export interface Patient {
     assignedCaregiver?: string | null;
 }
 
+import { API_BASE_URL } from '../constants/api.constants';
+
 @Injectable({
     providedIn: 'root'
 })
 export class PatientService {
-    private apiUrl = 'http://localhost:8080/api/patients';
+    private apiUrl = `${API_BASE_URL}/patients`;
 
     private patientsSource = new BehaviorSubject<Patient[]>([]);
     patients$ = this.patientsSource.asObservable();

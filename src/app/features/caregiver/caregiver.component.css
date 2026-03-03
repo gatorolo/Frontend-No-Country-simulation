@@ -769,13 +769,71 @@ td {
     background: #94a3b8;
 }
 
-@media (max-width: 640px) {
-    .edit-profile-form .form-grid {
+@media (max-width: 768px) {
+    .dashboard-container {
+        padding: 1rem;
+    }
+
+    .top-nav {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1.25rem;
+    }
+
+    .tabs-scroll-area {
+        width: 100%;
+        padding-bottom: 0.75rem;
+    }
+
+    .actions-area {
+        width: 100%;
+        justify-content: flex-end;
+    }
+
+    .glass-card {
+        padding: 1.25rem;
+        border-radius: 16px;
+    }
+
+    .section-title {
+        font-size: 1.25rem;
+    }
+
+    .form-grid {
         grid-template-columns: 1fr;
     }
 
-    .input-group.full-width {
-        grid-column: span 1;
+    .timer-display {
+        font-size: 2.2rem;
+    }
+
+    .main-action-btn {
+        padding: 1rem 2rem;
+        font-size: 1.1rem;
+        width: 100%;
+    }
+
+    .modal-content {
+        padding: 1.5rem;
+        margin: 1rem;
+        max-height: 90vh;
+    }
+
+    .status-info-badge {
+        padding: 0.75rem 1rem;
+        font-size: 0.9rem;
+    }
+}
+
+@media (max-width: 640px) {
+    .tab-btn {
+        padding: 0.6rem 1rem;
+        font-size: 0.9rem;
+    }
+
+    .edit-profile-btn {
+        width: 100%;
+        justify-content: center;
     }
 }
 
