@@ -85,6 +85,10 @@ export class CaregiverComponent implements OnInit {
         // Cargar Pacientes reales desde BD en vez del mock
         this.patientService.patients$.subscribe(data => {
             this.patients = data;
+            // Si hay una guardia activa, re-sincronizamos el formulario para mostrar los datos del paciente
+            if (this.isShiftActive) {
+                this.checkActiveShift();
+            }
         });
 
         // 2. Suscripción a Notificaciones (La que maneja la campanita)
@@ -469,7 +473,8 @@ export class CaregiverComponent implements OnInit {
                     const timeString = `${this.pad(startDate.getHours())}:${this.pad(startDate.getMinutes())}`;
 
                     const syncFormTask = () => {
-                        const patientObj = this.patients.find(p => p.name?.trim().toLowerCase() === myActiveShift.patientName?.trim().toLowerCase());
+                        const syncName = myActiveShift.patientName?.trim().toLowerCase();
+                        const patientObj = this.patients.find(p => p.name?.trim().toLowerCase() === syncName);
                         this.shiftForm.patchValue({
                             patientId: patientObj ? patientObj.id : '',
                             startTimeInput: timeString
@@ -477,10 +482,11 @@ export class CaregiverComponent implements OnInit {
                     };
 
                     // En caso de que la lista de pacientes tarde unos milisegundos más en cargar
-                    if (this.patients.length > 0) {
+                    if (this.patients && this.patients.length > 0) {
                         syncFormTask();
                     } else {
-                        setTimeout(syncFormTask, 1000);
+                        // Si no hay pacientes aún, la suscripción a patients$ se encargará de re-sincronizar
+                        console.log('⏳ Esperando carga de pacientes para sincronizar guardia activa...');
                     }
 
                     // Reanudar el reloj localmente
