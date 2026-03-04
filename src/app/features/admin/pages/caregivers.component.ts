@@ -24,7 +24,7 @@ export class CaregiversComponent implements OnInit {
 
   initForm() {
     this.caregiverForm = this.fb.group({
-      fullName: ['', Validators.required],
+      caregiverName: ['', Validators.required],
       specialty: ['', Validators.required],
       dni: ['', Validators.required],
       phone: ['', Validators.required],
@@ -45,7 +45,7 @@ export class CaregiversComponent implements OnInit {
     this.selectedCaregiver = cg;
     this.showAddForm = true;
     this.caregiverForm.patchValue({
-      fullName: cg.fullName,
+      caregiverName: cg.caregiverName,
       specialty: cg.specialty,
       dni: cg.dni,
       phone: cg.phone,
