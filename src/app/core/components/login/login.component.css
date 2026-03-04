@@ -1,6 +1,6 @@
 .login-container {
-    height: 100vh;
-    width: 100vw;
+    min-height: 100vh;
+    width: 100%;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -8,6 +8,7 @@
     background-size: 200% 200%;
     animation: gradient 15s ease infinite;
     font-family: 'Inter', sans-serif;
+    padding: 1rem;
 }
 
 @keyframes gradient {
@@ -28,7 +29,7 @@
     background: linear-gradient(to bottom, #f8fafc, #f1f5f9);
     width: 100%;
     max-width: 400px;
-    padding: 3rem;
+    padding: 2.5rem;
     border-radius: 16px;
     box-shadow:
         0 4px 6px -1px rgba(0, 0, 0, 0.05),
@@ -38,7 +39,7 @@
     border: 1px solid rgba(255, 255, 255, 0.6);
     display: flex;
     flex-direction: column;
-    gap: 2rem;
+    gap: 1.5rem;
     backdrop-filter: blur(10px);
 }
 
@@ -50,7 +51,7 @@
 }
 
 .brand h1 {
-    font-size: 2rem;
+    font-size: 1.75rem;
     margin: 0.5rem 0 0.25rem;
     color: #111827;
     letter-spacing: -0.5px;
@@ -58,16 +59,15 @@
 
 .brand p {
     margin: 0;
-    margin-left: 24%;
     color: #6b7280;
-    font-size: 0.95rem;
+    font-size: 0.9rem;
 }
 
 .form-group {
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
-    margin-bottom: 1.25rem;
+    margin-bottom: 1rem;
 }
 
 .form-group label {
@@ -91,7 +91,7 @@
 
 .form-control {
     width: 100%;
-    padding: 12px 12px 12px 42px;
+    padding: 10px 10px 10px 42px;
     border: 1px solid #d1d5db;
     border-radius: 8px;
     font-size: 0.95rem;
@@ -108,7 +108,7 @@
 .actions {
     display: flex;
     justify-content: flex-end;
-    margin-bottom: 1.5rem;
+    margin-bottom: 1rem;
 }
 
 .forgot-pass {
@@ -159,17 +159,15 @@
     }
 }
 
-@media (max-width: 640px) {
+@media (max-width: 480px) {
     .login-container {
-        padding: 1rem;
-        height: auto;
-        min-height: 100vh;
+        padding: 0.75rem;
     }
 
     .login-card {
         padding: 1.5rem;
-        gap: 1.5rem;
-        max-width: 100%;
+        gap: 1.25rem;
+        border-radius: 12px;
     }
 
     .brand h1 {
@@ -177,6 +175,16 @@
     }
 
     .brand p {
-        margin-left: 0;
+        font-size: 0.85rem;
+    }
+
+    .form-control {
+        font-size: 0.9rem;
+        padding: 12px 10px 12px 40px;
+    }
+
+    .btn-login {
+        height: 44px;
+        font-size: 0.95rem;
     }
 }

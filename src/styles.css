@@ -36,7 +36,8 @@ body {
     padding: 0;
     background-color: var(--bg-color);
     color: var(--text-color);
-    overflow: hidden;
+    overflow-y: auto;
+    overflow-x: hidden;
     box-sizing: border-box;
     transition: background-color 0.3s ease, color 0.3s ease;
 }
