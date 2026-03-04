@@ -201,6 +201,23 @@
     color: #64748b;
 }
 
+.location-text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.location-text .city {
+    font-weight: 500;
+    color: #334155;
+}
+
+.location-text .zone {
+    font-size: 0.75rem;
+    color: #64748b;
+    font-style: italic;
+}
+
 .status-pill {
     display: inline-flex;
     padding: 0.35rem 0.75rem;
