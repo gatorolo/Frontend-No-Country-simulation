@@ -67,7 +67,7 @@
         <tr>
           <th>Paciente</th>
           <th>Edad</th>
-          <th>Ciudad</th>
+          <th>Ubicación</th>
           <th>Dirección</th>
           <th>Obra Social</th>
           <th>Cuidador Asignado</th>
@@ -84,7 +84,12 @@
             </div>
           </td>
           <td data-label="Edad">{{ p.age }}</td>
-          <td data-label="Ciudad">{{ p.city || '—' }}</td>
+          <td data-label="Ubicación">
+            <span class="location-text">
+              <span class="city">{{ p.city || 'Ciudad no especificada' }}</span>
+              <span class="zone" *ngIf="p.zone">({{ p.zone }})</span>
+            </span>
+          </td>
           <td data-label="Dirección">
             <a *ngIf="p.locationLink" [href]="getMapsLink(p.locationLink)" target="_blank" rel="noopener noreferrer"
               style="color: #3b82f6; text-decoration: none;">Ver Mapa <span class="material-icons"

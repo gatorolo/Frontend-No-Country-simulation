@@ -6,6 +6,7 @@ import { ProfileService } from 'src/app/core/services/profile.service';
 import { RegistrationService } from 'src/app/core/services/registration.service';
 import Swal from 'sweetalert2';
 import { Router } from '@angular/router';
+import { ConfigService } from 'src/app/core/services/config.service';
 
 @Component({
     selector: 'app-admin-topbar',
@@ -21,6 +22,8 @@ export class AdminTopbarComponent implements OnInit {
     showNotifications = false;
     userName: string = 'Admin';
     userAvatar: string = 'assets/user-placeholder.png';
+    showProfileDropdown = false;
+    adminWhatsApp: string = '';
 
     constructor(
         private matchingService: MatchingService,
@@ -28,6 +31,7 @@ export class AdminTopbarComponent implements OnInit {
         private caregiverService: CaregiverService,
         private profileService: ProfileService,
         private registrationService: RegistrationService,
+        private configService: ConfigService,
         private router: Router
     ) { }
 
@@ -49,13 +53,39 @@ export class AdminTopbarComponent implements OnInit {
 
         // Mantenemos carga inicial de posts por si acaso
         this.matchingService.loadPosts().subscribe();
+
+        // Cargar WhatsApp actual
+        this.adminWhatsApp = this.configService.getWhatsAppNumber();
     }
 
     toggleNotifications() {
         this.showNotifications = !this.showNotifications;
         if (this.showNotifications) {
             this.unreadCount = 0;
+            this.showProfileDropdown = false;
         }
+    }
+
+    toggleProfileDropdown() {
+        this.showProfileDropdown = !this.showProfileDropdown;
+        if (this.showProfileDropdown) {
+            this.showNotifications = false;
+        }
+    }
+
+    updateWhatsApp() {
+        if (!this.adminWhatsApp) return;
+        this.configService.setWhatsAppNumber(this.adminWhatsApp);
+        Swal.fire({
+            icon: 'success',
+            title: 'WhatsApp Actualizado',
+            text: 'El número de contacto para familias y cuidadores ha sido actualizado.',
+            timer: 2000,
+            showConfirmButton: false,
+            toast: true,
+            position: 'top-end'
+        });
+        this.showProfileDropdown = false;
     }
 
     selectedNotification: any = null;

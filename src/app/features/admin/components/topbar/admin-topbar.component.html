@@ -38,9 +38,33 @@
         </div>
       </div>
     </div>
-    <div class="user-profile">
-      <img [src]="userAvatar" alt="Profile" class="avatar" />
-      <span class="user-name">{{ userName }}</span>
+    <div class="user-profile-wrapper">
+      <div class="user-profile" (click)="toggleProfileDropdown()">
+        <img [src]="userAvatar" alt="Profile" class="avatar" />
+        <span class="user-name">{{ userName }}</span>
+        <span class="material-icons dropdown-icon">expand_more</span>
+      </div>
+
+      <div class="profile-dropdown animate-scale-in" *ngIf="showProfileDropdown">
+        <div class="dropdown-header">
+          <span class="material-icons">settings</span>
+          Configuración rápida
+        </div>
+        <div class="dropdown-body">
+          <div class="config-item">
+            <label for="wa-admin">WhatsApp de Turno</label>
+            <div class="input-with-icon">
+              <span class="material-icons">whatsapp</span>
+              <input type="text" id="wa-admin" [(ngModel)]="adminWhatsApp" placeholder="Ej: 549341..."
+                class="dropdown-input" />
+            </div>
+            <p class="config-help">Este número se usará en los botones de contacto de Cuidadores y Familias.</p>
+          </div>
+        </div>
+        <div class="dropdown-footer">
+          <button class="btn-save" (click)="updateWhatsApp()">Guardar Cambios</button>
+        </div>
+      </div>
     </div>
     <button class="icon-btn logout-btn" routerLink="/login" title="Cerrar Sesión">
       <span class="material-icons">logout</span>
