@@ -398,6 +398,8 @@ export class CaregiverComponent implements OnInit {
             next: (res) => {
                 this.isShiftActive = true;
                 this.shiftSeconds = 0;
+
+                if (this.timerInterval) clearInterval(this.timerInterval);
                 this.timerInterval = setInterval(() => {
                     this.shiftSeconds++;
                     const hrs = Math.floor(this.shiftSeconds / 3600);
@@ -481,10 +483,17 @@ export class CaregiverComponent implements OnInit {
                         console.log('🔍 Intentando sincronizar paciente:', syncName, 'Encontrado:', patientObj?.name);
 
                         if (patientObj) {
+                            // Asignación directa para evitar depender solo del evento reactivo
+                            this.selectedPatientDetails = {
+                                ...patientObj,
+                                city: patientObj.city || 'No especificada',
+                                zone: patientObj.zone || 'No especificada'
+                            };
+
                             this.shiftForm.patchValue({
                                 patientId: patientObj.id,
                                 startTimeInput: timeString
-                            }, { emitEvent: true });
+                            }, { emitEvent: false }); // Ya lo asignamos arriba, no hace falta disparar evento
                         }
                     };
 
@@ -497,6 +506,7 @@ export class CaregiverComponent implements OnInit {
                     }
 
                     // Reanudar el reloj localmente
+                    if (this.timerInterval) clearInterval(this.timerInterval);
                     this.timerInterval = setInterval(() => {
                         this.shiftSeconds++;
                         const hrs = Math.floor(this.shiftSeconds / 3600);
