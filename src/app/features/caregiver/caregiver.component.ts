@@ -337,7 +337,8 @@ export class CaregiverComponent implements OnInit {
         // Escuchar cambios en el selector de paciente para mostrar su información 
         this.shiftForm.get('patientId')?.valueChanges.subscribe(id => {
             if (id) {
-                const patientReal = this.patients.find(p => p.id === +id);
+                // Usamos == para comparar string vs number de forma segura
+                const patientReal = this.patients.find(p => p.id == id);
                 if (patientReal) {
                     this.selectedPatientDetails = {
                         ...patientReal,
@@ -472,7 +473,7 @@ export class CaregiverComponent implements OnInit {
                         this.shiftForm.patchValue({
                             patientId: patientObj ? patientObj.id : '',
                             startTimeInput: timeString
-                        });
+                        }, { emitEvent: true }); // Aseguramos que se dispare el valueChanges para mostrar detalles
                     };
 
                     // En caso de que la lista de pacientes tarde unos milisegundos más en cargar
