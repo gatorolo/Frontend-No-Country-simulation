@@ -77,32 +77,32 @@
       </thead>
       <tbody>
         <tr *ngFor="let p of patients">
-          <td>
+          <td data-label="Paciente">
             <div class="patient-info">
               <span class="patient-name">{{ p.name }}</span>
               <span class="patient-diagnosis">{{ p.diagnosis | slice:0:30 }}...</span>
             </div>
           </td>
-          <td>{{ p.age }}</td>
-          <td>{{ p.city || '—' }}</td>
-          <td>
+          <td data-label="Edad">{{ p.age }}</td>
+          <td data-label="Ciudad">{{ p.city || '—' }}</td>
+          <td data-label="Dirección">
             <a *ngIf="p.locationLink" [href]="getMapsLink(p.locationLink)" target="_blank" rel="noopener noreferrer"
               style="color: #3b82f6; text-decoration: none;">Ver Mapa <span class="material-icons"
                 style="font-size: 14px; vertical-align: middle;">launch</span></a>
             <span *ngIf="!p.locationLink">—</span>
           </td>
-          <td>{{ p.healthInsurance }}</td>
-          <td>
+          <td data-label="Obra Social">{{ p.healthInsurance }}</td>
+          <td data-label="Cuidador Asignado">
             <span *ngIf="p.assignedCaregiver; else sinCuidador" class="caregiver-tag">
               <span class="material-icons" style="font-size:14px;vertical-align:middle;">person</span>
               {{ p.assignedCaregiver }}
             </span>
             <ng-template #sinCuidador><span style="color:#94a3b8;">Sin asignar</span></ng-template>
           </td>
-          <td>
+          <td data-label="Estado">
             <span class="status-pill" [class]="p.status?.toLowerCase()">{{ p.status || 'Sin estado' }}</span>
           </td>
-          <td class="actions">
+          <td data-label="Acciones" class="actions">
             <button class="icon-btn view" title="Ver Ficha Médica" (click)="viewDetails(p)">
               <span class="material-icons">medical_information</span>
             </button>

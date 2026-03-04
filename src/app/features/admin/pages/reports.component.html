@@ -49,8 +49,8 @@
             </td>
           </tr>
           <tr *ngFor="let r of reports">
-            <td style="font-weight: 500; color: #475569;">#{{ r.id }}</td>
-            <td>
+            <td data-label="ID Guardia" style="font-weight: 500; color: #475569;">#{{ r.id }}</td>
+            <td data-label="Cuidador">
               <div style="display: flex; align-items: center; gap: 8px;">
                 <div class="avatar-sm">
                   <span class="material-icons" style="font-size: 16px;">badge</span>
@@ -58,26 +58,26 @@
                 {{ r.caregiverName }}
               </div>
             </td>
-            <td>{{ r.patientName }}</td>
-            <td style="color: #64748b; font-size: 0.9rem;">
+            <td data-label="Paciente">{{ r.patientName }}</td>
+            <td data-label="Inicio" style="color: #64748b; font-size: 0.9rem;">
               {{ (r.startTime | date:'dd/MM HH:mm') || '...' }}
             </td>
-            <td style="color: #64748b; font-size: 0.9rem;">
+            <td data-label="Fin" style="color: #64748b; font-size: 0.9rem;">
               <span *ngIf="r.status === 'ACTIVA'" style="color: #10b981; font-weight: 500;">En Curso</span>
               <span *ngIf="r.status !== 'ACTIVA'">{{ (r.endTime | date:'dd/MM HH:mm') || 'Abierta' }}</span>
             </td>
-            <td style="text-align: center; font-weight: 500;">
+            <td data-label="Horas Trab." style="text-align: center; font-weight: 500;">
               {{ r.durationHours > 0 ? r.durationHours + ' hs' : '-' }}
             </td>
-            <td style="font-weight: 600; color: #10b981;">
+            <td data-label="Monto Generado" style="font-weight: 600; color: #10b981;">
               {{ r.earned > 0 ? ('$' + (r.earned | number:'1.2-2')) : '-' }}
             </td>
-            <td>
+            <td data-label="Pago a Cuidador">
               <span [ngClass]="getPaymentBadgeClass(r.paymentStatus)">
                 {{ r.paymentStatus }}
               </span>
             </td>
-            <td>
+            <td data-label="Cobro a Paciente">
               <span [ngClass]="getPaymentBadgeClass(r.patientPaymentStatus)">
                 {{ r.patientPaymentStatus }}
               </span>

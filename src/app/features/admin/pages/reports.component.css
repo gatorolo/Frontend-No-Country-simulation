@@ -29,7 +29,6 @@
 .table-container {
     width: 100%;
     overflow-x: auto;
-    /* Responsive scroll */
 }
 
 .data-table {
@@ -66,7 +65,6 @@
     font-size: 0.85rem;
 }
 
-/* Badges */
 .badge {
     padding: 0.35rem 0.75rem;
     border-radius: 9999px;
@@ -122,7 +120,6 @@
     cursor: not-allowed;
 }
 
-/* Animación para el icono de descarga */
 @keyframes spin {
     from {
         transform: rotate(0deg);
@@ -136,4 +133,66 @@
 .rotating-icon {
     animation: spin 1s linear infinite;
     display: inline-block;
+}
+
+@media (max-width: 768px) {
+    .dashboard-container {
+        padding: 1rem;
+    }
+
+    .card-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1.5rem;
+        padding: 1.25rem;
+    }
+
+    .card-header div {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        gap: 8px !important;
+    }
+
+    .btn {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .data-table thead {
+        display: none;
+    }
+
+    .data-table tr {
+        display: block;
+        background: white;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        margin-bottom: 1rem;
+        padding: 1rem;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    }
+
+    .data-table td {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.75rem 0;
+        border-bottom: 1px solid #f1f5f9;
+        text-align: right;
+    }
+
+    .data-table td:last-child {
+        border-bottom: none;
+    }
+
+    .data-table td::before {
+        content: attr(data-label);
+        font-weight: 700;
+        color: #64748b;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        padding-right: 1rem;
+        text-align: left;
+    }
 }

@@ -79,16 +79,16 @@
           </thead>
           <tbody>
             <tr *ngFor="let s of settlements">
-              <td>
+              <td data-label="Cuidador">
                 <span class="caregiver-name">{{ s.caregiverName }}</span>
               </td>
-              <td class="amount-cell">${{ s.amount | number }}</td>
-              <td>
+              <td data-label="Monto" class="amount-cell">${{ s.amount | number }}</td>
+              <td data-label="Estado Factura">
                 <span class="status-pill" [class]="s.invoiceUploaded ? 'uploaded' : 'missing'">
                   {{ s.invoiceUploaded ? 'Factura Recibida' : 'Pendiente Carga' }}
                 </span>
               </td>
-              <td>
+              <td data-label="Acción">
                 <div class="action-cell">
                   <button *ngIf="s.status !== 'Procesado'" class="pay-btn" [disabled]="s.amount === 0"
                     (click)="openReceiptModal(s)">
@@ -157,16 +157,16 @@
           </thead>
           <tbody>
             <tr *ngFor="let p of patientPayments">
-              <td>
+              <td data-label="Paciente">
                 <span class="caregiver-name" style="text-transform: capitalize;">{{ p.patientName }}</span>
               </td>
-              <td style="text-transform: capitalize;">
+              <td data-label="Guardia / Cuidador" style="text-transform: capitalize;">
                 {{ p.caregiverName }}
                 <br>
                 <small style="color: var(--text-light, #64748b);">{{ p.startTime | date:'dd/MM HH:mm' }}</small>
               </td>
-              <td class="amount-cell">${{ p.earned | number:'1.2-2' }}</td>
-              <td>
+              <td data-label="Monto a Cobrar" class="amount-cell">${{ p.earned | number:'1.2-2' }}</td>
+              <td data-label="Estado">
                 <div class="action-cell flex-center">
                   <span class="status-pill" [class]="p.patientPaymentStatus === 'PAGADO' ? 'uploaded' : 'missing'">
                     {{ p.patientPaymentStatus === 'PAGADO' ? 'Pagado' : 'Falta Pagar' }}

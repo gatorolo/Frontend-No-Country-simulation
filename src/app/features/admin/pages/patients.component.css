@@ -154,7 +154,6 @@
     transform: scale(1.02);
 }
 
-/* Table Design */
 .table-container {
     padding: 0;
     overflow: hidden;
@@ -229,12 +228,6 @@
     border: 1px solid #bae6fd;
 }
 
-.status-pill.pendiente {
-    background: #e0e7ff;
-    color: #4338ca;
-    border: 1px solid #c7d2fe;
-}
-
 .actions {
     display: flex;
     gap: 8px;
@@ -257,37 +250,9 @@
     color: #64748b;
 }
 
-.icon-btn.view:hover {
-    background: #e0f2fe;
-    color: #0369a1;
-}
-
 .icon-btn.edit {
     background: #f1f5f9;
     color: #64748b;
-}
-
-.icon-btn.edit:hover {
-    background: #fefce8;
-    color: #a16207;
-}
-
-/* Details View */
-.back-btn {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    background: transparent;
-    border: none;
-    color: #64748b;
-    font-weight: 700;
-    cursor: pointer;
-    margin-bottom: 1.5rem;
-    transition: color 0.2s;
-}
-
-.back-btn:hover {
-    color: #0369a1;
 }
 
 .medical-file-card {
@@ -323,12 +288,6 @@
     font-weight: 600;
 }
 
-@media (max-width: 768px) {
-    .file-grid {
-        grid-template-columns: 1fr;
-    }
-}
-
 .info-block h4 {
     display: flex;
     align-items: center;
@@ -336,10 +295,6 @@
     color: #1e293b;
     font-weight: 700;
     margin-bottom: 1.25rem;
-}
-
-.info-block h4 .material-icons {
-    color: #0369a1;
 }
 
 .med-list {
@@ -357,61 +312,6 @@
     border: 1px solid #e2e8f0;
     display: flex;
     justify-content: space-between;
-    align-items: center;
-}
-
-.med-name {
-    font-weight: 700;
-    color: #334155;
-}
-
-.med-time {
-    font-size: 0.813rem;
-    color: #64748b;
-    background: white;
-    padding: 2px 8px;
-    border-radius: 6px;
-    border: 1px solid #e2e8f0;
-}
-
-.file-footer {
-    margin-top: 2.5rem;
-    padding-top: 1.5rem;
-    border-top: 1px solid #f1f5f9;
-}
-
-.map-link {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    color: #0369a1;
-    text-decoration: none;
-    font-weight: 700;
-    font-size: 0.9rem;
-    transition: all 0.2s;
-}
-
-.map-link:hover {
-    transform: translateX(5px);
-}
-
-/* Animations */
-.animate-fade {
-    animation: fadeIn 0.4s ease-out;
-}
-
-.animate-slide-down {
-    animation: slideDown 0.3s ease-out;
-}
-
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-    }
-
-    to {
-        opacity: 1;
-    }
 }
 
 @keyframes slideDown {
@@ -423,5 +323,75 @@
     to {
         transform: translateY(0);
         opacity: 1;
+    }
+}
+
+@media (max-width: 768px) {
+    .dashboard-container {
+        padding: 1rem;
+    }
+
+    .header-actions {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+
+    .add-btn {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .premium-table thead {
+        display: none;
+    }
+
+    .premium-table tr {
+        display: block;
+        background: white;
+        border: 1px solid #e2e8f0;
+        border-radius: 16px;
+        margin-bottom: 1rem;
+        padding: 1rem;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    }
+
+    .premium-table td {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.75rem 0;
+        border-bottom: 1px solid #f1f5f9;
+    }
+
+    .premium-table td:last-child {
+        border-bottom: none;
+    }
+
+    .premium-table td::before {
+        content: attr(data-label);
+        font-weight: 700;
+        color: #64748b;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        padding-right: 1rem;
+    }
+
+    .actions {
+        justify-content: flex-end;
+    }
+
+    .medical-file-card {
+        padding: 1.5rem;
+    }
+
+    .file-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
     }
 }
