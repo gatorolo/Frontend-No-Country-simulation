@@ -262,8 +262,10 @@ export class CaregiverComponent implements OnInit {
 
             if (patientData) {
                 this.selectedNotification.locationLink = patientData.locationLink;
-                // Si el paciente tiene una dirección explícita también la agreamos, sino usamos locationLink crudo
-                this.selectedNotification.address = patientData.address || '';
+                // Si el paciente no tiene ciudad, usamos su zona
+                this.selectedNotification.city = patientData.city || patientData.zone || 'No especificada';
+                // Si no hay dirección guardada (que no la hay en el schema actual de Patient), usamos una descripción clara
+                this.selectedNotification.address = patientData.city ? `${patientData.city}, ${patientData.zone || ''}` : 'Ubicación de servicio';
             }
         }
         // --------------------------------------------------------
@@ -339,7 +341,7 @@ export class CaregiverComponent implements OnInit {
                 if (patientReal) {
                     this.selectedPatientDetails = {
                         ...patientReal,
-                        city: patientReal.city || patientReal.locationLink || 'No especificada',
+                        city: patientReal.city || 'No especificada',
                         zone: patientReal.zone || 'No especificada'
                     };
                 } else {
