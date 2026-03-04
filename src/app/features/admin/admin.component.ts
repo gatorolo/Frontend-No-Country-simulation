@@ -122,7 +122,8 @@ export class AdminComponent implements OnInit { // Implementamos OnInit
                     this.activeShifts = shifts.map(shift => {
                         const start = new Date(shift.startTime).getTime();
                         const now = new Date().getTime();
-                        const diffSeconds = Math.floor((now - start) / 1000);
+                        let diffSeconds = Math.floor((now - start) / 1000);
+                        if (diffSeconds < 0) diffSeconds = 0;
 
                         return {
                             ...shift,
@@ -176,6 +177,7 @@ export class AdminComponent implements OnInit { // Implementamos OnInit
 
         for (let shift of this.activeShifts) {
             shift.runningSeconds++;
+            if (shift.runningSeconds < 0) shift.runningSeconds = 0;
             shift.displayTimer = this.formatTime(shift.runningSeconds);
 
             // Costo por segundo del cuidador
@@ -367,7 +369,8 @@ export class AdminComponent implements OnInit { // Implementamos OnInit
     }
 
     private pad(num: number): string {
-        return num < 10 ? '0' + num : num.toString();
+        const abs = Math.abs(num);
+        return abs < 10 ? '0' + abs : abs.toString();
     }
 
     toggleNotifications() {

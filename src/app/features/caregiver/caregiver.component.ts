@@ -460,6 +460,7 @@ export class CaregiverComponent implements OnInit {
                     const startDate = new Date(myActiveShift.startTime);
                     const now = new Date().getTime();
                     this.shiftSeconds = Math.floor((now - startDate.getTime()) / 1000);
+                    if (this.shiftSeconds < 0) this.shiftSeconds = 0;
 
                     // Sincronizar UI Form
                     const timeString = `${this.pad(startDate.getHours())}:${this.pad(startDate.getMinutes())}`;
@@ -543,7 +544,8 @@ export class CaregiverComponent implements OnInit {
     }
 
     private pad(num: number): string {
-        return num < 10 ? '0' + num : num.toString();
+        const abs = Math.abs(num);
+        return abs < 10 ? '0' + abs : abs.toString();
     }
 
     loadDocuments() {
