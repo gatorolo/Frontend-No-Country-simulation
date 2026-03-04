@@ -103,6 +103,9 @@
                 <button class="icon-btn status" title="Verificar" (click)="toggleVerification(cg)">
                   <span class="material-icons">{{ cg.status === 'Verificado' ? 'verified_user' : 'rule' }}</span>
                 </button>
+                <button class="icon-btn delete" title="Eliminar" (click)="deleteCaregiver(cg.id)">
+                  <span class="material-icons">delete</span>
+                </button>
               </div>
             </td>
           </tr>

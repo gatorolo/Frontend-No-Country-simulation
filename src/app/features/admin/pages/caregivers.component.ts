@@ -103,6 +103,18 @@ export class CaregiversComponent implements OnInit {
     });
   }
 
+  deleteCaregiver(id: number) {
+    if (confirm('¿Estás seguro de que deseas eliminar este cuidador?')) {
+      this.caregiverService.deleteCaregiver(id).subscribe({
+        next: () => {
+          console.log('✅ Cuidador eliminado');
+          this.loadCaregivers();
+        },
+        error: (err) => console.error('Error al eliminar', err)
+      });
+    }
+  }
+
   // Agregamos este método para traer los datos reales al iniciar
   private loadCaregivers() {
     this.caregiverService.getAllCaregivers().subscribe(data => {

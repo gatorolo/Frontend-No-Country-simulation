@@ -192,6 +192,15 @@ td {
     background: #f1f5f9;
 }
 
+.icon-btn.delete {
+    color: #ef4444;
+    background: #fef2f2;
+}
+
+.icon-btn.delete:hover {
+    background: #fee2e2;
+}
+
 .icon-btn.photo {
     color: #7c3aed;
     background: #f5f3ff;
