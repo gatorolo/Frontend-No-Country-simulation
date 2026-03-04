@@ -473,12 +473,19 @@ export class CaregiverComponent implements OnInit {
                     const timeString = `${this.pad(startDate.getHours())}:${this.pad(startDate.getMinutes())}`;
 
                     const syncFormTask = () => {
-                        const syncName = myActiveShift.patientName?.trim().toLowerCase();
-                        const patientObj = this.patients.find(p => p.name?.trim().toLowerCase() === syncName);
-                        this.shiftForm.patchValue({
-                            patientId: patientObj ? patientObj.id : '',
-                            startTimeInput: timeString
-                        }, { emitEvent: true }); // Aseguramos que se dispare el valueChanges para mostrar detalles
+                        const normalize = (str: string) => str?.normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim().toLowerCase();
+                        const syncName = normalize(myActiveShift.patientName);
+
+                        const patientObj = this.patients.find(p => normalize(p.name) === syncName);
+
+                        console.log('🔍 Intentando sincronizar paciente:', syncName, 'Encontrado:', patientObj?.name);
+
+                        if (patientObj) {
+                            this.shiftForm.patchValue({
+                                patientId: patientObj.id,
+                                startTimeInput: timeString
+                            }, { emitEvent: true });
+                        }
                     };
 
                     // En caso de que la lista de pacientes tarde unos milisegundos más en cargar

@@ -105,10 +105,17 @@
                 </div>
                 <div class="form-group">
                     <label for="city">Ciudad</label>
-                    <div class="input-wrapper">
-                        <span class="material-icons input-icon">location_city</span>
-                        <input type="text" id="city" [(ngModel)]="city" name="city" placeholder="Ej: Córdoba Capital"
-                            class="form-control" required>
+                    <div class="input-group-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                        <div class="input-wrapper">
+                            <span class="material-icons input-icon">location_city</span>
+                            <input type="text" id="city" [(ngModel)]="city" name="city" placeholder="Ej: Córdoba"
+                                class="form-control" required>
+                        </div>
+                        <div class="input-wrapper">
+                            <span class="material-icons input-icon">map</span>
+                            <input type="text" id="zone" [(ngModel)]="zone" name="zone" placeholder="Zona/Barrio"
+                                class="form-control" required>
+                        </div>
                     </div>
                 </div>
                 <div class="form-group">

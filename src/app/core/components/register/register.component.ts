@@ -27,6 +27,7 @@ export class RegisterComponent {
     healthInsurance: string = '';
     diagnosis: string = '';
     city: string = '';
+    zone: string = '';
     locationLink: string = '';
 
     successMessage: string = '';
@@ -57,6 +58,7 @@ export class RegisterComponent {
                 healthInsurance: this.healthInsurance,
                 diagnosis: this.diagnosis,
                 city: this.city,
+                zone: this.zone,
                 locationLink: this.locationLink
             };
         }
