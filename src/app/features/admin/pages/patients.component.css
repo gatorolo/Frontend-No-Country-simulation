@@ -272,6 +272,39 @@
     color: #64748b;
 }
 
+.icon-btn.delete {
+    background: #fee2e2;
+    color: #ef4444;
+}
+
+.icon-btn.delete:hover {
+    background: #ef4444;
+    color: white;
+}
+
+.map-icon-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    background: #f0f9ff;
+    color: #0369a1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    text-decoration: none;
+}
+
+.map-icon-btn:hover {
+    background: #0369a1;
+    color: white;
+    transform: scale(1.1);
+}
+
+.map-icon-btn .material-icons {
+    font-size: 18px;
+}
+
 .medical-file-card {
     padding: 2.5rem;
     border-top: 6px solid #0369a1;

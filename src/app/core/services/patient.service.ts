@@ -82,6 +82,7 @@ export interface Patient {
     status: string | null;
     city?: string | null;
     zone?: string | null;
+    address?: string | null;
     profilePhoto?: string | null;
     assignedCaregiver?: string | null;
 }
@@ -144,6 +145,12 @@ export class PatientService {
                 const patients = this.getPatients();
                 this.patientsSource.next([...patients, newPatient]);
             })
+        );
+    }
+
+    deletePatient(id: number): Observable<void> {
+        return this.http.delete<void>(`${this.apiUrl}/${id}`).pipe(
+            tap(() => this.loadPatients())
         );
     }
 }

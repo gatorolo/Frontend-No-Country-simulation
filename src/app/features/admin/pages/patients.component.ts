@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { PatientService, Patient } from 'src/app/core/services/patient.service';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-patients',
@@ -12,7 +13,6 @@ export class PatientsComponent implements OnInit {
   patientForm!: FormGroup;
   showAddForm = false;
 
-  // Usamos any para que no chille por el ID que viene de la DB
   selectedPatient: any = null;
   selectedPatientId: number | null = null;
 
@@ -24,7 +24,6 @@ export class PatientsComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
-    // Pedimos los datos a la API apenas carga el admin
     this.patientService.loadPatients();
     this.patientService.patients$.subscribe(p => this.patients = p);
     this.initForm();
@@ -36,6 +35,7 @@ export class PatientsComponent implements OnInit {
       age: [0, [Validators.required, Validators.min(0)]],
       city: [''],
       zone: [''],
+      address: [''],
       diagnosis: ['', Validators.required],
       healthInsurance: ['', Validators.required],
       locationLink: [''],
@@ -64,7 +64,7 @@ export class PatientsComponent implements OnInit {
 
   editPatient(patient: any) {
     this.selectedPatient = patient;
-    this.selectedPatientId = patient.id; // Guardamos el ID de la base de datos
+    this.selectedPatientId = patient.id;
     this.showAddForm = true;
     this.patientForm.patchValue({
       name: patient.name,
@@ -73,6 +73,7 @@ export class PatientsComponent implements OnInit {
       zone: patient.zone,
       diagnosis: patient.diagnosis,
       healthInsurance: patient.healthInsurance,
+      address: patient.address,
       locationLink: patient.locationLink,
       status: patient.status
     });
@@ -84,23 +85,20 @@ export class PatientsComponent implements OnInit {
     const data = this.patientForm.value;
 
     if (this.selectedPatientId) {
-      // Caso EDITAR: Mandamos el ID y los datos por separado al servicio
-      // Nos aseguramos de mezclar con los datos viejos
       const updatedPatient: any = {
         ...this.selectedPatient,
         ...data
       };
 
-      // Enviamos ID como primer argumento y objeto como segundo
       this.patientService.updatePatient(this.selectedPatientId, updatedPatient).subscribe({
         next: () => {
           this.patientService.loadPatients();
           this.toggleAddMode();
+          Swal.fire('¡Actualizado!', 'Paciente actualizado correctamente', 'success');
         },
         error: (err) => console.error('Error al actualizar', err)
       });
     } else {
-      // Caso NUEVO: El admin crea un paciente desde cero
       const newPatient: Patient = {
         ...data,
         medications: [],
@@ -110,23 +108,62 @@ export class PatientsComponent implements OnInit {
         next: () => {
           this.patientService.loadPatients();
           this.toggleAddMode();
+          Swal.fire('¡Registrado!', 'Paciente guardado correctamente', 'success');
         },
         error: (err) => console.error('Error al crear', err)
       });
     }
   }
 
-  getMapsLink(link: string): string {
-    if (!link) return '';
-    // If it's already a full URL, trust it
-    if (link.startsWith('http://') || link.startsWith('https://')) {
-      return link;
+  deletePatient(id: number | undefined) {
+    if (!id) return;
+
+    Swal.fire({
+      title: '¿Estás seguro?',
+      text: 'Esta acción no se puede deshacer y eliminará permanentemente la ficha médica del paciente.',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Sí, eliminar',
+      cancelButtonText: 'Cancelar'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.patientService.deletePatient(id).subscribe({
+          next: () => {
+            Swal.fire('Eliminado', 'El paciente ha sido borrado.', 'success');
+          },
+          error: (err) => {
+            console.error('Error al eliminar', err);
+            Swal.fire('Error', 'No se pudo eliminar el paciente. Posiblemente tenga servicios asociados.', 'error');
+          }
+        });
+      }
+    });
+  }
+
+  getMapsLink(p: any): string {
+    if (!p) return '';
+
+    if (typeof p === 'string') {
+      if (p.startsWith('http://') || p.startsWith('https://')) return p;
+      if (p.startsWith('www.')) return `https://${p}`;
+      return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(p)}`;
     }
-    // If it looks like a short link (www.something.com)
-    if (link.startsWith('www.')) {
-      return `https://${link}`;
+
+    if (p.locationLink && (p.locationLink.startsWith('http') || p.locationLink.startsWith('www.'))) {
+      return p.locationLink.startsWith('www.') ? `https://${p.locationLink}` : p.locationLink;
     }
-    // Otherwise, treat it as a raw street address and search Google Maps
-    return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(link)}`;
+
+    const parts = [];
+    if (p.address) parts.push(p.address);
+    if (p.zone) parts.push(p.zone);
+    if (p.city) parts.push(p.city);
+
+    if (parts.length > 0) {
+      return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(parts.join(', '))}`;
+    }
+
+    return '';
   }
 }

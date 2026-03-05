@@ -31,10 +31,22 @@
                     <input type="text" formControlName="healthInsurance" placeholder="Ej: OSDE, Medicus">
                 </div>
                 <div class="input-group">
-                    <label>Ubicación (Enlace Google Maps)</label>
+                    <label>Ciudad</label>
+                    <input type="text" formControlName="city" placeholder="Ej: Córdoba Capital">
+                </div>
+                <div class="input-group">
+                    <label>Zona / Barrio</label>
+                    <input type="text" formControlName="zone" placeholder="Ej: Nueva Córdoba">
+                </div>
+                <div class="input-group">
+                    <label>Dirección exacta (Calle y Altura)</label>
+                    <input type="text" formControlName="address" placeholder="Ej: Santa Fe 1122">
+                </div>
+                <div class="input-group" style="grid-column: span 2;">
+                    <label>Ubicación (Enlace Google Maps alternativo)</label>
                     <div style="display: flex; align-items: center; gap: 12px;">
-                        <input type="text" formControlName="locationLink" placeholder="Pegue el enlace aquí"
-                            style="flex: 1;">
+                        <input type="text" formControlName="locationLink"
+                            placeholder="Pegue el enlace aquí o deje vacío" style="flex: 1;">
                         <a [href]="familyForm.get('locationLink')?.value" target="_blank" class="map-btn"
                             *ngIf="familyForm.get('locationLink')?.value" style="margin-top: 0; white-space: nowrap;">
                             <span class="material-icons">room</span> Ver en el Mapa

@@ -164,8 +164,9 @@ export class AdminTopbarComponent implements OnInit {
                 this.notificationService.markAsRead(this.activeNotificationId!);
             },
             error: (err) => {
-                Swal.fire('Error', 'Hubo un error al aprobar la solicitud.', 'error');
-                console.error(err);
+                const errorMsg = err.error || 'Hubo un error al aprobar la solicitud.';
+                Swal.fire('Error', errorMsg, 'error');
+                console.error('Error approveRegistration:', err);
             }
         });
     }

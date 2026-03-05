@@ -159,12 +159,14 @@
 
                 <section class="info-card location-card" style="padding-bottom: 0.5rem;">
                     <h3 class="section-sub"><span class="material-icons">room</span> Ubicación</h3>
-                    <p *ngIf="patientData.location"
-                        style="font-weight: 500; font-size: 0.9rem; color: #475569; margin: 0.2rem 0;">
-                        {{ patientData.location }}
-                    </p>
-                    <a [href]="getMapsLink(patientData.location)" target="_blank" class="map-link"
-                        style="margin-top: 0.5rem; margin-bottom: 0.5rem;">
+                    <div class="location-details"
+                        style="font-size: 0.9rem; color: #475569; margin: 0.5rem 0; display: flex; flex-direction: column; gap: 4px;">
+                        <span *ngIf="patientData.address"><strong>Dirección:</strong> {{ patientData.address }}</span>
+                        <span *ngIf="patientData.city"><strong>Ciudad:</strong> {{ patientData.city }}</span>
+                        <span *ngIf="patientData.zone"><strong>Zona:</strong> {{ patientData.zone }}</span>
+                    </div>
+                    <a *ngIf="getMapsLink(patientData)" [href]="getMapsLink(patientData)" target="_blank"
+                        class="map-link" style="margin-top: 0.5rem; margin-bottom: 0.5rem;">
                         <span class="material-icons">map</span> Ver en Google Maps
                     </a>
                 </section>

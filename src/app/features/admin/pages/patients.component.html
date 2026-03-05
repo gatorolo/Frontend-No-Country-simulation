@@ -37,6 +37,10 @@
           <input type="text" formControlName="zone" placeholder="Ej: Nueva Córdoba">
         </div>
         <div class="form-group">
+          <label>Dirección (Calle y Altura)</label>
+          <input type="text" formControlName="address" placeholder="Ej: Santa Fe 1122">
+        </div>
+        <div class="form-group">
           <label>Estado</label>
           <select formControlName="status">
             <option value="Activo">Activo</option>
@@ -91,10 +95,13 @@
             </span>
           </td>
           <td data-label="Dirección">
-            <a *ngIf="p.locationLink" [href]="getMapsLink(p.locationLink)" target="_blank" rel="noopener noreferrer"
-              style="color: #3b82f6; text-decoration: none;">Ver Mapa <span class="material-icons"
-                style="font-size: 14px; vertical-align: middle;">launch</span></a>
-            <span *ngIf="!p.locationLink">—</span>
+            <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px;">
+              <span>{{ p.address || '—' }}</span>
+              <a *ngIf="getMapsLink(p)" [href]="getMapsLink(p)" target="_blank" rel="noopener noreferrer"
+                class="map-icon-btn" title="Ver en Google Maps" style="flex-shrink: 0;">
+                <span class="material-icons" style="font-size: 18px;">map</span>
+              </a>
+            </div>
           </td>
           <td data-label="Obra Social">{{ p.healthInsurance }}</td>
           <td data-label="Cuidador Asignado">
@@ -113,6 +120,9 @@
             </button>
             <button class="icon-btn edit" title="Editar" (click)="editPatient(p)">
               <span class="material-icons">edit</span>
+            </button>
+            <button class="icon-btn delete" title="Eliminar Paciente" (click)="deletePatient(p.id)">
+              <span class="material-icons">delete</span>
             </button>
           </td>
         </tr>
@@ -140,6 +150,7 @@
           <p><strong>Edad:</strong> {{ selectedPatient.age }} años</p>
           <p *ngIf="selectedPatient.city"><strong>Ciudad:</strong> {{ selectedPatient.city }}</p>
           <p *ngIf="selectedPatient.zone"><strong>Zona:</strong> {{ selectedPatient.zone }}</p>
+          <p *ngIf="selectedPatient.address"><strong>Dirección:</strong> {{ selectedPatient.address }}</p>
         </div>
 
         <div class="info-block" *ngIf="selectedPatient.assignedCaregiver">
@@ -161,9 +172,8 @@
         </div>
       </div>
 
-      <div class="file-footer" *ngIf="selectedPatient.locationLink">
-        <a [href]="getMapsLink(selectedPatient.locationLink)" target="_blank" rel="noopener noreferrer"
-          class="map-link">
+      <div class="file-footer" *ngIf="getMapsLink(selectedPatient)">
+        <a [href]="getMapsLink(selectedPatient)" target="_blank" rel="noopener noreferrer" class="map-link">
           <span class="material-icons">room</span> Ver Ubicación del Paciente
         </a>
       </div>

@@ -8,6 +8,7 @@ export interface ServicePost {
     age: number;
     city: string;
     zone: string;
+    address: string;
     schedule: string;
     complexity: 'Baja' | 'Media' | 'Alta';
     specialty: 'Enfermería' | 'Kinesiología' | 'Gerontología' | 'Rehabilitación';

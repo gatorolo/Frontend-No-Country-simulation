@@ -84,28 +84,27 @@
                 </div>
 
                 <!-- NUEVO: DETALLES DEL PACIENTE ASIGNADO -->
-                <div *ngIf="selectedPatientDetails" class="patient-detail-card"
-                    style="margin-top: -1rem; margin-bottom: 2rem; padding: 1rem; border-radius: 8px; background: rgba(59, 130, 246, 0.05); border: 1px solid rgba(59, 130, 246, 0.1);">
-                    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
-                        <span class="material-icons" style="color: #3b82f6; font-size: 20px;">info</span>
-                        <span style="font-weight: 600; color: #1e293b; font-size: 0.95rem;">Información del
-                            Paciente</span>
+                <div *ngIf="selectedPatientDetails" class="patient-detail-card">
+                    <div class="patient-detail-header">
+                        <span class="material-icons">info</span>
+                        <span class="patient-detail-title">Información del Paciente</span>
                     </div>
-                    <div
-                        style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; font-size: 0.85rem; color: #475569;">
-                        <div>
+                    <div class="patient-detail-grid">
+                        <div class="patient-detail-item">
                             <strong>Ciudad:</strong> {{ selectedPatientDetails.city || 'No especificada' }}
                         </div>
-                        <div>
+                        <div class="patient-detail-item">
                             <strong>Zona:</strong> {{ selectedPatientDetails.zone || 'No especificada' }}
                         </div>
-                        <div style="grid-column: span 2;">
+                        <div class="patient-detail-item full-width">
+                            <strong>Dirección:</strong> {{ selectedPatientDetails.address || 'No especificada' }}
+                        </div>
+                        <div class="patient-detail-item full-width">
                             <strong>Obra Social:</strong> {{ selectedPatientDetails.healthInsurance || 'Particular' }}
                         </div>
-                        <div *ngIf="selectedPatientDetails.locationLink" style="grid-column: span 2; margin-top: 4px;">
-                            <a [href]="getMapsLink(selectedPatientDetails.locationLink)" target="_blank"
-                                rel="noopener noreferrer"
-                                style="color: #3b82f6; display: flex; align-items: center; gap: 4px; text-decoration: none;">
+                        <div *ngIf="getMapsLink(selectedPatientDetails)" class="full-width" style="margin-top: 4px;">
+                            <a [href]="getMapsLink(selectedPatientDetails)" target="_blank" rel="noopener noreferrer"
+                                class="map-link" style="display: flex; align-items: center; gap: 4px;">
                                 <span class="material-icons" style="font-size: 16px;">map</span> Ver Dirección en Mapa
                             </a>
                         </div>
@@ -400,12 +399,14 @@
                     style="grid-column: span 2;">
                     <span class="label">Dirección</span>
                     <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px;">
-                        <span class="value" style="font-size: 0.95rem;">{{ selectedNotification.address || 'Ubicación
-                            Geolocalizada' }}</span>
-                        <a *ngIf="selectedNotification.locationLink"
-                            [href]="getMapsLink(selectedNotification.locationLink)" target="_blank"
-                            rel="noopener noreferrer"
-                            style="display: inline-flex; align-items: center; gap: 4px; padding: 4px 8px; background: rgba(59, 130, 246, 0.1); color: #3b82f6; border-radius: 6px; text-decoration: none; font-size: 0.85rem; font-weight: 600; transition: background 0.2s;">
+                        <span class="value" style="font-size: 0.95rem;">
+                            {{ selectedNotification.address ? selectedNotification.address + ', ' : '' }}
+                            {{ selectedNotification.zone ? selectedNotification.zone + ', ' : '' }}
+                            {{ selectedNotification.city || 'Ubicación Geolocalizada' }}
+                        </span>
+                        <a *ngIf="getMapsLink(selectedNotification)" [href]="getMapsLink(selectedNotification)"
+                            target="_blank" rel="noopener noreferrer" class="map-link"
+                            style="display: inline-flex; align-items: center; gap: 4px; padding: 4px 8px; background: rgba(59, 130, 246, 0.1); border-radius: 6px; font-size: 0.85rem; font-weight: 600;">
                             <span class="material-icons" style="font-size: 16px;">map</span> Ver Mapa
                         </a>
                     </div>

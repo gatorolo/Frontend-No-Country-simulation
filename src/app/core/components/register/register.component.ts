@@ -59,6 +59,7 @@ export class RegisterComponent {
                 diagnosis: this.diagnosis,
                 city: this.city,
                 zone: this.zone,
+                address: this.address,
                 locationLink: this.locationLink
             };
         }

@@ -162,6 +162,9 @@ export class FamilyViewComponent implements OnInit {
       age: data.age || data.patientAge || '-',
       insurance: data.healthInsurance || data.insurance || '-',
       location: data.locationLink || data.location,
+      city: data.city || '-',
+      zone: data.zone || '-',
+      address: data.address || '-',
       medications: data.medications || [],
       // Inicializamos caregiverName en null para que el HTML muestre "Buscando..."
       caregiverName: null,
@@ -458,14 +461,37 @@ export class FamilyViewComponent implements OnInit {
     this.router.navigate(['/family']);
   }
 
-  getMapsLink(address: string): string {
-    if (!address) return '#';
-    // Si ya es un enlace web, lo retornamos tal cual
-    if (address.startsWith('http://') || address.startsWith('https://')) {
-      return address;
+  getMapsLink(p: any): string {
+    if (!p) return '';
+
+    // Si recibimos un string (por compatibilidad o fallback)
+    if (typeof p === 'string') {
+      if (p.startsWith('http://') || p.startsWith('https://')) return p;
+      if (p.startsWith('www.')) return `https://${p}`;
+      return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(p)}`;
     }
-    // Convertimos la dirección real a una URL de búsqueda de Google Maps
-    return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`;
+
+    // Si tenemos un enlace directo prioritario
+    if (p.locationLink && (p.locationLink.startsWith('http') || p.locationLink.startsWith('www.'))) {
+      return p.locationLink.startsWith('www.') ? `https://${p.locationLink}` : p.locationLink;
+    }
+
+    // Si no hay enlace directo, usamos los campos de texto
+    const parts = [];
+    if (p.address && p.address !== '-') parts.push(p.address);
+    if (p.zone && p.zone !== '-') parts.push(p.zone);
+    if (p.city && p.city !== '-') parts.push(p.city);
+
+    if (parts.length > 0) {
+      return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(parts.join(', '))}`;
+    }
+
+    // Fallback final sobre el campo location que a veces mapeamos
+    if (p.location && p.location !== '-') {
+      return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(p.location)}`;
+    }
+
+    return '';
   }
 
   // ---- NUEVOS MÉTODOS PARA SOLICITUD DE SERVICIO ----
@@ -489,8 +515,9 @@ export class FamilyViewComponent implements OnInit {
     const requestPayload = {
       patientName: this.patientData.name || this.patientData.patientName,
       age: this.patientData.age || 0,
-      city: this.patientData.city || 'Ubicación Registrada', // Usamos un nombre más genérico
-      zone: this.patientData.zone || this.patientData.location || 'Consultar Perfil',
+      city: this.patientData.city || 'Ubicación Registrada',
+      zone: this.patientData.zone || 'No especificada',
+      address: this.patientData.address || '',
       schedule: formValues.schedule,
       complexity: formValues.complexity,
       specialty: formValues.specialty

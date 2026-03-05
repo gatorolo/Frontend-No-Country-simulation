@@ -119,11 +119,19 @@
                     </div>
                 </div>
                 <div class="form-group">
-                    <label for="locationLink">Dirección Exacta</label>
+                    <label for="address">Dirección (Calle y Altura)</label>
                     <div class="input-wrapper">
                         <span class="material-icons input-icon">home</span>
+                        <input type="text" id="address" [(ngModel)]="address" name="address"
+                            placeholder="Ej: Santa Fe 1122" class="form-control" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="locationLink">Enlace Google Maps (Opcional)</label>
+                    <div class="input-wrapper">
+                        <span class="material-icons input-icon">map</span>
                         <input type="text" id="locationLink" [(ngModel)]="locationLink" name="locationLink"
-                            placeholder="Ej: Av. San Martín 1500" class="form-control" required>
+                            placeholder="Pegue aquí el enlace de Maps" class="form-control">
                     </div>
                 </div>
             </ng-container>

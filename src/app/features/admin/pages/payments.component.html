@@ -7,6 +7,10 @@
       <h1>Centro de Control de Pagos</h1>
     </div>
     <div class="actions">
+      <button class="export-btn" (click)="refreshData()"
+        style="background: white; color: var(--primary); margin-right: 10px;">
+        <span class="material-icons">refresh</span> Actualizar
+      </button>
       <button class="export-btn" (click)="exportData()">
         <span class="material-icons">download</span> Exportar Reporte
       </button>
@@ -168,7 +172,11 @@
               <td data-label="Monto a Cobrar" class="amount-cell">${{ p.earned | number:'1.2-2' }}</td>
               <td data-label="Estado">
                 <div class="action-cell flex-center">
-                  <span class="status-pill" [class]="p.patientPaymentStatus === 'PAGADO' ? 'uploaded' : 'missing'">
+                  <span class="status-pill" *ngIf="p.status === 'ACTIVA'" style="background: #e0f2fe; color: #0369a1;">
+                    En Curso
+                  </span>
+                  <span class="status-pill" *ngIf="p.status !== 'ACTIVA'"
+                    [class]="p.patientPaymentStatus === 'PAGADO' ? 'uploaded' : 'missing'">
                     {{ p.patientPaymentStatus === 'PAGADO' ? 'Pagado' : 'Falta Pagar' }}
                   </span>
                   <button class="hide-btn" (click)="hidePatientPayment(p.id, $event)" title="Ocultar de la lista">

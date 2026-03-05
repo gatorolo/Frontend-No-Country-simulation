@@ -47,7 +47,12 @@ export class PaymentsComponent implements OnInit {
     this.hiddenPatientPayments = JSON.parse(localStorage.getItem(this.HIDDEN_PATIENT_PAYMENTS_KEY) || '[]');
   }
 
-  private loadData() {
+  public refreshData() {
+    this.loadData();
+    this.loadPatientPayments();
+  }
+
+  public loadData() {
     this.reportsService.getShiftsHistory().subscribe({
       next: (shifts) => {
         // Objeto temporal para agrupar liquidaciones por nombre de cuidador
@@ -97,7 +102,7 @@ export class PaymentsComponent implements OnInit {
     });
   }
 
-  private loadPatientPayments() {
+  public loadPatientPayments() {
     this.reportsService.getShiftsHistory().subscribe({
       next: (data) => {
         // Filter out hidden IDs

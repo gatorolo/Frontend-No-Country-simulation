@@ -618,6 +618,26 @@ td {
     color: #ef4444;
 }
 
+.map-link,
+.map-link:visited {
+    color: #38bdf8 !important;
+    /* Brighter blue for better contrast */
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.2s;
+}
+
+.map-link:hover {
+    text-decoration: underline !important;
+    opacity: 1;
+    color: #7dd3fc !important;
+}
+
+:host-context(body.dark-mode) .map-link,
+:host-context(body.dark-mode) .map-link:visited {
+    color: #7dd3fc !important;
+}
+
 .detail-grid {
     display: grid;
     gap: 1.5rem;

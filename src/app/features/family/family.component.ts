@@ -96,6 +96,9 @@ export class FamilyComponent implements OnInit {
                     diagnosis: patient.diagnosis,
                     healthInsurance: patient.healthInsurance,
                     locationLink: patient.locationLink,
+                    city: patient.city,
+                    zone: patient.zone,
+                    address: patient.address,
                     authorizedCaregivers: patient.authorizedCaregivers || []
                 });
 
@@ -151,6 +154,9 @@ export class FamilyComponent implements OnInit {
                         diagnosis: patient.diagnosis,
                         healthInsurance: patient.healthInsurance,
                         locationLink: patient.locationLink,
+                        city: patient.city,
+                        zone: patient.zone,
+                        address: patient.address,
                         authorizedCaregivers: patient.authorizedCaregivers
                     });
                 }
@@ -166,7 +172,10 @@ export class FamilyComponent implements OnInit {
             patientAge: [null, [Validators.required, Validators.min(0)]],
             diagnosis: ['', Validators.required],
             healthInsurance: ['', Validators.required],
-            locationLink: ['', Validators.required],
+            locationLink: [''],
+            city: [''],
+            zone: [''],
+            address: [''],
 
             medications: this.fb.array([]),
             authorizedCaregivers: [[]]
@@ -202,6 +211,9 @@ export class FamilyComponent implements OnInit {
                 diagnosis: formData.diagnosis,
                 healthInsurance: formData.healthInsurance,
                 locationLink: formData.locationLink,
+                city: formData.city,
+                zone: formData.zone,
+                address: formData.address,
                 medications: formData.medications || [],
                 authorizedCaregivers: formData.authorizedCaregivers,
                 status: 'Pendiente'

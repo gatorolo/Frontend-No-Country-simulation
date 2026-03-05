@@ -668,14 +668,32 @@ export class CaregiverComponent implements OnInit {
         reader.readAsDataURL(file);
     }
 
-    getMapsLink(link: string): string {
-        if (!link) return '';
-        if (link.startsWith('http://') || link.startsWith('https://')) {
-            return link;
+    getMapsLink(p: any): string {
+        if (!p) return '';
+
+        // Si recibimos un string (por compatibilidad o fallback)
+        if (typeof p === 'string') {
+            if (p.startsWith('http://') || p.startsWith('https://')) return p;
+            if (p.startsWith('www.')) return `https://${p}`;
+            // Si el string no es URL, lo usamos para buscar
+            return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(p)}`;
         }
-        if (link.startsWith('www.')) {
-            return `https://${link}`;
+
+        // Si tenemos un enlace directo prioritario (en la propiedad locationLink del objeto)
+        if (p.locationLink && (p.locationLink.startsWith('http') || p.locationLink.startsWith('www.'))) {
+            return p.locationLink.startsWith('www.') ? `https://${p.locationLink}` : p.locationLink;
         }
-        return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(link)}`;
+
+        // Si no hay enlace directo, construimos la búsqueda con dirección, zona y ciudad
+        const parts = [];
+        if (p.address) parts.push(p.address);
+        if (p.zone) parts.push(p.zone);
+        if (p.city) parts.push(p.city);
+
+        if (parts.length > 0) {
+            return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(parts.join(', '))}`;
+        }
+
+        return '';
     }
 }
