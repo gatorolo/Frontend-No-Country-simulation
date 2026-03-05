@@ -5,6 +5,8 @@ import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { CoreModule } from './core/core.module';
 import { HttpClientModule } from '@angular/common/http';
+import { ErrorHandler } from '@angular/core';
+import { GlobalErrorHandlerService } from './core/services/global-error-handler.service';
 
 @NgModule({
   declarations: [
@@ -16,7 +18,9 @@ import { HttpClientModule } from '@angular/common/http';
     CoreModule,
     HttpClientModule
   ],
-  providers: [],
+  providers: [
+    { provide: ErrorHandler, useClass: GlobalErrorHandlerService }
+  ],
   bootstrap: [AppComponent]
 })
 export class AppModule { }
