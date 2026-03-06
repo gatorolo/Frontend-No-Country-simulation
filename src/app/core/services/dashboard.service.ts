@@ -20,4 +20,8 @@ export class DashboardService {
     getRecentPayments(): Observable<any[]> {
         return this.http.get<any[]>(`${this.apiUrl}/recent-payments`);
     }
+
+    resetBalance(): Observable<any> {
+        return this.http.post(`${this.apiUrl}/reset-balance`, {});
+    }
 }

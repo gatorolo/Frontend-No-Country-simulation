@@ -608,4 +608,38 @@ export class AdminComponent implements OnInit { // Implementamos OnInit
     deleteValidationRequest(id: number, event: Event) {
         this.deleteService(id, event);
     }
+
+    resetBalance() {
+        Swal.fire({
+            title: '¿Reiniciar Balance?',
+            text: 'Esta acción archivará los cobros actuales y pondrá el balance en cero para iniciar un nuevo mes.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#10b981',
+            cancelButtonColor: '#64748b',
+            confirmButtonText: 'Sí, reiniciar',
+            cancelButtonText: 'Cancelar'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                this.dashboardService.resetBalance().subscribe({
+                    next: () => {
+                        Swal.fire('¡Reiniciado!', 'El balance se ha puesto a cero.', 'success');
+                        // Recargar estadísticas
+                        this.dashboardService.getStats().subscribe(data => {
+                            this.stats = [
+                                { label: 'Acompañantes', value: data.totalCaregivers.toString(), icon: 'groups', color: 'blue' },
+                                { label: 'Pacientes/Familia', value: data.totalPatients.toString(), icon: 'elderly_woman', color: 'orange' },
+                                { label: 'Balance', value: `$${data.totalBalance.toLocaleString('es-AR')}`, icon: 'account_balance_wallet', color: 'green' }
+                            ];
+                        });
+                        this.loadPatientUnpaidShifts(); // Refrescar métricas locales también
+                    },
+                    error: (err) => {
+                        console.error('Error al reiniciar balance:', err);
+                        Swal.fire('Error', 'No se pudo reiniciar el balance.', 'error');
+                    }
+                });
+            }
+        });
+    }
 }

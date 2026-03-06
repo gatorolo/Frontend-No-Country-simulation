@@ -12,6 +12,10 @@
       <div class="stat-info">
         <span class="stat-label">{{ stat.label }}</span>
         <span class="stat-value">{{ stat.value }}</span>
+        <button *ngIf="stat.label === 'Balance'" class="reset-balance-btn" (click)="resetBalance()"
+          title="Reiniciar a cero">
+          <span class="material-icons" style="font-size: 14px;">restart_alt</span> Reiniciar
+        </button>
       </div>
       <div class="stat-chart-mini">
         <svg viewBox="0 0 100 25" class="sparkline">

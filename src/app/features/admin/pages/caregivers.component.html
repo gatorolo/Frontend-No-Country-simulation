@@ -76,7 +76,7 @@
         </thead>
         <tbody>
           <tr *ngFor="let cg of caregivers">
-            <td>
+            <td data-label="Nombre">
               <div class="cg-user">
                 <ng-container *ngIf="cg.profilePhoto; else defaultIcon">
                   <img [src]="cg.profilePhoto" alt="foto" class="cg-avatar">
@@ -87,15 +87,15 @@
                 <span>{{ cg.caregiverName || cg.fullName }}</span>
               </div>
             </td>
-            <td><span class="label-pill">{{ cg.specialty }}</span></td>
-            <td>
+            <td data-label="Especialidad"><span class="label-pill">{{ cg.specialty }}</span></td>
+            <td data-label="Estado">
               <span class="status-badge" [class.verified]="cg.status === 'Verificado'"
                 [class.pending]="cg.status !== 'Verificado'">
                 {{ cg.status }}
               </span>
             </td>
-            <td><span class="money">${{ cg.hourlyRate }}</span></td>
-            <td>
+            <td data-label="Valor Hora"><span class="money">${{ cg.hourlyRate }}</span></td>
+            <td data-label="Acciones">
               <div class="actions">
                 <button class="icon-btn edit" title="Editar" (click)="editCaregiver(cg)">
                   <span class="material-icons">edit</span>
