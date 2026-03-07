@@ -15,4 +15,8 @@ export class ReportsService {
     getShiftsHistory(): Observable<any[]> {
         return this.http.get<any[]>(`${this.apiUrl}/shifts-history`);
     }
+
+    clearAllHistory(): Observable<any> {
+        return this.http.delete(`${this.apiUrl}/clear-all`);
+    }
 }

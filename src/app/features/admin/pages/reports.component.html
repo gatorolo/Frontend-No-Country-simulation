@@ -17,6 +17,12 @@
         <button class="btn btn-secondary" (click)="printReport()" [disabled]="isLoading || reports.length === 0">
           <span class="material-icons" style="font-size: 18px; vertical-align: middle;">print</span> Imprimir
         </button>
+        <button class="btn btn-outline" style="color: #ef4444; border-color: #fecdd3; background: #fef2f2;"
+          (click)="clearAllHistory()" [disabled]="isLoading || reports.length === 0 || !canClearHistory"
+          [title]="!canClearHistory ? 'Primero debes descargar o imprimir el reporte' : 'Borrar historial permanentemente'">
+          <span class="material-icons" style="font-size: 18px; vertical-align: middle;">delete_forever</span> Borrar
+          Todo
+        </button>
       </div>
     </div>
 

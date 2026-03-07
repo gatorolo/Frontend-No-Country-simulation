@@ -76,6 +76,11 @@ span {
     border-radius: 8px;
 }
 
+.toggle-item label {
+    color: #1e293b;
+    font-weight: 500;
+}
+
 .toggle-input {
     width: 44px;
     height: 22px;

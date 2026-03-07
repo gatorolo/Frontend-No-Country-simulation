@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { ReportsService } from 'src/app/core/services/reports.service';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-reports',
@@ -11,6 +12,7 @@ import html2canvas from 'html2canvas';
 export class ReportsComponent implements OnInit {
   reports: any[] = [];
   isLoading = true;
+  canClearHistory = false;
 
   constructor(private reportsService: ReportsService) { }
 
@@ -19,6 +21,8 @@ export class ReportsComponent implements OnInit {
   }
 
   loadReports() {
+    this.isLoading = true;
+    this.canClearHistory = false; // Reset lock on reload
     this.reportsService.getShiftsHistory().subscribe({
       next: (data) => {
         this.reports = data;
@@ -53,6 +57,7 @@ export class ReportsComponent implements OnInit {
         pdf.addImage(contentDataURL, 'PNG', 0, position, imgWidth, imgHeight);
         pdf.save('Reporte_Valora_Guardias.pdf');
 
+        this.canClearHistory = true;
         this.isLoading = false;
       }).catch((err: any) => {
         console.error('Error al generar PDF', err);
@@ -63,5 +68,34 @@ export class ReportsComponent implements OnInit {
 
   printReport() {
     window.print();
+    this.canClearHistory = true;
+  }
+
+  clearAllHistory() {
+    Swal.fire({
+      title: '¿Borrar todo el historial?',
+      text: 'Esta acción eliminará todos los registros de guardias permanentemente. Asegúrate de haber descargado el reporte si lo necesitas.',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#ef4444',
+      cancelButtonColor: '#64748b',
+      confirmButtonText: 'Sí, borrar todo',
+      cancelButtonText: 'Cancelar'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.isLoading = true;
+        this.reportsService.clearAllHistory().subscribe({
+          next: () => {
+            Swal.fire('¡Borrado!', 'El historial ha sido vaciado.', 'success');
+            this.loadReports();
+          },
+          error: (err) => {
+            console.error('Error al borrar el historial', err);
+            Swal.fire('Error', 'No se pudo borrar el historial.', 'error');
+            this.isLoading = false;
+          }
+        });
+      }
+    });
   }
 }
