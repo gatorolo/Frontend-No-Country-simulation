@@ -6,6 +6,18 @@
     margin: 0 auto;
 }
 
+.form-header h2 {
+    color: #1e293b;
+    margin: 0;
+}
+
+.section-title {
+    color: #1e293b;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    font-size: 1.1rem;
+}
+
 .back-btn {
     display: flex;
     align-items: center;
@@ -65,6 +77,7 @@ span {
     border-radius: 8px;
     font-weight: 600;
     cursor: pointer;
+    color: #1e293b;
 }
 
 .toggle-item {
