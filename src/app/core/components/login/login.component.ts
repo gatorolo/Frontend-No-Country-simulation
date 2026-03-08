@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { ProfileService } from 'src/app/core/services/profile.service';
 import { CaregiverService } from 'src/app/core/services/caregiver.service';
 import { PatientService } from 'src/app/core/services/patient.service';
+import { Auth2FAService } from 'src/app/core/services/auth-2fa.service';
 import Swal from 'sweetalert2';
 
 @Component({
@@ -14,17 +15,65 @@ export class LoginComponent {
     isLoading = false;
     selectedRole: string = 'admin';
     username: string = '';
+    password: string = '';
+    show2FAForm: boolean = false;
+    twoFactorCode: string = '';
 
     constructor(
         private router: Router,
         private profileService: ProfileService,
         private caregiverService: CaregiverService,
-        private patientService: PatientService
+        private patientService: PatientService,
+        private auth2FAService: Auth2FAService
     ) { }
 
     onLogin() {
         this.isLoading = true;
 
+        // Si se proporciona contraseña, intentamos el login real con 2FA
+        if (this.password.trim() !== '') {
+            this.auth2FAService.login({ username: this.username, password: this.password }).subscribe({
+                next: (res) => {
+                    if (res.requires2FA) {
+                        this.show2FAForm = true;
+                        this.isLoading = false;
+                    } else {
+                        this.handleLoginSuccess(res);
+                    }
+                },
+                error: (err) => {
+                    console.error('Login error, falling back to legacy auth', err);
+                    this.legacyAuth();
+                }
+            });
+            return;
+        }
+
+        this.legacyAuth();
+    }
+
+    onVerify2FA() {
+        this.isLoading = true;
+        this.auth2FAService.verify2FA(this.username, parseInt(this.twoFactorCode)).subscribe({
+            next: (res) => {
+                this.handleLoginSuccess(res);
+            },
+            error: (err) => {
+                this.isLoading = false;
+                Swal.fire('Error', 'Código 2FA inválido', 'error');
+            }
+        });
+    }
+
+    private handleLoginSuccess(res: any) {
+        this.profileService.setUserName(res.username || this.username.split('@')[0]);
+        const target = res.role === 'admin' ? '/admin' : (res.role === 'caregiver' ? '/caregiver' : '/family');
+        this.router.navigate([target]).then(() => {
+            this.isLoading = false;
+        });
+    }
+
+    private legacyAuth() {
         if (this.selectedRole === 'caregiver' && this.username.trim() !== '') {
             this.caregiverService.getAllCaregivers().subscribe({
                 next: (caregivers) => {
@@ -42,13 +91,12 @@ export class LoginComponent {
                         });
                     } else {
                         this.isLoading = false;
-                        Swal.fire('Error', 'No se encontró un cuidador con ese nombre en la base de datos.', 'error');
+                        Swal.fire('Error', 'No se encontró un cuidador con ese nombre.', 'error');
                     }
                 },
                 error: (err) => {
                     this.isLoading = false;
-                    console.error(err);
-                    Swal.fire('Error', 'Error de conexión con el servidor', 'error');
+                    Swal.fire('Error', 'Error de conexión', 'error');
                 }
             });
             return;
@@ -70,45 +118,23 @@ export class LoginComponent {
                         });
                     } else {
                         this.isLoading = false;
-                        Swal.fire('Error', 'No se encontró un paciente con ese nombre en la base de datos.', 'error');
+                        Swal.fire('Error', 'No se encontró un paciente con ese nombre.', 'error');
                     }
                 },
                 error: (err) => {
                     this.isLoading = false;
-                    console.error(err);
-                    Swal.fire('Error', 'Error de conexión con el servidor', 'error');
+                    Swal.fire('Error', 'Error de conexión', 'error');
                 }
             });
             return;
         }
 
-        setTimeout(async () => {
-            try {
-                let target = '/admin';
-                switch (this.selectedRole) {
-                    case 'admin':
-                        target = '/admin';
-                        break;
-                }
-
-                const success = await this.router.navigate([target]);
-                if (success) {
-                    // Si el login fue exitoso y se escribió un nombre, lo guardamos en el ProfileService
-                    if (this.username.trim() !== '') {
-                        // Podemos usar solo la primera parte del email como nombre si tiene arroba
-                        const displayName = this.username.split('@')[0];
-                        // Capitalizamos la primera letra
-                        const capitalizedName = displayName.charAt(0).toUpperCase() + displayName.slice(1);
-                        this.profileService.setUserName(capitalizedName);
-                    }
-                } else {
-                    this.isLoading = false;
-                    console.error('Navigation rejected');
-                }
-            } catch (error) {
+        // Mock Admin login
+        setTimeout(() => {
+            this.router.navigate(['/admin']).then(() => {
                 this.isLoading = false;
-                console.error('Navigation error:', error);
-            }
-        }, 1500);
+                this.profileService.setUserName(this.username.split('@')[0]);
+            });
+        }, 1000);
     }
 }

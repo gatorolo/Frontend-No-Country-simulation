@@ -5,7 +5,8 @@
             <p>Gestión Integral de Cuidados</p>
         </div>
 
-        <form (submit)="onLogin(); $event.preventDefault()">
+        <form *ngIf="!show2FAForm" (submit)="onLogin(); $event.preventDefault()">
+            <!-- ... (existing form content) ... -->
             <div class="form-group">
                 <label for="email">Usuario / Email</label>
                 <div class="input-wrapper">
@@ -19,7 +20,8 @@
                 <label for="password">Contraseña</label>
                 <div class="input-wrapper">
                     <span class="material-icons input-icon">lock</span>
-                    <input type="password" id="password" placeholder="••••••••" class="form-control">
+                    <input type="password" id="password" [(ngModel)]="password" name="password" placeholder="••••••••"
+                        class="form-control">
                 </div>
             </div>
 
@@ -46,6 +48,7 @@
 
             <!-- REGISTRATION BUTTON -->
             <div style="margin-top: 1.5rem; text-align: center; border-top: 1px solid #e2e8f0; padding-top: 1.5rem;">
+                <!-- ... existing registration button ... -->
                 <p style="color: #64748b; font-size: 0.9rem; margin-bottom: 0.75rem;">¿Eres un usuario nuevo?</p>
                 <button type="button" class="btn-login" routerLink="/register"
                     style="background-color: white; color: #1e293b; border: 1px solid #cbd5e1; box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); height: auto; min-height: 48px; padding: 10px 16px;">
@@ -60,6 +63,35 @@
                     </span>
                 </button>
             </div>
+        </form>
+
+        <!-- 2FA Verification Form -->
+        <form *ngIf="show2FAForm" (submit)="onVerify2FA(); $event.preventDefault()">
+            <div style="text-align: center; margin-bottom: 1.5rem;">
+                <span class="material-icons" style="font-size: 3rem; color: #0ea5e9;">security</span>
+                <h3 style="margin-top: 1rem;">Verificación de Dos Pasos</h3>
+                <p style="color: #64748b; font-size: 0.9rem;">Ingresa el código de 6 dígitos de tu aplicación de
+                    autenticación.</p>
+            </div>
+
+            <div class="form-group">
+                <label for="twoFactorCode">Código de Seguridad</label>
+                <div class="input-wrapper">
+                    <span class="material-icons input-icon">pin</span>
+                    <input type="text" id="twoFactorCode" [(ngModel)]="twoFactorCode" name="twoFactorCode"
+                        placeholder="000 000" class="form-control" maxlength="6" autocomplete="off" required>
+                </div>
+            </div>
+
+            <button type="submit" class="btn-login" [disabled]="isLoading">
+                <span *ngIf="!isLoading">Verificar</span>
+                <div *ngIf="isLoading" class="spinner"></div>
+            </button>
+
+            <button type="button" class="btn-login" (click)="show2FAForm = false"
+                style="background: transparent; color: #64748b; margin-top: 1rem; border: none; font-size: 0.9rem;">
+                Volver al inicio de sesión
+            </button>
         </form>
     </div>
 </div>
