@@ -179,6 +179,7 @@
 .premium-table td {
     padding: 1.25rem 1.5rem;
     border-bottom: 1px solid #f1f5f9;
+    color: #1e293b;
 }
 
 .premium-table tr:hover:not(thead tr) {
@@ -198,7 +199,7 @@
 
 .patient-diagnosis {
     font-size: 0.813rem;
-    color: #64748b;
+    color: #1e293b;
 }
 
 .location-text {
@@ -209,12 +210,12 @@
 
 .location-text .city {
     font-weight: 500;
-    color: #334155;
+    color: #1e293b;
 }
 
 .location-text .zone {
     font-size: 0.75rem;
-    color: #64748b;
+    color: #1e293b;
     font-style: italic;
 }
 

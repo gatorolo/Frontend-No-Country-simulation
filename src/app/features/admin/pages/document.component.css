@@ -6,9 +6,13 @@
 }
 
 .page-subtitle {
-    color: var(--text-light);
+    color: #475569;
     margin-top: 4px;
     font-size: 0.95rem;
+}
+
+.page-title {
+    color: #1e293b;
 }
 
 .btn-refresh {
@@ -98,7 +102,7 @@
 .caregiver-name {
     font-size: 1.25rem;
     font-weight: 700;
-    color: var(--text-color);
+    color: #1e293b;
     margin-bottom: 12px;
 }
 
@@ -107,7 +111,7 @@
     display: flex;
     align-items: center;
     gap: 8px;
-    color: var(--text-light);
+    color: #64748b;
     font-size: 0.9rem;
     margin-bottom: 8px;
 }
@@ -183,10 +187,11 @@
 .caregiver-info h2 {
     font-size: 1.75rem;
     margin-bottom: 4px;
+    color: #1e293b;
 }
 
 .caregiver-id {
-    color: var(--text-light);
+    color: #64748b;
     font-size: 0.9rem;
 }
 
@@ -231,15 +236,16 @@
 .doc-type {
     font-weight: 700;
     font-size: 1rem;
+    color: #1e293b;
 }
 
 .doc-filename {
     font-size: 0.85rem;
-    color: var(--text-light);
+    color: #64748b;
 }
 
 .doc-meta {
-    color: var(--text-light);
+    color: #64748b;
     font-size: 0.85rem;
 }
 
