@@ -20,6 +20,7 @@
     align-items: center;
     gap: 8px;
     padding: 10px 20px;
+    margin-top: 4%;
     background: var(--primary);
     color: white;
     border: none;
@@ -295,7 +296,7 @@
     justify-content: center;
     padding: 100px 20px;
     text-align: center;
-    color: var(--text-light);
+    color: #64748b;
 }
 
 .empty-state span {
@@ -311,7 +312,7 @@
     justify-content: center;
     padding: 100px 20px;
     gap: 16px;
-    color: var(--text-light);
+    color: #64748b;
 }
 
 .spinner {
