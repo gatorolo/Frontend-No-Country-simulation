@@ -542,3 +542,31 @@
     background: #f1f5f9;
     color: #475569;
 }
+
+@media (max-width: 768px) {
+    .notification-dropdown {
+        position: fixed;
+        left: 5%;
+        right: 5%;
+        width: 90%;
+        top: 70px;
+        transform: none;
+    }
+
+    .profile-dropdown {
+        position: fixed;
+        left: 5%;
+        right: 5%;
+        width: 90%;
+        top: 70px;
+        transform: none;
+    }
+
+    .topbar {
+        padding: 0 1rem;
+    }
+
+    .material-icons {
+        font-size: 2.2rem;
+    }
+}
