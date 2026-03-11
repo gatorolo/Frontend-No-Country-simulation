@@ -28,31 +28,32 @@ export class LoginComponent {
     ) { }
 
     onLogin() {
-        this.isLoading = true;
-
-        // Si se proporciona contraseña, intentamos el login real con 2FA
-        if (this.password.trim() !== '') {
-            this.auth2FAService.login({ username: this.username, password: this.password }).subscribe({
-                next: (res) => {
-                    if (res.requires2FA) {
-                        this.show2FAForm = true;
-                        this.isLoading = false;
-                    } else {
-                        this.handleLoginSuccess(res);
-                    }
-                },
-                error: (err) => {
-                    console.error('Login error, falling back to legacy auth', err);
-                    this.legacyAuth();
-                }
-            });
+        if (!this.username || !this.password) {
+            Swal.fire('Atención', 'Por favor ingresa usuario y contraseña', 'warning');
             return;
         }
 
-        this.legacyAuth();
+        this.isLoading = true;
+        this.auth2FAService.login({ username: this.username, password: this.password }).subscribe({
+            next: (res) => {
+                if (res.requires2FA) {
+                    this.show2FAForm = true;
+                    this.isLoading = false;
+                } else {
+                    this.handleLoginSuccess(res);
+                }
+            },
+            error: (err) => {
+                this.isLoading = false;
+                const msg = err.error?.message || 'Error de autenticación. Verifica tus credenciales.';
+                Swal.fire('Error', msg, 'error');
+            }
+        });
     }
 
     onVerify2FA() {
+        if (!this.twoFactorCode) return;
+
         this.isLoading = true;
         this.auth2FAService.verify2FA(this.username, parseInt(this.twoFactorCode)).subscribe({
             next: (res) => {
@@ -60,81 +61,25 @@ export class LoginComponent {
             },
             error: (err) => {
                 this.isLoading = false;
-                Swal.fire('Error', 'Código 2FA inválido', 'error');
+                Swal.fire('Error', 'Código de verificación inválido', 'error');
             }
         });
     }
 
     private handleLoginSuccess(res: any) {
-        this.profileService.setUserName(res.username || this.username.split('@')[0]);
-        const target = res.role === 'admin' ? '/admin' : (res.role === 'caregiver' ? '/caregiver' : '/family');
+        // Guardamos el token real
+        if (res.token) {
+            this.auth2FAService.saveToken(res.token);
+        }
+
+        this.profileService.setUserName(res.username || this.username);
+
+        // El backend devuelve el rol real del usuario
+        const role = res.role ? res.role.toLowerCase() : 'admin';
+        const target = role === 'admin' ? '/admin' : (role === 'caregiver' ? '/caregiver' : '/family');
+
         this.router.navigate([target]).then(() => {
             this.isLoading = false;
         });
-    }
-
-    private legacyAuth() {
-        if (this.selectedRole === 'caregiver' && this.username.trim() !== '') {
-            this.caregiverService.getAllCaregivers().subscribe({
-                next: (caregivers) => {
-                    const typedName = this.username.trim().toLowerCase();
-                    const foundCv = caregivers.find(c =>
-                        (c.caregiverName && c.caregiverName.toLowerCase().includes(typedName)) ||
-                        (c.fullName && c.fullName.toLowerCase().includes(typedName))
-                    );
-
-                    if (foundCv && foundCv.id) {
-                        this.profileService.setUserId(foundCv.id);
-                        this.profileService.setUserName(foundCv.caregiverName || foundCv.fullName || typedName);
-                        this.router.navigate(['/caregiver']).then(() => {
-                            this.isLoading = false;
-                        });
-                    } else {
-                        this.isLoading = false;
-                        Swal.fire('Error', 'No se encontró un cuidador con ese nombre.', 'error');
-                    }
-                },
-                error: (err) => {
-                    this.isLoading = false;
-                    Swal.fire('Error', 'Error de conexión', 'error');
-                }
-            });
-            return;
-        }
-
-        if (this.selectedRole === 'patient' && this.username.trim() !== '') {
-            this.patientService.getPatientsFromApi().subscribe({
-                next: (patients) => {
-                    const typedName = this.username.trim().toLowerCase();
-                    const foundPt = patients.find(p =>
-                        p.name && p.name.toLowerCase().includes(typedName)
-                    );
-
-                    if (foundPt && foundPt.id) {
-                        this.profileService.setUserId(foundPt.id);
-                        this.profileService.setUserName(foundPt.name || typedName);
-                        this.router.navigate([`/family/view/${foundPt.id}`]).then(() => {
-                            this.isLoading = false;
-                        });
-                    } else {
-                        this.isLoading = false;
-                        Swal.fire('Error', 'No se encontró un paciente con ese nombre.', 'error');
-                    }
-                },
-                error: (err) => {
-                    this.isLoading = false;
-                    Swal.fire('Error', 'Error de conexión', 'error');
-                }
-            });
-            return;
-        }
-
-        // Mock Admin login
-        setTimeout(() => {
-            this.router.navigate(['/admin']).then(() => {
-                this.isLoading = false;
-                this.profileService.setUserName(this.username.split('@')[0]);
-            });
-        }, 1000);
     }
 }
