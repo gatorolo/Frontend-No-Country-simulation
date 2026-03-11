@@ -4,13 +4,15 @@ import { RouterModule } from '@angular/router';
 import { HeaderComponent } from './components/header/header.component';
 import { LoginComponent } from './components/login/login.component';
 import { RegisterComponent } from './components/register/register.component';
+import { AdminRegisterComponent } from './components/admin-register/admin-register.component';
 import { FormsModule } from '@angular/forms';
 
 @NgModule({
     declarations: [
         HeaderComponent,
         LoginComponent,
-        RegisterComponent
+        RegisterComponent,
+        AdminRegisterComponent
     ],
     imports: [
         CommonModule,
