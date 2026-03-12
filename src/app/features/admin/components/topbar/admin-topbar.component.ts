@@ -37,7 +37,14 @@ export class AdminTopbarComponent implements OnInit {
 
     ngOnInit(): void {
         // Suscripción al perfil del admin (avatar y nombre)
-        this.profileService.userName$.subscribe(n => this.userName = n);
+        this.profileService.userName$.subscribe(n => {
+            if (n && n.includes('@')) {
+                const parts = n.split('@');
+                this.userName = parts[0].charAt(0).toUpperCase() + parts[0].slice(1);
+            } else {
+                this.userName = n || 'Admin';
+            }
+        });
         this.profileService.userAvatar$.subscribe(a => this.userAvatar = a);
 
         // Suscripción a Notificaciones Reales vía NotificationService

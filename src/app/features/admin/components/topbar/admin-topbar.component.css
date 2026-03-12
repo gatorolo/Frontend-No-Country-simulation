@@ -118,6 +118,16 @@
     font-weight: 600;
     color: var(--text-color, #334155);
     font-size: 0.95rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 150px;
+}
+
+@media (max-width: 768px) {
+    .user-name {
+        max-width: 80px;
+    }
 }
 
 .dropdown-icon {

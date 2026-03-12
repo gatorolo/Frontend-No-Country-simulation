@@ -5,6 +5,8 @@ import { HeaderComponent } from './components/header/header.component';
 import { LoginComponent } from './components/login/login.component';
 import { RegisterComponent } from './components/register/register.component';
 import { AdminRegisterComponent } from './components/admin-register/admin-register.component';
+import { ForgotPasswordComponent } from './components/forgot-password/forgot-password.component';
+import { ResetPasswordComponent } from './components/reset-password/reset-password.component';
 import { FormsModule } from '@angular/forms';
 
 @NgModule({
@@ -12,7 +14,9 @@ import { FormsModule } from '@angular/forms';
         HeaderComponent,
         LoginComponent,
         RegisterComponent,
-        AdminRegisterComponent
+        AdminRegisterComponent,
+        ForgotPasswordComponent,
+        ResetPasswordComponent
     ],
     imports: [
         CommonModule,

@@ -17,13 +17,42 @@
                 </div>
             </div>
 
-            <!-- SHARED FIELDS -->
             <div class="form-group">
                 <label for="fullName">Nombre Completo</label>
                 <div class="input-wrapper">
                     <span class="material-icons input-icon">person</span>
                     <input type="text" id="fullName" [(ngModel)]="fullName" name="fullName" placeholder="Ej: Juan Pérez"
                         class="form-control" autocomplete="off" required>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="regEmail">Correo Electrónico (será tu usuario)</label>
+                <div class="input-wrapper">
+                    <span class="material-icons input-icon">email</span>
+                    <input type="email" id="regEmail" [(ngModel)]="email" name="email" placeholder="tu@correo.com"
+                        class="form-control" autocomplete="off" required>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="input-group-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                    <div>
+                        <label for="regPassword">Contraseña</label>
+                        <div class="input-wrapper">
+                            <span class="material-icons input-icon">lock</span>
+                            <input type="password" id="regPassword" [(ngModel)]="password" name="password"
+                                placeholder="••••••••" class="form-control" required>
+                        </div>
+                    </div>
+                    <div>
+                        <label for="confirmPassword">Confirmar</label>
+                        <div class="input-wrapper">
+                            <span class="material-icons input-icon">lock_reset</span>
+                            <input type="password" id="confirmPassword" [(ngModel)]="confirmPassword"
+                                name="confirmPassword" placeholder="••••••••" class="form-control" required>
+                        </div>
+                    </div>
                 </div>
             </div>
 

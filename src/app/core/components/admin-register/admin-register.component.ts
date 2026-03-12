@@ -11,6 +11,7 @@ import Swal from 'sweetalert2';
 export class AdminRegisterComponent {
     isLoading = false;
     username = '';
+    email = '';
     password = '';
     confirmPassword = '';
 
@@ -20,7 +21,7 @@ export class AdminRegisterComponent {
     ) { }
 
     onSubmit() {
-        if (!this.username || !this.password || !this.confirmPassword) {
+        if (!this.username || !this.email || !this.password || !this.confirmPassword) {
             Swal.fire('Error', 'Todos los campos son obligatorios', 'error');
             return;
         }
@@ -33,6 +34,7 @@ export class AdminRegisterComponent {
         this.isLoading = true;
         const request = {
             username: this.username,
+            email: this.email,
             password: this.password,
             role: 'ADMIN'
         };

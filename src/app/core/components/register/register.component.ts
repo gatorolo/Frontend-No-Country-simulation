@@ -14,6 +14,9 @@ export class RegisterComponent {
 
     // Shared Fields
     fullName: string = '';
+    email: string = '';
+    password: string = '';
+    confirmPassword: string = '';
 
     // Caregiver Fields
     dni: string = '';
@@ -36,23 +39,31 @@ export class RegisterComponent {
     constructor(private http: HttpClient, private router: Router) { }
 
     onSubmit() {
+        if (this.password !== this.confirmPassword) {
+            this.errorMessage = 'Las contraseñas no coinciden';
+            return;
+        }
+
         this.isLoading = true;
         this.successMessage = '';
         this.errorMessage = '';
 
-        let payload: any = {};
+        let payload: any = {
+            email: this.email,
+            password: this.password
+        };
 
         if (this.selectedRole === 'CAREGIVER') {
-            payload = {
+            Object.assign(payload, {
                 caregiverName: this.fullName,
                 dni: this.dni,
                 specialty: this.specialty,
                 phone: this.phone,
                 hourlyRate: this.hourlyRate,
                 address: this.address
-            };
+            });
         } else {
-            payload = {
+            Object.assign(payload, {
                 name: this.fullName,
                 age: this.age,
                 healthInsurance: this.healthInsurance,
@@ -61,7 +72,7 @@ export class RegisterComponent {
                 zone: this.zone,
                 address: this.address,
                 locationLink: this.locationLink
-            };
+            });
         }
 
         const requestBody = {

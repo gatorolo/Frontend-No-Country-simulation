@@ -3,6 +3,8 @@ import { RouterModule, Routes } from '@angular/router';
 import { LoginComponent } from './core/components/login/login.component';
 import { RegisterComponent } from './core/components/register/register.component';
 import { AdminRegisterComponent } from './core/components/admin-register/admin-register.component';
+import { ForgotPasswordComponent } from './core/components/forgot-password/forgot-password.component';
+import { ResetPasswordComponent } from './core/components/reset-password/reset-password.component';
 import { MaintenanceGuard } from './core/guards/maintenance.guard';
 
 const routes: Routes = [
@@ -10,6 +12,8 @@ const routes: Routes = [
   { path: 'login', component: LoginComponent },
   { path: 'register', component: RegisterComponent },
   { path: 'admin-register', component: AdminRegisterComponent },
+  { path: 'forgot-password', component: ForgotPasswordComponent },
+  { path: 'reset-password', component: ResetPasswordComponent },
   {
     path: 'admin',
     loadChildren: () => import('./features/admin/admin.module').then(m => m.AdminModule)

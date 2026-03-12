@@ -10,8 +10,17 @@
                 <label for="username">Usuario / Email del Administrador</label>
                 <div class="input-wrapper">
                     <span class="material-icons input-icon">person</span>
-                    <input type="text" id="username" [(ngModel)]="username" name="username"
-                        placeholder="admin@valora.com" class="form-control" autocomplete="off" required>
+                    <input type="text" id="username" [(ngModel)]="username" name="username" placeholder="admin_user"
+                        class="form-control" autocomplete="off" required>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="email">Correo Electrónico (para recuperación)</label>
+                <div class="input-wrapper">
+                    <span class="material-icons input-icon">email</span>
+                    <input type="email" id="email" [(ngModel)]="email" name="email" placeholder="admin@valora.com"
+                        class="form-control" autocomplete="off" required>
                 </div>
             </div>
 
